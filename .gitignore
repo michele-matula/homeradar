@@ -1,0 +1,17 @@
+# Brainstorming visual companion
+.superpowers/
+
+# Dependencies & build output
+node_modules/
+.output/
+.wxt/
+dist/
+coverage/
+playwright-report/
+test-results/
+
+# Env & OS
+.env
+.env.*
+.DS_Store
+Thumbs.db
