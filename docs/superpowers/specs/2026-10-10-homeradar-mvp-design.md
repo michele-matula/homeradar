@@ -79,6 +79,8 @@ Percorsi e regole:
 - **ID crescenti nel tempo:** l'ID dell'annuncio cresce con la data di creazione, quindi permette di stimare l'età dai soli risultati di ricerca.
 - **Navigazione interna:** cambiando filtro, ordinamento o pagina il sito non ricarica la pagina; `__NEXT_DATA__` resta quello iniziale. I nuovi risultati arrivano da una XHR a `/api-next/search-list/listings/`.
 
+**Bot protection:** il sito è protetto da **DataDome**; richieste HTTP fuori dal browser (es. `curl`) ricevono 403 (verificato nel precedente tentativo bookmarklet, repository `homeradar-bookmarklet`, 2026-10-07). Conferma la scelta di non effettuare mai richieste proprie: l'estensione lavora solo dentro la sessione reale dell'agente.
+
 **Rischio noto non verificato:** non sappiamo se `createdAt` si azzera quando un privato toglie e ripubblica l'annuncio. In quel caso l'età risulterebbe sottostimata.
 
 ## 5. Architettura
