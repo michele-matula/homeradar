@@ -1,0 +1,1003 @@
+{
+ "props": {
+  "pageProps": {
+   "dehydratedState": {
+    "queries": [
+     {
+      "state": {
+       "data": {
+        "count": 18926,
+        "currentPage": 15,
+        "results": [
+         {
+          "realEstate": {
+           "id": 128929988,
+           "title": "Quadrilocale via Esempio 1, Lodi - Brenta, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 479000,
+            "formattedValue": "€ 479.000",
+            "priceRange": "300.001 - 500.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "125 m²",
+             "rooms": "4",
+             "bathrooms": "2",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 1",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Porta Vittoria, Lodi",
+              "microzone": "Lodi - Brenta"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128929988/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128873364,
+           "title": "Quadrilocale via Esempio 2, Greco - Segnano, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 360000,
+            "formattedValue": "€ 360.000",
+            "priceRange": "300.001 - 500.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "96 m²",
+             "rooms": "4",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 2",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Bicocca, Niguarda",
+              "microzone": "Greco - Segnano"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128873364/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128883322,
+           "title": "Bilocale via Esempio 3, Viale Ungheria - Mecenate, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 270000,
+            "formattedValue": "€ 270.000",
+            "priceRange": "200.001 - 300.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "65 m²",
+             "rooms": "2",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 3",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Forlanini",
+              "microzone": "Viale Ungheria - Mecenate"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128883322/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128865692,
+           "title": "Trilocale via Esempio 4, Frua, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 269000,
+            "formattedValue": "€ 269.000",
+            "priceRange": "200.001 - 300.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "53 m²",
+             "rooms": "3",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 4",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Solari, Washington",
+              "microzone": "Frua"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128865692/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128883022,
+           "title": "Bilocale via Esempio 5, Solari, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 395000,
+            "formattedValue": "€ 395.000",
+            "priceRange": "300.001 - 500.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "65 m²",
+             "rooms": "2",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 5",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Solari, Washington",
+              "microzone": "Solari"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128883022/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128831682,
+           "title": "Bilocale via Esempio 6, Pasteur, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 329000,
+            "formattedValue": "€ 329.000",
+            "priceRange": "300.001 - 500.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "54 m²",
+             "rooms": "2",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 6",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Pasteur, Rovereto",
+              "microzone": "Pasteur"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128831682/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128847698,
+           "title": "Appartamento via Esempio 7, Monte Stella, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 430000,
+            "formattedValue": "€ 430.000",
+            "priceRange": "300.001 - 500.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "95 m²",
+             "rooms": "5",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 7",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "San Siro, Trenno",
+              "microzone": "Monte Stella"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128847698/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128845358,
+           "title": "Appartamento via Esempio 8, Certosa, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 324000,
+            "formattedValue": "€ 324.000",
+            "priceRange": "300.001 - 500.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "106 m²",
+             "rooms": "5+",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 8",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Uptown, Cascina Merlata, Viale Certosa",
+              "microzone": "Certosa"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128845358/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128805478,
+           "title": "Monolocale via Esempio 9, Viale Ungheria - Mecenate, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 165000,
+            "formattedValue": "€ 165.000",
+            "priceRange": "150.001 - 200.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "28 m²",
+             "rooms": "1",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 9",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Forlanini",
+              "microzone": "Viale Ungheria - Mecenate"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128805478/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128779438,
+           "title": "Trilocale via Esempio 10, Gambara, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 430000,
+            "formattedValue": "€ 430.000",
+            "priceRange": "300.001 - 500.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "84 m²",
+             "rooms": "3",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 10",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Bande Nere, Inganni",
+              "microzone": "Gambara"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128779438/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128758670,
+           "title": "Appartamento via Esempio 11, Buenos Aires, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 1090000,
+            "formattedValue": "€ 1.090.000",
+            "priceRange": "oltre 500.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "180 m²",
+             "rooms": "5+",
+             "bathrooms": "2",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 11",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Centrale, Repubblica",
+              "microzone": "Buenos Aires"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128758670/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128760348,
+           "title": "Bilocale via Esempio 12, Santa Giulia, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 220000,
+            "formattedValue": "€ 220.000",
+            "priceRange": "200.001 - 300.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "51 m²",
+             "rooms": "2",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 12",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Ponte Lambro, Santa Giulia",
+              "microzone": "Santa Giulia"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128760348/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128761890,
+           "title": "Bilocale via Esempio 13, Villa San Giovanni, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 240000,
+            "formattedValue": "€ 240.000",
+            "priceRange": "200.001 - 300.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "60 m²",
+             "rooms": "2",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 13",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Precotto, Turro",
+              "microzone": "Villa San Giovanni"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128761890/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128758720,
+           "title": "Bilocale via Esempio 14, Cimiano, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 185000,
+            "formattedValue": "€ 185.000",
+            "priceRange": "150.001 - 200.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "42 m²",
+             "rooms": "2",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 14",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Cimiano, Crescenzago, Adriano",
+              "microzone": "Cimiano"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128758720/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128750250,
+           "title": "Attico via Esempio 15, Quarto Oggiaro, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 940000,
+            "formattedValue": "€ 940.000",
+            "priceRange": "oltre 500.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "153 m²",
+             "rooms": "5",
+             "bathrooms": "2",
+             "typology": {
+              "id": 15,
+              "name": "Attico"
+             },
+             "location": {
+              "address": "Via Esempio 15",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Affori, Bovisa",
+              "microzone": "Quarto Oggiaro"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128750250/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128583128,
+           "title": "Appartamento via Esempio 16, Quintosole - Chiaravalle, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 720000,
+            "formattedValue": "€ 720.000",
+            "priceRange": "oltre 500.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "193 m²",
+             "rooms": "5",
+             "bathrooms": "2",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 16",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Ripamonti, Vigentino",
+              "microzone": "Quintosole - Chiaravalle"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128583128/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128583512,
+           "title": "Bilocale via Esempio 17, Tre Castelli - Faenza, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 259000,
+            "formattedValue": "€ 259.000",
+            "priceRange": "200.001 - 300.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "50 m²",
+             "rooms": "2",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 17",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Famagosta, Barona",
+              "microzone": "Tre Castelli - Faenza"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128583512/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128556300,
+           "title": "Appartamento via Esempio 18, Farini, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 790000,
+            "formattedValue": "€ 790.000",
+            "priceRange": "oltre 500.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "95 m²",
+             "rooms": "5+",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 18",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Cenisio, Sarpi, Isola",
+              "microzone": "Farini"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128556300/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128525022,
+           "title": "Trilocale via Esempio 19, Gallaratese, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 430000,
+            "formattedValue": "€ 430.000",
+            "priceRange": "300.001 - 500.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "90 m²",
+             "rooms": "3",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 19",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "San Siro, Trenno",
+              "microzone": "Gallaratese"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128525022/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128486436,
+           "title": "Bilocale via Esempio 20, Città Studi, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 249000,
+            "formattedValue": "€ 249.000",
+            "priceRange": "200.001 - 300.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "71 m²",
+             "rooms": "2",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 20",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Città Studi, Susa",
+              "microzone": "Città Studi"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128486436/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128481866,
+           "title": "Bilocale via Esempio 21, Centrale, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 575000,
+            "formattedValue": "€ 575.000",
+            "priceRange": "oltre 500.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "96 m²",
+             "rooms": "2",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 21",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Centrale, Repubblica",
+              "microzone": "Centrale"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128481866/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128449836,
+           "title": "Quadrilocale via Esempio 22, Gallaratese, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 350000,
+            "formattedValue": "€ 350.000",
+            "priceRange": "300.001 - 500.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "120 m²",
+             "rooms": "4",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 22",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "San Siro, Trenno",
+              "microzone": "Gallaratese"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128449836/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128466902,
+           "title": "Monolocale via Esempio 23, Porta Venezia, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 268000,
+            "formattedValue": "€ 268.000",
+            "priceRange": "200.001 - 300.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "31 m²",
+             "rooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 23",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Porta Venezia, Indipendenza",
+              "microzone": "Porta Venezia"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128466902/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128417210,
+           "title": "Bilocale via Esempio 24, Ripamonti - Fondazione Prada, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 319000,
+            "formattedValue": "€ 319.000",
+            "priceRange": "300.001 - 500.000 &euro;"
+           },
+           "properties": [
+            {
+             "surface": "35 m²",
+             "rooms": "2",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 24",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Ripamonti, Vigentino",
+              "microzone": "Ripamonti - Fondazione Prada"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128417210/"
+          }
+         },
+         {
+          "realEstate": {
+           "id": 128416572,
+           "title": "Bilocale via Esempio 25, Turro, Milano",
+           "contract": "sale",
+           "price": {
+            "visible": true,
+            "value": 235000,
+            "formattedValue": "€ 235.000",
+            "priceRange": "200.001 - 300.000 &euro;",
+            "loweredPrice": {
+             "originalPrice": "€ 249.000",
+             "currentPrice": "€ 235.000",
+             "discountPercentage": "5,6",
+             "priceDecreasedBy": "€ 14.000",
+             "passedDays": 19,
+             "date": "21/09/2026",
+             "typologiesCount": 0
+            }
+           },
+           "properties": [
+            {
+             "surface": "62 m²",
+             "rooms": "2",
+             "bathrooms": "1",
+             "typology": {
+              "id": 14,
+              "name": "Appartamento"
+             },
+             "location": {
+              "address": "Via Esempio 25",
+              "city": "Milano",
+              "province": "Milano",
+              "macrozone": "Precotto, Turro",
+              "microzone": "Turro"
+             }
+            }
+           ],
+           "advertiser": {
+            "supervisor": {
+             "type": "user"
+            }
+           }
+          },
+          "seo": {
+           "url": "https://www.immobiliare.it/annunci/128416572/"
+          }
+         }
+        ]
+       }
+      }
+     }
+    ]
+   }
+  }
+ }
+}

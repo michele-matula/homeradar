@@ -151,9 +151,9 @@ WXT (Manifest V3) · TypeScript · React · Dexie (IndexedDB) · zod · SheetJS 
 - `{ listingKey, status: "new" | "to_contact" | "contacted" | "discarded", notes, statusChangedAt }`
 - Separata dai dati calcolati: i ricalcoli non toccano mai stato e note.
 
-### `settings`
+### `meta`
 
-- `minAgeDays` (predefinito 120), `minDropPercent` (predefinito 0, cioè qualsiasi ribasso), `retentionDays` (90).
+- Tabella chiave/valore. `settings` = `{ minAgeDays: 120, minDropPercent: 0, retentionDays: 90 }`; `diagnostics` = contatori, ultimi 20 errori, avviso adattatore.
 
 ### `idCalibration`
 
@@ -197,13 +197,14 @@ Alla pulizia periodica si eliminano gli annunci (con snapshot) con `lastSeenAt` 
 - **Pannello laterale:**
   - schede per stato: Nuovi, Da contattare, Contattati, Scartati, con conteggi
   - per ogni lead: priorità, titolo e prezzo, motivi, numero di visite, mini-grafico dello storico prezzi, selettore dello stato, campo note, link all'annuncio
+  - pulsante **Elimina** con conferma inline
   - in fondo: **Esporta XLSX** e **CSV** della vista corrente
   - Impostazioni: soglie, conservazione, "Copia report diagnostico"
 - **Icona estensione:** indicatore di avviso quando l'adattatore rileva dati non riconosciuti.
 
 ### Colonne dell'export
 
-Priorità · Stato · Indirizzo · Città/Zona · Tipologia · m² · Locali · Prezzo attuale · Prezzo massimo noto · Calo % · Data ultimo ribasso · Online da (giorni) · Età stimata (sì/no) · Prima visita · Ultima visita · Note · URL.
+Priorità · Stato · Titolo · Indirizzo · Città/Zona · Tipologia · m² · Locali · Prezzo attuale · Prezzo massimo noto · Calo % · Data ultimo ribasso · Online da (giorni) · Età stimata (sì/no) · Prima visita · Ultima visita · Note · URL.
 
 ## 9. Gestione errori
 
