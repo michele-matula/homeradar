@@ -2,17 +2,21 @@ import type { Evaluation, Priority } from '@/shared/types';
 
 export const BADGE_ATTR = 'data-homeradar-badge';
 
-const BASE: Partial<CSSStyleDeclaration> = {
-  position: 'absolute', top: '8px', left: '8px', zIndex: '5', pointerEvents: 'none',
-  padding: '3px 8px', borderRadius: '999px', borderWidth: '1px', borderStyle: 'solid',
-  font: '600 12px/1.3 system-ui, sans-serif', whiteSpace: 'nowrap',
+// Tutte le proprietà vengono impostate con !important: il CSS del sito (es. i figli del
+// contenitore foto stirati a tutta larghezza prima del lazy-load) non deve deformare il badge.
+const BASE: Record<string, string> = {
+  position: 'absolute', top: '8px', left: '8px', right: 'auto', bottom: 'auto',
+  width: 'auto', height: 'auto', 'max-width': 'calc(100% - 16px)', margin: '0', transform: 'none',
+  display: 'inline-block', 'box-sizing': 'border-box', overflow: 'hidden', 'text-overflow': 'ellipsis',
+  'z-index': '5', 'pointer-events': 'none', padding: '3px 8px', 'border-radius': '999px',
+  'border-width': '1px', 'border-style': 'solid', font: '600 12px/1.3 system-ui, sans-serif', 'white-space': 'nowrap',
 };
 
-const COLORS: Record<Priority, Partial<CSSStyleDeclaration>> = {
-  high: { background: '#fde2e1', color: '#a4161a', borderColor: '#f5a3a0' },
-  medium: { background: '#fff1d6', color: '#8a5300', borderColor: '#f3c77a' },
-  verify: { background: '#e7eefc', color: '#1d4ed8', borderColor: '#a9c1f5' },
-  none: { background: '#f1f1f1', color: '#555555', borderColor: '#dddddd' },
+const COLORS: Record<Priority, Record<string, string>> = {
+  high: { background: '#fde2e1', color: '#a4161a', 'border-color': '#f5a3a0' },
+  medium: { background: '#fff1d6', color: '#8a5300', 'border-color': '#f3c77a' },
+  verify: { background: '#e7eefc', color: '#1d4ed8', 'border-color': '#a9c1f5' },
+  none: { background: '#f1f1f1', color: '#555555', 'border-color': '#dddddd' },
 };
 
 function findCard(root: ParentNode, portalId: number): HTMLElement | null {
@@ -40,6 +44,8 @@ export function renderBadge(root: ParentNode, ev: Evaluation): 'created' | 'upda
   }
   badge.textContent = ev.badgeText;
   badge.dataset.priority = ev.priority;
-  Object.assign(badge.style, BASE, COLORS[ev.priority]);
+  for (const [prop, value] of Object.entries({ ...BASE, ...COLORS[ev.priority] })) {
+    badge.style.setProperty(prop, value, 'important');
+  }
   return result;
 }

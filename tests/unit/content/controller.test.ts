@@ -79,6 +79,25 @@ describe('createController', () => {
     expect(send.mock.calls[1]![0]).toMatchObject({ type: 'ingest' });
   });
 
+  it('sa se in pagina ci sono annunci mai ricevuti (agenzie comprese)', async () => {
+    const send = fakeSend();
+    const c = createController({ adapter: immobiliareAdapter, send, root: document, getUrl: () => SEARCH_URL });
+    expect(c.hasUnseenListings()).toBe(true);
+    await c.handle('next-data', SEARCH_URL, searchNextData([
+      searchResult(realEstate()),
+      searchResult(realEstate({ id: 2, advertiser: agencyAdvertiser }), 2),
+    ]));
+    expect(c.hasUnseenListings()).toBe(false);
+    document.querySelector('ul')!.insertAdjacentHTML('beforeend', '<li><img><a href="/annunci/999/">nuovo</a></li>');
+    expect(c.hasUnseenListings()).toBe(true);
+  });
+
+  it('nessun annuncio in pagina: niente da segnalare', () => {
+    document.body.innerHTML = '<p>caricamento…</p>';
+    const c = createController({ adapter: immobiliareAdapter, send: fakeSend(), root: document, getUrl: () => SEARCH_URL });
+    expect(c.hasUnseenListings()).toBe(false);
+  });
+
   it('resta ok=true per una pagina senza risultati e senza errori', async () => {
     const send = fakeSend();
     const c = createController({ adapter: immobiliareAdapter, send, root: document, getUrl: () => SEARCH_URL });

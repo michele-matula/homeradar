@@ -40,6 +40,21 @@ describe('renderBadge', () => {
     expect(document.querySelector<HTMLElement>(`[${BADGE_ATTR}]`)!.dataset.priority).toBe('medium');
   });
 
+  it('resiste al CSS del sito che allarga i figli del contenitore della foto', () => {
+    // Immobiliare.it: prima del lazy-load i figli del contenitore vengono stirati a tutta la foto.
+    const style = document.createElement('style');
+    style.textContent = '.nd-slideshow__content > * { width: 100%; height: 100%; right: 0; bottom: 0; display: block; }';
+    document.head.append(style);
+    renderBadge(document, ev());
+    const badge = document.querySelector<HTMLElement>(`[${BADGE_ATTR}]`)!;
+    for (const prop of ['width', 'height', 'right', 'bottom']) {
+      expect(badge.style.getPropertyValue(prop)).toBe('auto');
+      expect(badge.style.getPropertyPriority(prop)).toBe('important');
+    }
+    expect(getComputedStyle(badge).width).toBe('auto');
+    style.remove();
+  });
+
   it('usa la card intera se manca la foto e salta gli annunci senza card', () => {
     expect(renderBadge(document, ev({ portalId: 222 }))).toBe('created');
     expect(renderBadge(document, ev({ portalId: 999 }))).toBe('no-card');

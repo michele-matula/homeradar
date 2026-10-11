@@ -16,6 +16,9 @@ export default defineContentScript({
       timeoutMs: 5000,
       graceMs: 3000,
       onMissing: () => {
+        // Il sito riusa i risultati già in cache (es. tornando indietro): se tutti gli annunci
+        // in pagina sono già noti non manca nulla e il banner sarebbe un falso allarme.
+        if (!controller.hasUnseenListings()) return;
         showBanner(document, FALLBACK_TEXT);
         send({ type: 'fallbackShown' }).catch(() => {});
       },

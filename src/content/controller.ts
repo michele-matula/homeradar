@@ -13,9 +13,20 @@ export interface ControllerDeps {
 
 export function createController({ adapter, send, root, getUrl }: ControllerDeps) {
   const evaluations = new Map<number, Evaluation>();
+  /** ID di tutti gli annunci ricevuti in un payload, agenzie comprese. */
+  const seen = new Set<number>();
 
   function applyAll(): void {
     for (const ev of evaluations.values()) renderBadge(root, ev);
+  }
+
+  /** true se nelle card in pagina c'è un annuncio mai arrivato in un payload (dati persi). */
+  function hasUnseenListings(): boolean {
+    for (const a of root.querySelectorAll<HTMLAnchorElement>('li a[href*="/annunci/"]')) {
+      const id = adapter.listingIdFromHref(a.getAttribute('href') ?? '');
+      if (id != null && !seen.has(id)) return true;
+    }
+    return false;
   }
 
   async function handle(kind: 'next-data' | 'api', url: string, payload: unknown): Promise<void> {
@@ -25,6 +36,7 @@ export function createController({ adapter, send, root, getUrl }: ControllerDeps
     const total = result.errors.length + result.observations.length;
     const hasUnknownSeller = result.observations.some((o) => o.sellerType === 'unknown');
     const ok = !hasUnknownSeller && (total === 0 || result.errors.length <= total * 0.2);
+    for (const o of result.observations) seen.add(o.portalId);
     await send({ type: 'parseStatus', ok, errors: result.errors, source: kind });
     if (!result.observations.length) return;
     const evs = (await send({ type: 'ingest', observations: result.observations })) as Evaluation[];
@@ -32,5 +44,5 @@ export function createController({ adapter, send, root, getUrl }: ControllerDeps
     applyAll();
   }
 
-  return { handle, applyAll };
+  return { handle, applyAll, hasUnseenListings };
 }
