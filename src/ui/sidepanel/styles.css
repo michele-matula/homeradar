@@ -20,7 +20,7 @@ body { margin: 0; }
 .pill--verify { background: #e7eefc; color: #1d4ed8; }
 .sparkline { color: #a4161a; }
 .empty { padding: 16px 12px; color: #666; }
-.export { display: flex; gap: 8px; align-items: center; padding: 10px 12px; background: #fafafa; border-top: 1px solid #eee; }
+.export { position: sticky; bottom: 0; z-index: 1; display: flex; gap: 8px; align-items: center; padding: 10px 12px; background: #fafafa; border-top: 1px solid #eee; }
 .export__hint { font-size: 11px; color: #888; }
 .settings { display: flex; flex-direction: column; gap: 10px; padding: 12px; }
 .settings__field { display: flex; flex-direction: column; gap: 4px; }
