@@ -103,6 +103,32 @@ describe('App', () => {
     expect(api.deleteListings).toHaveBeenCalledWith(['immobiliare:3']);
   });
 
+  it('filtra per badge con i conteggi della scheda e mantiene il filtro cambiando scheda', async () => {
+    render(<App api={fakeApi([lead(1, 'high'), lead(2, 'medium'), lead(3, 'verify'), lead(4, 'verify'), lead(5, 'high', 'contacted')])} />);
+    expect(await screen.findByRole('radio', { name: 'Tutti (4)' })).toBeTruthy();
+    expect(screen.getByRole('radio', { name: 'Tutti (4)' }).getAttribute('aria-checked')).toBe('true');
+    fireEvent.click(screen.getByRole('radio', { name: 'Da verificare (2)' }));
+    expect(screen.getByText('Bilocale 3')).toBeTruthy();
+    expect(screen.getByText('Bilocale 4')).toBeTruthy();
+    expect(screen.queryByText('Bilocale 1')).toBeNull();
+    expect(screen.queryByText('Bilocale 2')).toBeNull();
+    fireEvent.click(screen.getByRole('tab', { name: 'Contattati (1)' }));
+    expect(screen.getByRole('radio', { name: 'Da verificare (0)' }).getAttribute('aria-checked')).toBe('true');
+    expect(screen.getByRole('radio', { name: 'Media (0)' }).hasAttribute('disabled')).toBe(true);
+    expect(screen.getByText('Nessun lead «Da verificare» in questa scheda.')).toBeTruthy();
+    fireEvent.click(screen.getByRole('radio', { name: 'Alta (1)' }));
+    expect(screen.getByText('Bilocale 5')).toBeTruthy();
+  });
+
+  it('con un filtro attivo "Elimina tutti" agisce solo sugli annunci filtrati', async () => {
+    const api = fakeApi([lead(1, 'high'), lead(2, 'verify'), lead(3, 'verify')]);
+    render(<App api={api} />);
+    fireEvent.click(await screen.findByRole('radio', { name: 'Da verificare (2)' }));
+    fireEvent.click(screen.getByText('Elimina tutti «Da verificare» (2)'));
+    fireEvent.click(screen.getByText('Conferma: elimina 2 annunci «Da verificare»'));
+    expect(api.deleteListings).toHaveBeenCalledWith(['immobiliare:2', 'immobiliare:3']);
+  });
+
   it('azzera l\'archivio dalle impostazioni dopo conferma', async () => {
     const api = fakeApi([lead(1, 'high'), lead(2, 'medium')]);
     render(<App api={api} />);

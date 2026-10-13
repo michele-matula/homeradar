@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { groupByStatus } from '@/core/leads';
-import { LEAD_STATUSES, type LeadStatus, type LeadView } from '@/shared/types';
+import { groupByStatus, PRIORITY_LABELS } from '@/core/leads';
+import { LEAD_STATUSES, type LeadStatus, type LeadView, type Priority } from '@/shared/types';
 import { defaultApi, type Api } from './api';
 import { ExportBar } from './ExportBar';
 import { AlertIcon, BackIcon, Logo, SearchIcon, SettingsIcon } from './Icons';
@@ -8,11 +8,17 @@ import { LeadItem } from './LeadItem';
 import { SettingsView } from './SettingsView';
 
 const TAB_LABELS: Record<LeadStatus, string> = { new: 'Nuovi', to_contact: 'Da contattare', contacted: 'Contattati', discarded: 'Scartati' };
+type PriorityFilter = 'all' | Exclude<Priority, 'none'>;
+const PRIORITY_FILTERS: PriorityFilter[] = ['all', 'high', 'medium', 'verify'];
+const FILTER_LABELS: Record<PriorityFilter, string> = { all: 'Tutti', high: PRIORITY_LABELS.high, medium: PRIORITY_LABELS.medium, verify: PRIORITY_LABELS.verify };
+const byFilter = (leads: LeadView[], f: PriorityFilter) => (f === 'all' ? leads : leads.filter((l) => l.evaluation.priority === f));
+const nAnnunci = (n: number) => `${n} ${n === 1 ? 'annuncio' : 'annunci'}`;
 const errorText = (e: unknown) => `Errore: ${e instanceof Error ? e.message : String(e)}`;
 
 export function App({ api = defaultApi }: { api?: Api }) {
   const [leads, setLeads] = useState<LeadView[]>([]);
   const [tab, setTab] = useState<LeadStatus>('new');
+  const [filter, setFilter] = useState<PriorityFilter>('all');
   const [view, setView] = useState<'leads' | 'settings'>('leads');
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState(false);
@@ -39,9 +45,10 @@ export function App({ api = defaultApi }: { api?: Api }) {
   };
 
   const groups = groupByStatus(leads);
-  const visible = groups[tab];
+  const visible = byFilter(groups[tab], filter);
+  const filterTag = filter === 'all' ? '' : ` «${FILTER_LABELS[filter]}»`;
 
-  useEffect(() => setConfirmingAll(false), [tab, visible.length]);
+  useEffect(() => setConfirmingAll(false), [tab, filter, visible.length]);
 
   return (
     <main className="panel">
@@ -95,9 +102,29 @@ export function App({ api = defaultApi }: { api?: Api }) {
               </button>
             ))}
           </nav>
+          <div className="filters" role="radiogroup" aria-label="Filtra per badge">
+            {PRIORITY_FILTERS.map((f) => {
+              const count = byFilter(groups[tab], f).length;
+              const on = f === filter;
+              return (
+                <button
+                  key={f}
+                  type="button"
+                  role="radio"
+                  aria-checked={on}
+                  aria-label={`${FILTER_LABELS[f]} (${count})`}
+                  className={`chip chip--${f}${on ? ' chip--on' : ''}`}
+                  disabled={count === 0 && !on}
+                  onClick={() => setFilter(f)}
+                >
+                  {FILTER_LABELS[f]} <span className="chip__count">{count}</span>
+                </button>
+              );
+            })}
+          </div>
           {visible.length > 0 && (
             <div className="bulk">
-              <span className="bulk__count">{`${visible.length} ${visible.length === 1 ? 'annuncio' : 'annunci'}`}</span>
+              <span className="bulk__count">{nAnnunci(visible.length)}</span>
               <div className="bulk__actions">
                 {confirmingAll ? (
                   <>
@@ -106,13 +133,13 @@ export function App({ api = defaultApi }: { api?: Api }) {
                       className="btn btn--danger btn--sm"
                       onClick={() => run(() => api.deleteListings(visible.map((l) => l.listing.key)))}
                     >
-                      {`Conferma: elimina ${visible.length} ${visible.length === 1 ? 'annuncio' : 'annunci'}`}
+                      {`Conferma: elimina ${nAnnunci(visible.length)}${filterTag}`}
                     </button>
                     <button type="button" className="btn btn--sm" onClick={() => setConfirmingAll(false)}>Annulla</button>
                   </>
                 ) : (
                   <button type="button" className="btn btn--ghost-danger btn--sm" onClick={() => setConfirmingAll(true)}>
-                    {`Elimina tutti (${visible.length})`}
+                    {`Elimina tutti${filterTag} (${visible.length})`}
                   </button>
                 )}
               </div>
@@ -121,7 +148,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
           {visible.length === 0 ? (
             <div className="empty">
               <SearchIcon />
-              <p>Nessun lead in questa scheda. Naviga su Immobiliare.it per raccoglierne.</p>
+              <p>{filter === 'all' ? 'Nessun lead in questa scheda. Naviga su Immobiliare.it per raccoglierne.' : `Nessun lead${filterTag} in questa scheda.`}</p>
             </div>
           ) : (
             <ul className="leads">

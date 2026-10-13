@@ -117,6 +117,21 @@ button, input, select { font: inherit; color: inherit; }
 .tab--on:hover { color: #fff; }
 .tab--on .tab__count { color: #fff; }
 
+.filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 12px 0; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px;
+  border: 1px solid var(--border); border-radius: 999px; background: var(--surface);
+  color: var(--muted); font-size: 12px; font-weight: 500; cursor: pointer;
+}
+.chip:hover:not(:disabled) { border-color: var(--border-strong); color: var(--text); }
+.chip:focus-visible { outline: none; box-shadow: var(--focus); }
+.chip:disabled { opacity: 0.45; cursor: default; }
+.chip__count { font-variant-numeric: tabular-nums; font-weight: 700; }
+.chip--on { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); }
+.chip--high.chip--on { border-color: var(--high-border); background: var(--high-soft); color: var(--high); }
+.chip--medium.chip--on { border-color: var(--medium-border); background: var(--medium-soft); color: var(--medium); }
+.chip--verify.chip--on { border-color: var(--verify-border); background: var(--verify-soft); color: var(--verify); }
+
 .bulk { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 40px; padding: 4px 12px; }
 .bulk__count { color: var(--muted); font-size: 12px; }
 .bulk__actions { display: flex; gap: 6px; }
