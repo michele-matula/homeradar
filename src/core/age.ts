@@ -8,6 +8,10 @@ export type IdDate = { portalId: number; createdAt: number };
  * Idealista: prima cattura sul Wayback Machine degli annunci di ogni fascia di ID
  * (CDX `url=www.idealista.it/immobile/{prefisso}&matchType=prefix&collapse=urlkey`),
  * quindi un limite superiore con pochi giorni di ritardo; l'ultimo punto è stato letto dal sito il 2026-10-13.
+ * Subito: per finestre di pochi giorni, l'ID più alto catturato dal Wayback Machine sotto
+ * `www.subito.it/appartamenti/` (CDX `matchType=prefix&from=…&to=…`), con la data della cattura:
+ * limite superiore della creazione; escluse le finestre con meno di 150 catture. Gli ID sono un
+ * contatore unico per tutto il sito. L'ultimo punto è stato letto dal sito il 2026-10-13.
  */
 export const DEFAULT_CALIBRATION: Record<Portal, IdDate[]> = {
   immobiliare: [
@@ -23,10 +27,22 @@ export const DEFAULT_CALIBRATION: Record<Portal, IdDate[]> = {
     { portalId: 37_000_000, createdAt: Date.UTC(2026, 9, 5) },
     { portalId: 37_142_000, createdAt: Date.UTC(2026, 9, 13) },
   ],
+  subito: [
+    { portalId: 601_602_407, createdAt: Date.UTC(2025, 4, 12) },
+    { portalId: 608_659_595, createdAt: Date.UTC(2025, 6, 8) },
+    { portalId: 615_809_896, createdAt: Date.UTC(2025, 8, 10) },
+    { portalId: 624_462_677, createdAt: Date.UTC(2025, 10, 15) },
+    { portalId: 630_881_728, createdAt: Date.UTC(2026, 0, 10) },
+    { portalId: 638_471_742, createdAt: Date.UTC(2026, 2, 7) },
+    { portalId: 653_902_986, createdAt: Date.UTC(2026, 6, 13) },
+    { portalId: 660_221_521, createdAt: Date.UTC(2026, 8, 10) },
+    { portalId: 663_604_784, createdAt: Date.UTC(2026, 9, 7) },
+    { portalId: 664_395_700, createdAt: Date.UTC(2026, 9, 13) },
+  ],
 };
 
-/** Ritmo medio di nuovi ID al giorno, per i portali che imparano dalla pagina "più recenti". */
-export const LEARN_RATE_PER_DAY: Partial<Record<Portal, number>> = { idealista: 8200 };
+/** Ritmo medio di nuovi ID al giorno, per i portali che imparano dagli annunci di oggi. */
+export const LEARN_RATE_PER_DAY: Partial<Record<Portal, number>> = { idealista: 8200, subito: 120_000 };
 
 export const utcDay = (ms: number) => Math.floor(ms / DAY_MS) * DAY_MS;
 
