@@ -9,6 +9,7 @@ export type Request =
   | { type: 'setLeadState'; listingKey: string; status?: LeadStatus; notes?: string }
   | { type: 'deleteListing'; listingKey: string }
   | { type: 'deleteListings'; listingKeys: string[] }
+  | { type: 'deleteAllListings' }
   | { type: 'getSettings' }
   | { type: 'saveSettings'; settings: Settings }
   | { type: 'parseStatus'; ok: boolean; errors: string[]; source: 'next-data' | 'api' }

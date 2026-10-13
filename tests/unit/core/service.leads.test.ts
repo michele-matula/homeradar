@@ -67,6 +67,20 @@ describe('LeadService.deleteListings', () => {
   });
 });
 
+describe('LeadService.deleteAllListings', () => {
+  it('svuota annunci, snapshot e stati ma conserva le impostazioni', async () => {
+    const { db, svc } = setup();
+    await svc.saveSettings({ minAgeDays: 150 });
+    await svc.ingest([obs(), obs({ portalId: 2, lastDrop: null })]);
+    await svc.setLeadState(KEY, { status: 'contacted', notes: 'x' });
+    expect(await svc.deleteAllListings()).toBe(2);
+    expect(await db.listings.count()).toBe(0);
+    expect(await db.priceSnapshots.count()).toBe(0);
+    expect(await db.leadStates.count()).toBe(0);
+    expect((await svc.getSettings()).minAgeDays).toBe(150);
+  });
+});
+
 describe('LeadService impostazioni', () => {
   it('salva, valida e influenza la valutazione', async () => {
     const { svc } = setup();

@@ -132,6 +132,14 @@ export class LeadService {
     });
   }
 
+  async deleteAllListings(): Promise<number> {
+    return this.db.transaction('rw', [this.db.listings, this.db.priceSnapshots, this.db.leadStates], async () => {
+      const count = await this.db.listings.count();
+      await Promise.all([this.db.listings.clear(), this.db.priceSnapshots.clear(), this.db.leadStates.clear()]);
+      return count;
+    });
+  }
+
   async purge(): Promise<number> {
     const settings = await this.getSettings();
     const cutoff = this.clock() - settings.retentionDays * DAY_MS;

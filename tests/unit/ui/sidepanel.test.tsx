@@ -34,6 +34,7 @@ function fakeApi(leads: LeadView[], adapterWarning = false): Api {
     setLeadState: vi.fn(async (k, p) => ({ listingKey: k, status: p.status ?? 'new', notes: p.notes ?? '', statusChangedAt: 0 })),
     deleteListing: vi.fn(async () => {}),
     deleteListings: vi.fn(async () => {}),
+    deleteAllListings: vi.fn(async () => leads.length),
     getSettings: vi.fn(async () => DEFAULT_SETTINGS),
     saveSettings: vi.fn(async (s) => s),
     getDiagnostics: vi.fn(async () => ({ version: '0.1.0', counters: {}, errors: [], adapterWarning })),
@@ -99,6 +100,19 @@ describe('App', () => {
     fireEvent.click(screen.getByText('Elimina tutti (1)'));
     fireEvent.click(screen.getByText('Conferma: elimina 1 annuncio'));
     expect(api.deleteListings).toHaveBeenCalledWith(['immobiliare:3']);
+  });
+
+  it('azzera l\'archivio dalle impostazioni dopo conferma', async () => {
+    const api = fakeApi([lead(1, 'high'), lead(2, 'medium')]);
+    render(<App api={api} />);
+    fireEvent.click(await screen.findByText('⚙ Impostazioni'));
+    fireEvent.click(await screen.findByText('Azzera archivio annunci'));
+    fireEvent.click(screen.getByText('Annulla'));
+    expect(api.deleteAllListings).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByText('Azzera archivio annunci'));
+    fireEvent.click(screen.getByText('Conferma: azzera tutto'));
+    expect(await screen.findByText('Archivio azzerato: 2 annunci eliminati')).toBeTruthy();
+    expect(api.deleteAllListings).toHaveBeenCalledTimes(1);
   });
 
   it('mostra il banner quando l\'adattatore segnala un problema', async () => {

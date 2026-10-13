@@ -7,6 +7,7 @@ export interface Api {
   setLeadState(listingKey: string, patch: { status?: LeadStatus; notes?: string }): Promise<LeadState>;
   deleteListing(listingKey: string): Promise<void>;
   deleteListings(listingKeys: string[]): Promise<void>;
+  deleteAllListings(): Promise<number>;
   getSettings(): Promise<Settings>;
   saveSettings(settings: Settings): Promise<Settings>;
   getDiagnostics(): Promise<Diagnostics>;
@@ -18,6 +19,7 @@ export const defaultApi: Api = {
   setLeadState: (listingKey, patch) => send({ type: 'setLeadState', listingKey, ...patch }),
   deleteListing: (listingKey) => send({ type: 'deleteListing', listingKey }),
   deleteListings: (listingKeys) => send({ type: 'deleteListings', listingKeys }),
+  deleteAllListings: () => send({ type: 'deleteAllListings' }),
   getSettings: () => send({ type: 'getSettings' }),
   saveSettings: (settings) => send({ type: 'saveSettings', settings }),
   getDiagnostics: () => send({ type: 'getDiagnostics' }),

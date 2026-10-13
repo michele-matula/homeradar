@@ -13,6 +13,9 @@ describe('handleRequest', () => {
     const evs = (await handleRequest(svc, { type: 'ingest', observations: [obs()] }, '0.1.0', h)) as { priority: string }[];
     expect(evs[0]!.priority).toBe('high');
     expect(h.leadsChanged).toHaveBeenCalledTimes(1);
+    await svc.ingest([obs()]);
+    expect(await handleRequest(svc, { type: 'deleteAllListings' }, 'v', h)).toBe(1);
+    expect(h.leadsChanged).toHaveBeenCalledTimes(2);
     expect((await svc.getDiagnostics('x')).counters.ingested).toBe(1);
   });
 
