@@ -1,3 +1,4 @@
+import type { PortalAdapter } from '@/adapters/types';
 import type { Evaluation, Priority } from '@/shared/types';
 
 export const BADGE_ATTR = 'data-homeradar-badge';
@@ -20,13 +21,12 @@ const COLORS: Record<Priority, Record<string, string>> = {
   none: { background: '#ffffff', color: '#0f4c5c', 'border-color': '#cdd5db' },
 };
 
-function findCard(root: ParentNode, portalId: number): HTMLElement | null {
-  const anchor = root.querySelector<HTMLAnchorElement>(`a[href*="/annunci/${portalId}/"]`);
-  return anchor?.closest('li') ?? null;
-}
-
-export function renderBadge(root: ParentNode, ev: Evaluation): 'created' | 'updated' | 'unchanged' | 'no-card' {
-  const card = findCard(root, ev.portalId);
+export function renderBadge(
+  root: ParentNode,
+  ev: Evaluation,
+  adapter: Pick<PortalAdapter, 'cardFor' | 'badgeHost'>,
+): 'created' | 'updated' | 'unchanged' | 'no-card' {
+  const card = adapter.cardFor(root, ev.portalId);
   if (!card) return 'no-card';
 
   let badge = card.querySelector<HTMLElement>(`[${BADGE_ATTR}]`);
@@ -34,8 +34,7 @@ export function renderBadge(root: ParentNode, ev: Evaluation): 'created' | 'upda
 
   let result: 'created' | 'updated' = 'updated';
   if (!badge) {
-    const img = card.querySelector('img');
-    const host = (img?.closest<HTMLElement>('.nd-slideshow__content') ?? img?.parentElement ?? card) as HTMLElement;
+    const host = adapter.badgeHost(card);
     const pos = host.ownerDocument.defaultView?.getComputedStyle(host).position;
     if (!pos || pos === 'static') host.style.position = 'relative';
     badge = host.ownerDocument.createElement('span');

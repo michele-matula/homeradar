@@ -1,4 +1,4 @@
-import type { PortalAdapter } from '@/adapters/types';
+import type { PayloadKind, PortalAdapter } from '@/adapters/types';
 import type {
   ListingObservation, ObservationSource, ParseResult, PriceDrop, SellerType,
 } from '@/shared/types';
@@ -85,18 +85,32 @@ function findSearchData(json: unknown): unknown {
   return obj(obj(q)?.state)?.data;
 }
 
-export const immobiliareAdapter: PortalAdapter = {
+function parseNextData(json: unknown, url: string): ParseResult {
+  const kind = pageKind(url);
+  if (kind === 'search') return parseSearchData(findSearchData(json));
+  if (kind === 'detail') return parseDetailData(obj(obj(obj(json)?.props)?.pageProps)?.detailData);
+  return { observations: [], errors: [] };
+}
+
+function parseIntercepted(url: string, json: unknown): ParseResult {
+  return isListingsApiUrl(url) ? parseSearchData(json) : { observations: [], errors: [] };
+}
+
+const adapter: PortalAdapter = {
   portal: 'immobiliare',
   pageKind,
-  parseNextData(json, url) {
-    const kind = pageKind(url);
-    if (kind === 'search') return parseSearchData(findSearchData(json));
-    if (kind === 'detail') return parseDetailData(obj(obj(obj(json)?.props)?.pageProps)?.detailData);
-    return { observations: [], errors: [] };
+  parsePayload: (kind: PayloadKind, url: string, json: unknown) =>
+    kind === 'next-data' ? parseNextData(json, url) : parseIntercepted(url, json),
+  cardFor: (root: ParentNode, id: number) => root.querySelector<HTMLAnchorElement>(`a[href*="/annunci/${id}/"]`)?.closest('li') ?? null,
+  badgeHost(card: HTMLElement): HTMLElement {
+    const img = card.querySelector('img');
+    return img?.closest<HTMLElement>('.nd-slideshow__content') ?? img?.parentElement ?? card;
   },
-  isInterceptedUrl: isListingsApiUrl,
-  parseIntercepted(url, json) {
-    return isListingsApiUrl(url) ? parseSearchData(json) : { observations: [], errors: [] };
-  },
-  listingIdFromHref,
+  cardIds: (root: ParentNode) =>
+    [...root.querySelectorAll<HTMLAnchorElement>('li a[href*="/annunci/"]')]
+      .map((a) => listingIdFromHref(a.getAttribute('href') ?? ''))
+      .filter((id): id is number => id != null),
 };
+
+// Le funzioni in più restano esposte per i test dell'adattatore.
+export const immobiliareAdapter = { ...adapter, parseNextData, parseIntercepted, isInterceptedUrl: isListingsApiUrl, listingIdFromHref };

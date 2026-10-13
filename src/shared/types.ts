@@ -46,6 +46,8 @@ export interface ListingObservation {
 export interface ParseResult {
   observations: ListingObservation[];
   errors: string[];
+  /** Pagine "più recenti": ID più alto in pagina, candidato punto di calibrazione. */
+  newestId?: number;
 }
 
 export interface ListingRecord {

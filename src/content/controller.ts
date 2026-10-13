@@ -1,7 +1,7 @@
-import type { PortalAdapter } from '@/adapters/types';
+import type { PayloadKind, PortalAdapter } from '@/adapters/types';
 import { renderBadge } from '@/content/badges';
-import type { Request } from '@/shared/messages';
-import type { Evaluation } from '@/shared/types';
+import type { ParseSource, Request } from '@/shared/messages';
+import type { Evaluation, ParseResult } from '@/shared/types';
 
 export interface ControllerDeps {
   adapter: PortalAdapter;
@@ -13,36 +13,59 @@ export interface ControllerDeps {
 
 export function createController({ adapter, send, root, getUrl }: ControllerDeps) {
   const evaluations = new Map<number, Evaluation>();
-  /** ID di tutti gli annunci ricevuti in un payload, agenzie comprese. */
+  /** ID di tutti gli annunci ricevuti, agenzie comprese. */
   const seen = new Set<number>();
+  /** Modalità DOM: ID già inviati per l'URL corrente. */
+  const sent = new Set<number>();
+  let scannedUrl: string | null = null;
 
   function applyAll(): void {
-    for (const ev of evaluations.values()) renderBadge(root, ev);
+    for (const ev of evaluations.values()) renderBadge(root, ev, adapter);
   }
 
   /** true se nelle card in pagina c'è un annuncio mai arrivato in un payload (dati persi). */
   function hasUnseenListings(): boolean {
-    for (const a of root.querySelectorAll<HTMLAnchorElement>('li a[href*="/annunci/"]')) {
-      const id = adapter.listingIdFromHref(a.getAttribute('href') ?? '');
-      if (id != null && !seen.has(id)) return true;
-    }
-    return false;
+    return adapter.cardIds(root).some((id) => !seen.has(id));
   }
 
-  async function handle(kind: 'next-data' | 'api', url: string, payload: unknown): Promise<void> {
-    // Le risposte api valgono solo sulle pagine di ricerca: /annunci/{id}/ serve anche gli affitti.
-    if (kind === 'api' && adapter.pageKind(getUrl()) !== 'search') return;
-    const result = kind === 'next-data' ? adapter.parseNextData(payload, url) : adapter.parseIntercepted(url, payload);
+  async function process(result: ParseResult, source: ParseSource): Promise<void> {
     const total = result.errors.length + result.observations.length;
     const hasUnknownSeller = result.observations.some((o) => o.sellerType === 'unknown');
     const ok = !hasUnknownSeller && (total === 0 || result.errors.length <= total * 0.2);
     for (const o of result.observations) seen.add(o.portalId);
-    await send({ type: 'parseStatus', portal: adapter.portal, ok, errors: result.errors, source: kind });
+    await send({ type: 'parseStatus', portal: adapter.portal, ok, errors: result.errors, source });
     if (!result.observations.length) return;
-    const evs = (await send({ type: 'ingest', observations: result.observations })) as Evaluation[];
+    const calibrationHint = result.newestId != null ? { portal: adapter.portal, portalId: result.newestId } : undefined;
+    const evs = (await send({ type: 'ingest', observations: result.observations, ...(calibrationHint ? { calibrationHint } : {}) })) as Evaluation[];
     for (const ev of evs) evaluations.set(ev.portalId, ev);
     applyAll();
   }
 
-  return { handle, applyAll, hasUnseenListings };
+  async function handle(kind: PayloadKind, url: string, payload: unknown): Promise<void> {
+    if (!adapter.parsePayload) return;
+    // Le risposte api valgono solo sulle pagine di ricerca: /annunci/{id}/ serve anche gli affitti.
+    if (kind === 'api' && adapter.pageKind(getUrl()) !== 'search') return;
+    await process(adapter.parsePayload(kind, url, payload), kind);
+  }
+
+  /** Modalità DOM: invia le card nuove; se non ce ne sono si limita a riapplicare i badge. */
+  async function scan(): Promise<void> {
+    if (!adapter.readDocument) return;
+    const url = getUrl();
+    const isNewUrl = url !== scannedUrl;
+    if (isNewUrl) {
+      scannedUrl = url;
+      sent.clear();
+    }
+    const result = adapter.readDocument(root, url);
+    const fresh = result.observations.filter((o) => !sent.has(o.portalId));
+    if (!isNewUrl && !fresh.length) {
+      applyAll();
+      return;
+    }
+    for (const o of fresh) sent.add(o.portalId);
+    await process({ ...result, observations: fresh }, 'dom');
+  }
+
+  return { handle, scan, applyAll, hasUnseenListings };
 }
