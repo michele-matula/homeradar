@@ -53,6 +53,20 @@ describe('LeadService.deleteListing', () => {
   });
 });
 
+describe('LeadService.deleteListings', () => {
+  it('elimina solo gli annunci indicati, con snapshot e stato', async () => {
+    const { db, svc } = setup();
+    await svc.ingest([obs(), obs({ portalId: 2, lastDrop: null }), obs({ portalId: 3, lastDrop: null })]);
+    await svc.setLeadState(KEY, { status: 'contacted' });
+    await svc.deleteListings([KEY, 'immobiliare:2']);
+    expect(await db.listings.toCollection().primaryKeys()).toEqual(['immobiliare:3']);
+    expect(await db.priceSnapshots.where('listingKey').anyOf([KEY, 'immobiliare:2']).count()).toBe(0);
+    expect(await db.leadStates.get(KEY)).toBeUndefined();
+    await svc.deleteListings([]);
+    expect(await db.listings.count()).toBe(1);
+  });
+});
+
 describe('LeadService impostazioni', () => {
   it('salva, valida e influenza la valutazione', async () => {
     const { svc } = setup();

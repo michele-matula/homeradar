@@ -33,6 +33,7 @@ function fakeApi(leads: LeadView[], adapterWarning = false): Api {
     listLeads: vi.fn(async () => leads),
     setLeadState: vi.fn(async (k, p) => ({ listingKey: k, status: p.status ?? 'new', notes: p.notes ?? '', statusChangedAt: 0 })),
     deleteListing: vi.fn(async () => {}),
+    deleteListings: vi.fn(async () => {}),
     getSettings: vi.fn(async () => DEFAULT_SETTINGS),
     saveSettings: vi.fn(async (s) => s),
     getDiagnostics: vi.fn(async () => ({ version: '0.1.0', counters: {}, errors: [], adapterWarning })),
@@ -88,10 +89,23 @@ describe('App', () => {
     expect(screen.getByText('Bilocale 3 — € 235.000')).toBeTruthy();
   });
 
+  it('elimina tutti gli annunci della scheda corrente dopo conferma', async () => {
+    const api = fakeApi([lead(1, 'high'), lead(2, 'medium'), lead(3, 'medium', 'contacted')]);
+    render(<App api={api} />);
+    fireEvent.click(await screen.findByText('Elimina tutti (2)'));
+    expect(api.deleteListings).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByText('Annulla'));
+    fireEvent.click(screen.getByText('Contattati (1)'));
+    fireEvent.click(screen.getByText('Elimina tutti (1)'));
+    fireEvent.click(screen.getByText('Conferma: elimina 1 annuncio'));
+    expect(api.deleteListings).toHaveBeenCalledWith(['immobiliare:3']);
+  });
+
   it('mostra il banner quando l\'adattatore segnala un problema', async () => {
     render(<App api={fakeApi([], true)} />);
     expect(await screen.findByText('Immobiliare.it potrebbe essere cambiato: alcuni dati non sono stati letti.')).toBeTruthy();
     expect(screen.getByText('Nessun lead in questa scheda. Naviga su Immobiliare.it per raccoglierne.')).toBeTruthy();
+    expect(screen.queryByText(/Elimina tutti/)).toBeNull();
   });
 
   it('mostra un errore se il database non risponde, lasciando l\'export disponibile', async () => {

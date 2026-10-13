@@ -8,6 +8,7 @@ export type Request =
   | { type: 'listLeads' }
   | { type: 'setLeadState'; listingKey: string; status?: LeadStatus; notes?: string }
   | { type: 'deleteListing'; listingKey: string }
+  | { type: 'deleteListings'; listingKeys: string[] }
   | { type: 'getSettings' }
   | { type: 'saveSettings'; settings: Settings }
   | { type: 'parseStatus'; ok: boolean; errors: string[]; source: 'next-data' | 'api' }

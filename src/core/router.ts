@@ -22,6 +22,10 @@ export async function handleRequest(service: LeadService, req: Request, version:
       await service.deleteListing(req.listingKey);
       hooks.leadsChanged();
       return null;
+    case 'deleteListings':
+      await service.deleteListings(req.listingKeys);
+      hooks.leadsChanged();
+      return null;
     case 'getSettings':
       return service.getSettings();
     case 'saveSettings': {

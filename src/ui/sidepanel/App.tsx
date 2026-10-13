@@ -15,6 +15,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
   const [view, setView] = useState<'leads' | 'settings'>('leads');
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState(false);
+  const [confirmingAll, setConfirmingAll] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
@@ -39,6 +40,8 @@ export function App({ api = defaultApi }: { api?: Api }) {
   const groups = groupByStatus(leads);
   const visible = groups[tab];
 
+  useEffect(() => setConfirmingAll(false), [tab, visible.length]);
+
   return (
     <main className="panel">
       <header className="panel__header">
@@ -60,6 +63,24 @@ export function App({ api = defaultApi }: { api?: Api }) {
               </button>
             ))}
           </nav>
+          {visible.length > 0 && (
+            <div className="bulk">
+              {confirmingAll ? (
+                <>
+                  <button
+                    type="button"
+                    className="bulk__danger"
+                    onClick={() => run(() => api.deleteListings(visible.map((l) => l.listing.key)))}
+                  >
+                    {`Conferma: elimina ${visible.length} ${visible.length === 1 ? 'annuncio' : 'annunci'}`}
+                  </button>
+                  <button type="button" onClick={() => setConfirmingAll(false)}>Annulla</button>
+                </>
+              ) : (
+                <button type="button" onClick={() => setConfirmingAll(true)}>{`Elimina tutti (${visible.length})`}</button>
+              )}
+            </div>
+          )}
           {visible.length === 0 ? (
             <p className="empty">Nessun lead in questa scheda. Naviga su Immobiliare.it per raccoglierne.</p>
           ) : (

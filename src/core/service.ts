@@ -120,10 +120,15 @@ export class LeadService {
   }
 
   async deleteListing(key: string): Promise<void> {
+    await this.deleteListings([key]);
+  }
+
+  async deleteListings(keys: string[]): Promise<void> {
+    if (!keys.length) return;
     await this.db.transaction('rw', [this.db.listings, this.db.priceSnapshots, this.db.leadStates], async () => {
-      await this.db.listings.delete(key);
-      await this.db.priceSnapshots.where('listingKey').equals(key).delete();
-      await this.db.leadStates.delete(key);
+      await this.db.listings.bulkDelete(keys);
+      await this.db.priceSnapshots.where('listingKey').anyOf(keys).delete();
+      await this.db.leadStates.bulkDelete(keys);
     });
   }
 

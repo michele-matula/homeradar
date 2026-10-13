@@ -43,6 +43,11 @@ describe('handleRequest', () => {
     expect(await handleRequest(svc, { type: 'getDiagnostics' }, 'v', h)).toMatchObject({ version: 'v', counters: { fallbackShown: 1 } });
     await handleRequest(svc, { type: 'deleteListing', listingKey: 'immobiliare:128416572' }, 'v', h);
     expect(await handleRequest(svc, { type: 'listLeads' }, 'v', h)).toEqual([]);
+    await svc.ingest([obs()]);
+    h.leadsChanged.mockClear();
+    await handleRequest(svc, { type: 'deleteListings', listingKeys: ['immobiliare:128416572'] }, 'v', h);
+    expect(await handleRequest(svc, { type: 'listLeads' }, 'v', h)).toEqual([]);
+    expect(h.leadsChanged).toHaveBeenCalledTimes(1);
   });
 
   it('rifiuta richieste sconosciute', async () => {
