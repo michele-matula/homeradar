@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-HomeRadar è un'estensione Chrome (MV3, WXT + React + TypeScript) per agenti immobiliari: su Immobiliare.it riconosce gli annunci di privati, ne costruisce lo storico prezzi in locale e segnala i lead (anzianità ≥ soglia oppure ribassi). Conversazione e testi dell'interfaccia in italiano.
+HomeRadar è un'estensione Chrome (MV3, WXT + React + TypeScript) per agenti immobiliari: su Immobiliare.it e Idealista.it riconosce gli annunci di privati, ne costruisce lo storico prezzi in locale e segnala i lead (anzianità ≥ soglia oppure ribassi). Conversazione e testi dell'interfaccia in italiano.
 
 ## Comandi
 
@@ -19,10 +19,13 @@ node scripts/generate-icons.mjs                 # rigenera public/icon/*.png da 
 
 ## Architettura
 
-Flusso: `bridge (MAIN world) → content script (ISOLATED) → adapter → background → IndexedDB → side panel`.
+Flusso Immobiliare: `bridge (MAIN world) → content script (ISOLATED) → adapter.parsePayload → background → IndexedDB → side panel`.
+Flusso Idealista: `content script (ISOLATED) → adapter.readDocument (DOM già mostrato) → background → …`, nessun bridge.
 
 - `src/bridge/bridge.ts`: unico codice nel contesto della pagina. Inoltra `__NEXT_DATA__` e le risposte XHR di `/api-next/search-list/listings/` via `window.postMessage`. Non fa mai richieste proprie.
 - `src/adapters/immobiliare/`: funzioni pure. Gli schemi zod sono la **lista dei campi ammessi**: ciò che non è dichiarato (telefoni, nomi, descrizioni) viene scartato. `urls.ts` non importa zod perché è usato anche dal bridge.
+- `src/adapters/idealista/`: funzioni pure sul DOM delle card (`article.item[data-element-id]`, `data-is-professional-ad`; esclusi gli annunci suggeriti `.geo-reach-card`). Nessuna data di pubblicazione: l'età si stima dall'ID (`DEFAULT_CALIBRATION.idealista` in `core/age.ts`, più i punti appresi dalla pagina "più recenti"). Non leggere mai `.professional-name` (nome del privato).
+- `src/adapters/types.ts`: `PortalAdapter` con modalità `parsePayload` (bridge) o `readDocument` (DOM), più `cardFor`/`badgeHost`/`cardIds` per i badge.
 - `src/core/`: logica pura e testabile. `rules.ts` (priorità e badge), `age.ts` (stima età da ID), `service.ts` (`LeadService`, unico scrittore su Dexie), `router.ts` (dispatch dei messaggi), `export.ts`.
 - `src/content/`: badge sulle card (`li` con link `/annunci/{id}/`), `RouteWatcher` che mostra il banner "ricarica" se dopo un cambio rotta non arrivano dati.
 - `src/ui/sidepanel/`: React; parla col background solo tramite `api.ts`.
@@ -34,7 +37,7 @@ Flusso: `bridge (MAIN world) → content script (ISOLATED) → adapter → backg
 - Salvare solo annunci di privati; mai telefoni o nomi del venditore.
 - Il repository è pubblico: le fixture vanno sempre passate da `scripts/sanitize-fixture.mjs`; i file grezzi stanno in `fixtures-raw/` (ignorata).
 - Timestamp sempre in ms epoch UTC.
-- Se Immobiliare.it cambia struttura: aggiorna gli schemi in `src/adapters/immobiliare/schemas.ts`, ricattura le fixture (vedi `docs/smoke-test.md`), non modificare le fixture a mano.
+- Se un portale cambia struttura: aggiorna gli schemi (Immobiliare, `src/adapters/immobiliare/schemas.ts`) o i selettori (Idealista, `src/adapters/idealista/parse.ts`), ricattura le fixture (vedi `docs/smoke-test.md`), non modificare le fixture a mano.
 
 ## Documenti
 

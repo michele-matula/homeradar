@@ -1,6 +1,8 @@
 # Smoke test sul sito reale (prima di ogni rilascio al pilota)
 
-Durata: ~5 minuti. Usa `npm run build` e carica `.output/chrome-mv3` in Chrome.
+Durata: ~10 minuti. Usa `npm run build` e carica `.output/chrome-mv3` in Chrome.
+
+## Immobiliare.it
 
 1. Apri `https://www.immobiliare.it/vendita-case/milano/da-privati/`.
    - [ ] Compare un badge sulla foto di ogni annuncio di privato; nessun badge sulle agenzie.
@@ -29,4 +31,21 @@ Durata: ~5 minuti. Usa `npm run build` e carica `.output/chrome-mv3` in Chrome.
 11. Su una pagina di ricerca con badge, apri la console di Chrome (DevTools).
     - [ ] Nessun errore di idratazione React (hydration mismatch).
 
-Se il sito è cambiato: ricattura le fixture (piano, Task 4), aggiorna gli schemi, riesegui `npm test`.
+## Idealista.it
+
+Naviga a mano, senza automazione: Idealista usa DataDome.
+
+12. Apri `https://www.idealista.it/vendita-case/milano-milano/?ordine=da-privati-asc`.
+    - [ ] Badge sulla foto di ogni privato (anche sulle card "Senza foto"); nessun badge su agenzie, pubblicità e annunci suggeriti "dalla tua zona".
+13. Vai alla pagina 2 con il link del sito (la pagina si ricarica).
+    - [ ] Badge sulla nuova pagina; nessun banner "ricarica".
+14. Apri la scheda di un privato con ribasso.
+    - [ ] Nel pannello il lead ha l'etichetta "Idealista" e "Ribassato del …% (… → … €) rilevato il gg/mm".
+15. Apri `?ordine=pubblicazione-desc` (prima pagina), poi Impostazioni → "Copia report diagnostico".
+    - [ ] Il report dice "Avviso adattatore: no" e ha il contatore `domScans`.
+16. Export XLSX/CSV.
+    - [ ] Colonna "Portale" con "Idealista.it" / "Immobiliare.it".
+17. Console di Chrome sulla pagina di ricerca.
+    - [ ] Nessun errore `[HomeRadar]`.
+
+Se il sito è cambiato: ricattura le fixture (Immobiliare: piano MVP, Task 4; Idealista: piano 2026-10-13, Task 8), aggiorna schemi o selettori, riesegui `npm test`.
