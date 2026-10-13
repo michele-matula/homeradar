@@ -194,3 +194,21 @@ describe("createController con l'adattatore Idealista", () => {
     expect(document.querySelector(`article[data-element-id="37142311"] [${BADGE_ATTR}]`)).not.toBeNull();
   });
 });
+
+describe('createController DOM: errori e card caricate dopo', () => {
+  const BROKEN = '<article class="item"><a class="item-link"></a></article>';
+  it('non rimanda gli errori già segnalati quando arrivano card nuove (niente falso avviso)', async () => {
+    const goods = Array.from({ length: 9 }, (_, i) => idealistaCard({ id: 100 + i }));
+    document.body.innerHTML = searchBody([...goods, BROKEN]);
+    const send = fakeSend();
+    const url = 'https://www.idealista.it/vendita-case/milano-milano/';
+    const c = createController({ adapter: idealistaAdapter, send, root: document, getUrl: () => url });
+    await c.scan();
+    document.querySelector('section')!.insertAdjacentHTML('beforeend', idealistaCard({ id: 200 }));
+    await c.scan();
+    const statuses = send.mock.calls.map((x) => x[0]).filter((r) => r.type === 'parseStatus');
+    expect(statuses).toHaveLength(2);
+    expect(statuses[0]).toMatchObject({ ok: true, errors: ['card[9]: id o titolo mancanti'] });
+    expect(statuses[1]).toMatchObject({ ok: true, errors: [] });
+  });
+});

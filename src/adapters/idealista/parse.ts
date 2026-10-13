@@ -27,7 +27,9 @@ export function parseTitle(title: string): TitleParts {
   const parts = m[2]!.split(',').map((s) => s.trim()).filter(Boolean);
   const city = parts.pop() ?? null;
   let zone: string | null = null;
-  if (parts.length > 1 || (parts.length === 1 && !STREET.test(parts[0]!))) zone = parts.pop()!;
+  // L'ultima parte prima della città è la zona, a meno che sia un civico o (da sola) una via.
+  const last = parts.at(-1);
+  if (last && !/^\d/.test(last) && (parts.length > 1 || !STREET.test(last))) zone = parts.pop()!;
   return { typology: m[1]!.trim(), address: parts.length ? parts.join(', ') : null, zone, city };
 }
 

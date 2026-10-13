@@ -15,8 +15,9 @@ export function createController({ adapter, send, root, getUrl }: ControllerDeps
   const evaluations = new Map<number, Evaluation>();
   /** ID di tutti gli annunci ricevuti, agenzie comprese. */
   const seen = new Set<number>();
-  /** Modalità DOM: ID già inviati per l'URL corrente. */
+  /** Modalità DOM: ID ed errori già inviati per l'URL corrente. */
   const sent = new Set<number>();
+  const sentErrors = new Set<string>();
   let scannedUrl: string | null = null;
 
   function applyAll(): void {
@@ -56,6 +57,7 @@ export function createController({ adapter, send, root, getUrl }: ControllerDeps
     if (isNewUrl) {
       scannedUrl = url;
       sent.clear();
+      sentErrors.clear();
     }
     const result = adapter.readDocument(root, url);
     const fresh = result.observations.filter((o) => !sent.has(o.portalId));
@@ -63,8 +65,12 @@ export function createController({ adapter, send, root, getUrl }: ControllerDeps
       applyAll();
       return;
     }
+    // Solo le card e gli errori nuovi: rimandare gli errori già noti insieme a poche card nuove
+    // ne gonfierebbe la quota e accenderebbe un falso avviso.
+    const freshErrors = result.errors.filter((e) => !sentErrors.has(e));
     for (const o of fresh) sent.add(o.portalId);
-    await process({ ...result, observations: fresh }, 'dom');
+    for (const e of freshErrors) sentErrors.add(e);
+    await process({ ...result, observations: fresh, errors: freshErrors }, 'dom');
   }
 
   return { handle, scan, applyAll, hasUnseenListings };

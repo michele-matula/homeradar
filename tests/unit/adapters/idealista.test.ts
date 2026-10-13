@@ -45,6 +45,9 @@ describe('parseTitle', () => {
   it('via senza zona: la riconosce come indirizzo', () => {
     expect(parseTitle('Villa in Via Esempio, Milano')).toEqual({ typology: 'Villa', address: 'Via Esempio', zone: null, city: 'Milano' });
   });
+  it('civico senza zona: resta nell\'indirizzo, non diventa la zona', () => {
+    expect(parseTitle('Trilocale in Via Roma, 27, Milano')).toEqual({ typology: 'Trilocale', address: 'Via Roma, 27', zone: null, city: 'Milano' });
+  });
   it('titolo non riconosciuto: tutto nullo', () => {
     expect(parseTitle('???')).toEqual({ typology: null, address: null, zone: null, city: null });
   });
