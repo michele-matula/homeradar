@@ -156,7 +156,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
           {visible.length === 0 ? (
             <div className="empty">
               <SearchIcon />
-              <p>{filter === 'all' ? 'Nessun lead in questa scheda. Naviga su Immobiliare.it per raccoglierne.' : `Nessun lead${filterTag} in questa scheda.`}</p>
+              <p>{filter === 'all' ? 'Nessun lead in questa scheda. Naviga su Immobiliare.it o Idealista.it per raccoglierne.' : `Nessun lead${filterTag} in questa scheda.`}</p>
             </div>
           ) : (
             <ul className="leads">

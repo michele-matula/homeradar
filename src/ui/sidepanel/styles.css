@@ -149,8 +149,12 @@ button, input, select { font: inherit; color: inherit; }
 .lead--medium::before { background: #e8930c; }
 .lead--verify::before { background: var(--verify); }
 .lead__top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.lead__top:has(> :only-child.sparkline) { justify-content: flex-end; }
 .lead__top:empty { display: none; }
+.lead__tags { display: flex; align-items: center; gap: 6px; }
+.portal-tag {
+  padding: 2px 8px; border: 1px solid var(--border); border-radius: 999px;
+  background: var(--surface-muted); color: var(--muted); font-size: 11px; font-weight: 500;
+}
 .lead__head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: 6px; }
 .lead__title {
   font-weight: 600; line-height: 1.35;

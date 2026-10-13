@@ -54,6 +54,13 @@ describe('Sparkline', () => {
 });
 
 describe('LeadItem', () => {
+  it('mostra il portale di provenienza', () => {
+    const l = lead(1, 'high');
+    const fromIdealista = { ...l, listing: { ...l.listing, key: 'idealista:1', portal: 'idealista' as const } };
+    render(<ul><LeadItem lead={fromIdealista} onChange={() => {}} onDelete={() => {}} /></ul>);
+    expect(screen.getByText('Idealista').className).toBe('portal-tag');
+  });
+
   it('mostra priorità, titolo, motivi e visite', () => {
     render(<ul><LeadItem lead={lead(1, 'high')} onChange={() => {}} onDelete={() => {}} /></ul>);
     expect(screen.getByText('Alta')).toBeTruthy();
@@ -155,7 +162,7 @@ describe('App', () => {
   it('mostra il banner quando l\'adattatore segnala un problema', async () => {
     render(<App api={fakeApi([], { immobiliare: true })} />);
     expect(await screen.findByText('Immobiliare.it potrebbe essere cambiato: alcuni dati non sono stati letti.')).toBeTruthy();
-    expect(screen.getByText('Nessun lead in questa scheda. Naviga su Immobiliare.it per raccoglierne.')).toBeTruthy();
+    expect(screen.getByText('Nessun lead in questa scheda. Naviga su Immobiliare.it o Idealista.it per raccoglierne.')).toBeTruthy();
     expect(screen.queryByText(/Elimina tutti/)).toBeNull();
   });
 

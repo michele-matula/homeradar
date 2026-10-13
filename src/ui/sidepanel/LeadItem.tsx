@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { PRIORITY_LABELS, STATUS_LABELS } from '@/core/leads';
 import { formatEuro } from '@/shared/format';
-import { LEAD_STATUSES, type LeadStatus, type LeadView } from '@/shared/types';
+import { LEAD_STATUSES, PORTAL_TAGS, type LeadStatus, type LeadView } from '@/shared/types';
 import { ExternalIcon, TrashIcon } from './Icons';
 import { Sparkline } from './Sparkline';
 
@@ -23,9 +23,12 @@ export function LeadItem({ lead, onChange, onDelete }: Props) {
   return (
     <li className={`lead lead--${evaluation.priority}`}>
       <div className="lead__top">
-        {evaluation.priority !== 'none' && (
-          <span className={`pill pill--${evaluation.priority}`}>{PRIORITY_LABELS[evaluation.priority]}</span>
-        )}
+        <div className="lead__tags">
+          {evaluation.priority !== 'none' && (
+            <span className={`pill pill--${evaluation.priority}`}>{PRIORITY_LABELS[evaluation.priority]}</span>
+          )}
+          <span className="portal-tag">{PORTAL_TAGS[listing.portal]}</span>
+        </div>
         <Sparkline prices={prices.map((p) => p.price)} />
       </div>
       <div className="lead__head">

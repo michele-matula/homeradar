@@ -73,6 +73,6 @@ test('il pannello elenca i lead ed esporta il CSV', async ({ context, extensionI
 
   const [download] = await Promise.all([panel.waitForEvent('download'), panel.getByRole('button', { name: 'CSV', exact: true }).click()]);
   const csv = readFileSync((await download.path())!, 'utf8');
-  expect(csv).toContain('Priorità;Stato;Titolo;Indirizzo');
+  expect(csv).toContain('Priorità;Stato;Portale;Titolo;Indirizzo');
   expect(csv).not.toMatch(/\b3\d{2}[ .]?\d{3}[ .]?\d{3,4}\b/);
 });

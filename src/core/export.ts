@@ -1,10 +1,10 @@
 import * as XLSX from 'xlsx';
 import { PRIORITY_LABELS, STATUS_LABELS } from '@/core/leads';
 import { formatDate } from '@/shared/format';
-import type { LeadView } from '@/shared/types';
+import { PORTAL_SITES, type LeadView } from '@/shared/types';
 
 export const EXPORT_COLUMNS = [
-  'Priorità', 'Stato', 'Titolo', 'Indirizzo', 'Città/Zona', 'Tipologia', 'm²', 'Locali', 'Prezzo attuale',
+  'Priorità', 'Stato', 'Portale', 'Titolo', 'Indirizzo', 'Città/Zona', 'Tipologia', 'm²', 'Locali', 'Prezzo attuale',
   'Prezzo massimo noto', 'Calo %', 'Data ultimo ribasso', 'Online da (giorni)', 'Età stimata', 'Prima visita',
   'Ultima visita', 'Note', 'URL',
 ] as const;
@@ -15,6 +15,7 @@ export function toExportRows(leads: LeadView[]): ExportRow[] {
   return leads.map(({ listing: l, evaluation: e, state: s }) => ({
     'Priorità': PRIORITY_LABELS[e.priority],
     'Stato': STATUS_LABELS[s.status],
+    'Portale': PORTAL_SITES[l.portal],
     'Titolo': l.title,
     'Indirizzo': l.address ?? '',
     'Città/Zona': [l.city, l.zone].filter(Boolean).join(' / '),
