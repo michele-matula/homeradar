@@ -57,7 +57,8 @@ describe('LeadItem', () => {
   it('mostra priorità, titolo, motivi e visite', () => {
     render(<ul><LeadItem lead={lead(1, 'high')} onChange={() => {}} onDelete={() => {}} /></ul>);
     expect(screen.getByText('Alta')).toBeTruthy();
-    expect(screen.getByText('Bilocale 1 — € 235.000')).toBeTruthy();
+    expect(screen.getByText('Bilocale 1')).toBeTruthy();
+    expect(screen.getByText('€ 235.000')).toBeTruthy();
     expect(screen.getByText('Online da 173 gg · Ribassato del 5,6% · Visto 3 volte')).toBeTruthy();
   });
 
@@ -72,7 +73,7 @@ describe('LeadItem', () => {
     expect(onChange).toHaveBeenCalledTimes(1);
     fireEvent.blur(notes);
     expect(onChange).toHaveBeenLastCalledWith({ notes: 'chiamare' });
-    fireEvent.click(screen.getByText('Elimina'));
+    fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
     expect(onDelete).not.toHaveBeenCalled();
     fireEvent.click(screen.getByText('Conferma eliminazione'));
     expect(onDelete).toHaveBeenCalledTimes(1);
@@ -82,12 +83,12 @@ describe('LeadItem', () => {
 describe('App', () => {
   it('mostra le schede con i conteggi e filtra per stato', async () => {
     render(<App api={fakeApi([lead(1, 'high'), lead(2, 'medium'), lead(3, 'medium', 'contacted')])} />);
-    expect(await screen.findByText('Nuovi (2)')).toBeTruthy();
-    expect(screen.getByText('Contattati (1)')).toBeTruthy();
-    expect(screen.getByText('Bilocale 1 — € 235.000')).toBeTruthy();
-    expect(screen.queryByText('Bilocale 3 — € 235.000')).toBeNull();
-    fireEvent.click(screen.getByText('Contattati (1)'));
-    expect(screen.getByText('Bilocale 3 — € 235.000')).toBeTruthy();
+    expect(await screen.findByRole('tab', { name: 'Nuovi (2)' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Contattati (1)' })).toBeTruthy();
+    expect(screen.getByText('Bilocale 1')).toBeTruthy();
+    expect(screen.queryByText('Bilocale 3')).toBeNull();
+    fireEvent.click(screen.getByRole('tab', { name: 'Contattati (1)' }));
+    expect(screen.getByText('Bilocale 3')).toBeTruthy();
   });
 
   it('elimina tutti gli annunci della scheda corrente dopo conferma', async () => {
@@ -96,7 +97,7 @@ describe('App', () => {
     fireEvent.click(await screen.findByText('Elimina tutti (2)'));
     expect(api.deleteListings).not.toHaveBeenCalled();
     fireEvent.click(screen.getByText('Annulla'));
-    fireEvent.click(screen.getByText('Contattati (1)'));
+    fireEvent.click(screen.getByRole('tab', { name: 'Contattati (1)' }));
     fireEvent.click(screen.getByText('Elimina tutti (1)'));
     fireEvent.click(screen.getByText('Conferma: elimina 1 annuncio'));
     expect(api.deleteListings).toHaveBeenCalledWith(['immobiliare:3']);
@@ -105,7 +106,7 @@ describe('App', () => {
   it('azzera l\'archivio dalle impostazioni dopo conferma', async () => {
     const api = fakeApi([lead(1, 'high'), lead(2, 'medium')]);
     render(<App api={api} />);
-    fireEvent.click(await screen.findByText('⚙ Impostazioni'));
+    fireEvent.click(await screen.findByRole('button', { name: 'Impostazioni' }));
     fireEvent.click(await screen.findByText('Azzera archivio annunci'));
     fireEvent.click(screen.getByText('Annulla'));
     expect(api.deleteAllListings).not.toHaveBeenCalled();
@@ -127,6 +128,6 @@ describe('App', () => {
     api.listLeads = vi.fn(async () => { throw new Error('QuotaExceededError'); });
     render(<App api={api} />);
     expect(await screen.findByText('Errore: QuotaExceededError')).toBeTruthy();
-    expect(screen.getByText('⬇ Esporta XLSX')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Esporta XLSX' })).toBeTruthy();
   });
 });

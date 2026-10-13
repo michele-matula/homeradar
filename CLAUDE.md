@@ -14,6 +14,7 @@ npm test             # unit test (Vitest, jsdom + fake-indexeddb)
 npx vitest run tests/unit/core/rules.test.ts   # un singolo file
 npx vitest run -t "Alta"                        # test per nome
 npm run test:e2e     # build + Playwright su pagine fixture locali
+node scripts/generate-icons.mjs                 # rigenera public/icon/*.png da src/shared/logo.ts
 ```
 
 ## Architettura

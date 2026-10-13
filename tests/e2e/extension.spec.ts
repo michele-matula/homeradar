@@ -68,10 +68,10 @@ test('il pannello elenca i lead ed esporta il CSV', async ({ context, extensionI
 
   const panel = await context.newPage();
   await panel.goto(`chrome-extension://${extensionId}/sidepanel.html`);
-  await expect(panel.getByText(/^Nuovi \([1-9]\d*\)$/)).toBeVisible();
+  await expect(panel.getByRole('tab', { name: /^Nuovi \([1-9]\d*\)$/ })).toBeVisible();
   await expect(panel.locator('.lead').first()).toBeVisible();
 
-  const [download] = await Promise.all([panel.waitForEvent('download'), panel.getByText('⬇ CSV').click()]);
+  const [download] = await Promise.all([panel.waitForEvent('download'), panel.getByRole('button', { name: 'CSV', exact: true }).click()]);
   const csv = readFileSync((await download.path())!, 'utf8');
   expect(csv).toContain('Priorità;Stato;Titolo;Indirizzo');
   expect(csv).not.toMatch(/\b3\d{2}[ .]?\d{3}[ .]?\d{3,4}\b/);

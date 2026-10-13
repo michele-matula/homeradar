@@ -1,5 +1,19 @@
+import { BRAND_COLOR, LOGO_SVG } from '@/shared/logo';
+
 export const BANNER_ID = 'homeradar-banner';
 export const FALLBACK_TEXT = 'HomeRadar: ricarica la pagina per analizzare questi risultati';
+
+const FONT = "500 13px/1.4 Inter, 'Segoe UI', system-ui, sans-serif";
+
+function button(doc: Document, text: string, style: Partial<CSSStyleDeclaration>): HTMLButtonElement {
+  const b = doc.createElement('button');
+  b.type = 'button';
+  b.textContent = text;
+  Object.assign(b.style, {
+    font: FONT, cursor: 'pointer', borderRadius: '7px', border: '0', margin: '0', ...style,
+  } satisfies Partial<CSSStyleDeclaration>);
+  return b;
+}
 
 export function showBanner(doc: Document, text: string): void {
   if (doc.getElementById(BANNER_ID)) return;
@@ -7,20 +21,23 @@ export function showBanner(doc: Document, text: string): void {
   el.id = BANNER_ID;
   el.setAttribute('role', 'status');
   Object.assign(el.style, {
-    position: 'fixed', top: '12px', left: '50%', transform: 'translateX(-50%)', zIndex: '2147483647',
-    background: '#1d4ed8', color: '#fff', padding: '8px 12px', borderRadius: '8px',
-    font: '500 13px/1.4 system-ui, sans-serif', boxShadow: '0 4px 12px rgba(0,0,0,.2)',
-    display: 'flex', gap: '10px', alignItems: 'center',
+    position: 'fixed', top: '14px', left: '50%', transform: 'translateX(-50%)', zIndex: '2147483647',
+    background: BRAND_COLOR, color: '#fff', padding: '8px 8px 8px 10px', borderRadius: '12px',
+    font: FONT, boxShadow: '0 8px 24px rgba(10,58,71,.35), 0 0 0 1px rgba(255,255,255,.08) inset',
+    display: 'flex', gap: '10px', alignItems: 'center', maxWidth: 'calc(100vw - 32px)',
   } satisfies Partial<CSSStyleDeclaration>);
+  const logo = doc.createElement('span');
+  logo.innerHTML = LOGO_SVG; // costante interna, nessun dato esterno
+  Object.assign(logo.style, { display: 'block', width: '24px', height: '24px', flex: 'none' } satisfies Partial<CSSStyleDeclaration>);
+  const svg = logo.querySelector('svg');
+  if (svg) Object.assign(svg.style, { display: 'block', width: '100%', height: '100%' });
   const msg = doc.createElement('span');
   msg.textContent = text;
-  const reload = doc.createElement('button');
-  reload.textContent = 'Ricarica';
+  const reload = button(doc, 'Ricarica', { background: '#fff', color: BRAND_COLOR, fontWeight: '600', padding: '5px 12px' });
   reload.addEventListener('click', () => doc.defaultView?.location.reload());
-  const close = doc.createElement('button');
-  close.textContent = '✕';
+  const close = button(doc, '✕', { background: 'transparent', color: 'rgba(255,255,255,.8)', padding: '5px 8px' });
   close.setAttribute('aria-label', 'Chiudi');
   close.addEventListener('click', () => el.remove());
-  el.append(msg, reload, close);
+  el.append(logo, msg, reload, close);
   doc.body.append(el);
 }

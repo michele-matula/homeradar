@@ -3,6 +3,7 @@ import { groupByStatus } from '@/core/leads';
 import { LEAD_STATUSES, type LeadStatus, type LeadView } from '@/shared/types';
 import { defaultApi, type Api } from './api';
 import { ExportBar } from './ExportBar';
+import { AlertIcon, BackIcon, Logo, SearchIcon, SettingsIcon } from './Icons';
 import { LeadItem } from './LeadItem';
 import { SettingsView } from './SettingsView';
 
@@ -45,44 +46,83 @@ export function App({ api = defaultApi }: { api?: Api }) {
   return (
     <main className="panel">
       <header className="panel__header">
-        <b>HomeRadar</b>
-        <button type="button" onClick={() => setView(view === 'leads' ? 'settings' : 'leads')}>
-          {view === 'leads' ? '⚙ Impostazioni' : '← Lead'}
-        </button>
+        <div className="brand">
+          <Logo size={28} />
+          <div>
+            <div className="brand__name">HomeRadar</div>
+            <div className="brand__sub">{view === 'leads' ? 'Lead da privati' : 'Impostazioni'}</div>
+          </div>
+        </div>
+        {view === 'leads' ? (
+          <button type="button" className="icon-btn icon-btn--on-brand" aria-label="Impostazioni" title="Impostazioni" onClick={() => setView('settings')}>
+            <SettingsIcon />
+          </button>
+        ) : (
+          <button type="button" className="icon-btn icon-btn--on-brand" aria-label="Torna ai lead" title="Torna ai lead" onClick={() => setView('leads')}>
+            <BackIcon />
+          </button>
+        )}
       </header>
-      {warning && <p className="banner banner--warning">Immobiliare.it potrebbe essere cambiato: alcuni dati non sono stati letti.</p>}
-      {error && <p className="banner banner--error">{error}</p>}
+      {warning && (
+        <p className="banner banner--warning">
+          <AlertIcon />
+          <span>Immobiliare.it potrebbe essere cambiato: alcuni dati non sono stati letti.</span>
+        </p>
+      )}
+      {error && (
+        <p className="banner banner--error">
+          <AlertIcon />
+          <span>{error}</span>
+        </p>
+      )}
       {view === 'settings' ? (
         <SettingsView api={api} onSaved={() => void refresh()} />
       ) : (
         <>
-          <nav className="tabs">
+          <nav className="tabs" role="tablist">
             {LEAD_STATUSES.map((s) => (
-              <button key={s} type="button" className={s === tab ? 'tab tab--on' : 'tab'} onClick={() => setTab(s)}>
-                {`${TAB_LABELS[s]} (${groups[s].length})`}
+              <button
+                key={s}
+                type="button"
+                role="tab"
+                aria-selected={s === tab}
+                aria-label={`${TAB_LABELS[s]} (${groups[s].length})`}
+                className={s === tab ? 'tab tab--on' : 'tab'}
+                onClick={() => setTab(s)}
+              >
+                <span className="tab__count">{groups[s].length}</span>
+                <span className="tab__label">{TAB_LABELS[s]}</span>
               </button>
             ))}
           </nav>
           {visible.length > 0 && (
             <div className="bulk">
-              {confirmingAll ? (
-                <>
-                  <button
-                    type="button"
-                    className="bulk__danger"
-                    onClick={() => run(() => api.deleteListings(visible.map((l) => l.listing.key)))}
-                  >
-                    {`Conferma: elimina ${visible.length} ${visible.length === 1 ? 'annuncio' : 'annunci'}`}
+              <span className="bulk__count">{`${visible.length} ${visible.length === 1 ? 'annuncio' : 'annunci'}`}</span>
+              <div className="bulk__actions">
+                {confirmingAll ? (
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn--danger btn--sm"
+                      onClick={() => run(() => api.deleteListings(visible.map((l) => l.listing.key)))}
+                    >
+                      {`Conferma: elimina ${visible.length} ${visible.length === 1 ? 'annuncio' : 'annunci'}`}
+                    </button>
+                    <button type="button" className="btn btn--sm" onClick={() => setConfirmingAll(false)}>Annulla</button>
+                  </>
+                ) : (
+                  <button type="button" className="btn btn--ghost-danger btn--sm" onClick={() => setConfirmingAll(true)}>
+                    {`Elimina tutti (${visible.length})`}
                   </button>
-                  <button type="button" onClick={() => setConfirmingAll(false)}>Annulla</button>
-                </>
-              ) : (
-                <button type="button" onClick={() => setConfirmingAll(true)}>{`Elimina tutti (${visible.length})`}</button>
-              )}
+                )}
+              </div>
             </div>
           )}
           {visible.length === 0 ? (
-            <p className="empty">Nessun lead in questa scheda. Naviga su Immobiliare.it per raccoglierne.</p>
+            <div className="empty">
+              <SearchIcon />
+              <p>Nessun lead in questa scheda. Naviga su Immobiliare.it per raccoglierne.</p>
+            </div>
           ) : (
             <ul className="leads">
               {visible.map((l) => (

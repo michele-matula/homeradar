@@ -8,15 +8,16 @@ const BASE: Record<string, string> = {
   position: 'absolute', top: '8px', left: '8px', right: 'auto', bottom: 'auto',
   width: 'auto', height: 'auto', 'max-width': 'calc(100% - 16px)', margin: '0', transform: 'none',
   display: 'inline-block', 'box-sizing': 'border-box', overflow: 'hidden', 'text-overflow': 'ellipsis',
-  'z-index': '5', 'pointer-events': 'none', padding: '3px 8px', 'border-radius': '999px',
-  'border-width': '1px', 'border-style': 'solid', font: '600 12px/1.3 system-ui, sans-serif', 'white-space': 'nowrap',
+  'z-index': '5', 'pointer-events': 'none', padding: '4px 10px', 'border-radius': '999px',
+  'border-width': '1px', 'border-style': 'solid', font: "600 12px/1.3 Inter, 'Segoe UI', system-ui, sans-serif", 'white-space': 'nowrap',
+  'letter-spacing': '0.01em', 'box-shadow': '0 1px 2px rgba(16,24,40,.12), 0 2px 8px rgba(16,24,40,.18)',
 };
 
 const COLORS: Record<Priority, Record<string, string>> = {
-  high: { background: '#fde2e1', color: '#a4161a', 'border-color': '#f5a3a0' },
-  medium: { background: '#fff1d6', color: '#8a5300', 'border-color': '#f3c77a' },
-  verify: { background: '#e7eefc', color: '#1d4ed8', 'border-color': '#a9c1f5' },
-  none: { background: '#f1f1f1', color: '#555555', 'border-color': '#dddddd' },
+  high: { background: '#c0262d', color: '#ffffff', 'border-color': '#a01e24' },
+  medium: { background: '#fff4e0', color: '#8a3f04', 'border-color': '#f2cf8c' },
+  verify: { background: '#eaf1fd', color: '#1d5fd1', 'border-color': '#b6ccf5' },
+  none: { background: '#ffffff', color: '#0f4c5c', 'border-color': '#cdd5db' },
 };
 
 function findCard(root: ParentNode, portalId: number): HTMLElement | null {
