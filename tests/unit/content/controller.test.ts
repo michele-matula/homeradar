@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { immobiliareAdapter } from '@/adapters/immobiliare';
+import { idealistaAdapter } from '@/adapters/idealista';
 import type { PortalAdapter } from '@/adapters/types';
 import type { ListingObservation } from '@/shared/types';
 import { createController } from '@/content/controller';
 import { BADGE_ATTR } from '@/content/badges';
 import type { Request } from '@/shared/messages';
 import { API_URL, DETAIL_URL, SEARCH_URL, agencyAdvertiser, realEstate, searchNextData, searchResult } from '../adapters/builders';
+import { card as idealistaCard, NEWEST_URL, searchBody } from '../adapters/idealista-builders';
 
 beforeEach(() => {
   document.body.innerHTML = `<ul>
@@ -177,5 +179,18 @@ describe('createController in modalità DOM', () => {
     const c = createController({ adapter: immobiliareAdapter, send, root: document, getUrl: () => SEARCH_URL });
     await c.scan();
     expect(send).not.toHaveBeenCalled();
+  });
+});
+
+describe("createController con l'adattatore Idealista", () => {
+  it('ingerisce le card della pagina "più recenti", disegna i badge solo sui privati e passa il candidato', async () => {
+    document.body.innerHTML = searchBody([idealistaCard({ id: 37142258, professional: 'true' }), idealistaCard({ id: 37142311 })]);
+    const send = fakeSend();
+    const c = createController({ adapter: idealistaAdapter, send, root: document, getUrl: () => NEWEST_URL });
+    await c.scan();
+    expect(send.mock.calls[0]![0]).toMatchObject({ type: 'parseStatus', portal: 'idealista', ok: true, source: 'dom' });
+    expect(send.mock.calls[1]![0]).toMatchObject({ type: 'ingest', calibrationHint: { portal: 'idealista', portalId: 37142311 } });
+    expect(document.querySelectorAll(`[${BADGE_ATTR}]`)).toHaveLength(1);
+    expect(document.querySelector(`article[data-element-id="37142311"] [${BADGE_ATTR}]`)).not.toBeNull();
   });
 });

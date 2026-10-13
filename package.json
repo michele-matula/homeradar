@@ -1,6 +1,6 @@
 {
   "name": "homeradar",
-  "description": "Estensione Chrome per agenti immobiliari: annunci di privati maturi su Immobiliare.it",
+  "description": "Estensione Chrome per agenti immobiliari: annunci di privati maturi su Immobiliare.it e Idealista.it",
   "private": true,
   "version": "0.1.0",
   "type": "module",
