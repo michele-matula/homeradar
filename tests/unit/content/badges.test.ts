@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { idealistaAdapter } from '@/adapters/idealista';
 import { immobiliareAdapter } from '@/adapters/immobiliare';
+import { card, searchBody } from '../adapters/idealista-builders';
 import { BADGE_ATTR, renderBadge } from '@/content/badges';
 import type { Evaluation } from '@/shared/types';
 
@@ -59,5 +61,11 @@ describe('renderBadge', () => {
   it('usa la card intera se manca la foto e salta gli annunci senza card', () => {
     expect(renderBadge(document, ev({ portalId: 222 }), immobiliareAdapter)).toBe('created');
     expect(renderBadge(document, ev({ portalId: 999 }), immobiliareAdapter)).toBe('no-card');
+  });
+
+  it('su Idealista mette il badge nel contenitore della foto della card', () => {
+    document.body.innerHTML = searchBody([card({ id: 111 })]);
+    expect(renderBadge(document, ev(), idealistaAdapter)).toBe('created');
+    expect(document.querySelectorAll(`article .item-multimedia > [${BADGE_ATTR}]`)).toHaveLength(1);
   });
 });
