@@ -1,4 +1,5 @@
-export type Portal = 'immobiliare';
+export type Portal = 'immobiliare' | 'idealista';
+export const PORTALS: Portal[] = ['immobiliare', 'idealista'];
 export type SellerType = 'private' | 'agency' | 'constructor' | 'unknown';
 export type PageKind = 'search' | 'detail' | 'other';
 export type ObservationSource = 'search' | 'detail';
@@ -86,8 +87,15 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Settings = { minAgeDays: 120, minDropPercent: 0, retentionDays: 90 };
 
 export interface CalibrationPoint {
+  portal: Portal;
   portalId: number;
   createdAt: number;
+}
+
+/** ID dell'annuncio più recente di una pagina "più recenti": candidato punto "creato oggi". */
+export interface CalibrationHint {
+  portal: Portal;
+  portalId: number;
 }
 
 export type Priority = 'high' | 'medium' | 'verify' | 'none';

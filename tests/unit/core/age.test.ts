@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_CALIBRATION, estimateCreatedAt, mergeCalibration } from '@/core/age';
+import { acceptLearnedPoint, DEFAULT_CALIBRATION, estimateCreatedAt, mergeCalibration, utcDay } from '@/core/age';
 
 const pts = [
   { portalId: 100, createdAt: 0 },
@@ -27,7 +27,8 @@ describe('estimateCreatedAt', () => {
     expect(estimateCreatedAt(125, [...pts].reverse())).toBe(200);
   });
   it('con la calibrazione predefinita colloca un ID noto alla sua data', () => {
-    expect(estimateCreatedAt(131597836, DEFAULT_CALIBRATION)).toBe(1786025032000);
+    expect(estimateCreatedAt(131597836, DEFAULT_CALIBRATION.immobiliare)).toBe(1786025032000);
+    expect(estimateCreatedAt(36_000_000, DEFAULT_CALIBRATION.idealista)).toBe(Date.UTC(2026, 5, 13));
   });
 });
 
@@ -39,5 +40,36 @@ describe('mergeCalibration', () => {
       { portalId: 2, createdAt: 25 },
       { portalId: 3, createdAt: 30 },
     ]);
+  });
+});
+
+describe('utcDay', () => {
+  it('riporta alla mezzanotte UTC', () => {
+    expect(utcDay(Date.UTC(2026, 9, 13, 23, 59))).toBe(Date.UTC(2026, 9, 13));
+  });
+});
+
+describe('acceptLearnedPoint', () => {
+  const pts = DEFAULT_CALIBRATION.idealista; // ultimo punto: 37.142.000 il 13/10/2026
+  const RATE = 8200;
+  const at = (day: number) => Date.UTC(2026, 9, day);
+
+  it("accetta l'annuncio più recente di una grande città", () => {
+    expect(acceptLearnedPoint({ portalId: 37_200_000, createdAt: at(20) }, pts, RATE)).toBe(true);
+  });
+  it('rifiuta un ID non maggiore di quelli noti', () => {
+    expect(acceptLearnedPoint({ portalId: 37_100_000, createdAt: at(20) }, pts, RATE)).toBe(false);
+  });
+  it("rifiuta un punto nello stesso giorno dell'ultimo", () => {
+    expect(acceptLearnedPoint({ portalId: 37_150_000, createdAt: at(13) }, pts, RATE)).toBe(false);
+  });
+  it('rifiuta un ritmo troppo basso (comune piccolo, annuncio vecchio)', () => {
+    expect(acceptLearnedPoint({ portalId: 37_150_000, createdAt: at(20) }, pts, RATE)).toBe(false);
+  });
+  it('rifiuta un ritmo troppo alto', () => {
+    expect(acceptLearnedPoint({ portalId: 37_400_000, createdAt: at(20) }, pts, RATE)).toBe(false);
+  });
+  it('senza punti di riferimento non accetta nulla', () => {
+    expect(acceptLearnedPoint({ portalId: 37_200_000, createdAt: at(20) }, [], RATE)).toBe(false);
   });
 });

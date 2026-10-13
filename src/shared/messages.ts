@@ -1,10 +1,10 @@
 import { browser } from 'wxt/browser';
-import type { LeadStatus, ListingObservation, Settings } from '@/shared/types';
+import type { CalibrationHint, LeadStatus, ListingObservation, Settings } from '@/shared/types';
 
 export const LEADS_CHANGED = 'leadsChanged';
 
 export type Request =
-  | { type: 'ingest'; observations: ListingObservation[] }
+  | { type: 'ingest'; observations: ListingObservation[]; calibrationHint?: CalibrationHint }
   | { type: 'listLeads' }
   | { type: 'setLeadState'; listingKey: string; status?: LeadStatus; notes?: string }
   | { type: 'deleteListing'; listingKey: string }

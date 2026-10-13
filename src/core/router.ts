@@ -9,7 +9,7 @@ export interface RouterHooks {
 export async function handleRequest(service: LeadService, req: Request, version: string, hooks: RouterHooks): Promise<unknown> {
   switch (req.type) {
     case 'ingest': {
-      const evaluations = await service.ingest(req.observations);
+      const evaluations = await service.ingest(req.observations, req.calibrationHint);
       await service.bumpCounter('ingested', req.observations.length);
       if (evaluations.length) hooks.leadsChanged();
       return evaluations;

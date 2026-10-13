@@ -1,12 +1,12 @@
 import Dexie from 'dexie';
-import { DEFAULT_CALIBRATION, estimateCreatedAt, mergeCalibration } from '@/core/age';
+import { acceptLearnedPoint, DEFAULT_CALIBRATION, estimateCreatedAt, LEARN_RATE_PER_DAY, mergeCalibration, utcDay } from '@/core/age';
 import type { HomeRadarDB } from '@/core/db';
 import { sortLeads } from '@/core/leads';
 import { evaluate } from '@/core/rules';
 import { validateSettings } from '@/core/settings';
 import {
-  DAY_MS, listingKey, type Diagnostics, type Evaluation, type LeadState, type LeadStatus, type LeadView,
-  type ListingObservation, type ListingRecord, type PriceSnapshot, type Settings,
+  DAY_MS, listingKey, type CalibrationHint, type Diagnostics, type Evaluation, type LeadState, type LeadStatus, type LeadView,
+  type ListingObservation, type ListingRecord, type Portal, type PriceSnapshot, type Settings,
 } from '@/shared/types';
 
 export const VISIT_GAP_MS = 30 * 60_000;
@@ -22,16 +22,25 @@ export class LeadService {
     return validateSettings((rec?.value ?? {}) as Partial<Settings>);
   }
 
-  async ingest(observations: ListingObservation[]): Promise<Evaluation[]> {
+  async ingest(observations: ListingObservation[], hint?: CalibrationHint): Promise<Evaluation[]> {
     const now = this.clock();
     const settings = await this.getSettings();
-    const { listings, priceSnapshots, leadStates, idCalibration } = this.db;
+    const { listings, priceSnapshots, leadStates, calibration } = this.db;
 
-    return this.db.transaction('rw', [listings, priceSnapshots, leadStates, idCalibration], async () => {
+    return this.db.transaction('rw', [listings, priceSnapshots, leadStates, calibration], async () => {
       for (const o of observations) {
-        if (o.portalCreatedAt != null) await idCalibration.put({ portalId: o.portalId, createdAt: o.portalCreatedAt });
+        if (o.portalCreatedAt != null) await calibration.put({ portal: o.portal, portalId: o.portalId, createdAt: o.portalCreatedAt });
       }
-      const calibration = mergeCalibration(DEFAULT_CALIBRATION, await idCalibration.toArray());
+      const learned = await calibration.toArray();
+      const pointsFor = (p: Portal) => mergeCalibration(DEFAULT_CALIBRATION[p], learned.filter((x) => x.portal === p));
+      const rate = hint && LEARN_RATE_PER_DAY[hint.portal];
+      if (hint && rate) {
+        const candidate = { portal: hint.portal, portalId: hint.portalId, createdAt: utcDay(now) };
+        if (acceptLearnedPoint(candidate, pointsFor(hint.portal), rate)) {
+          await calibration.put(candidate);
+          learned.push(candidate);
+        }
+      }
 
       const evaluations: Evaluation[] = [];
       for (const o of observations) {
@@ -52,7 +61,7 @@ export class LeadService {
           rooms: o.rooms ?? prev?.rooms ?? null,
           currentPrice: o.price ?? prev?.currentPrice ?? null,
           portalCreatedAt: o.portalCreatedAt ?? prev?.portalCreatedAt ?? null,
-          estimatedCreatedAt: estimateCreatedAt(o.portalId, calibration),
+          estimatedCreatedAt: estimateCreatedAt(o.portalId, pointsFor(o.portal)),
           lastDrop: o.lastDrop ?? prev?.lastDrop ?? null,
           firstSeenAt: prev?.firstSeenAt ?? now,
           lastSeenAt: now,

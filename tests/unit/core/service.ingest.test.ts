@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { VISIT_GAP_MS } from '@/core/service';
+import type { ListingObservation } from '@/shared/types';
 import { obs, setup } from './helpers';
 
 const KEY = 'immobiliare:128416572';
@@ -30,7 +31,7 @@ describe('LeadService.ingest', () => {
     const created = Date.UTC(2026, 3, 1);
     const [e] = await svc.ingest([obs({ source: 'detail', portalCreatedAt: created })]);
     expect(e!.ageEstimated).toBe(false);
-    expect(await db.idCalibration.get(128416572)).toEqual({ portalId: 128416572, createdAt: created });
+    expect(await db.calibration.get(['immobiliare', 128416572])).toEqual({ portal: 'immobiliare', portalId: 128416572, createdAt: created });
     await svc.ingest([obs()]);
     expect((await db.listings.get(KEY))!.portalCreatedAt).toBe(created);
   });
@@ -75,5 +76,27 @@ describe('LeadService.ingest', () => {
     await db.leadStates.put({ listingKey: KEY, status: 'contacted', notes: 'richiamare', statusChangedAt: 1 });
     await svc.ingest([obs()]);
     expect(await db.leadStates.get(KEY)).toMatchObject({ status: 'contacted', notes: 'richiamare' });
+  });
+
+  const idealista = (o: Partial<ListingObservation> = {}) => obs({
+    portal: 'idealista', portalId: 37200000, url: 'https://www.idealista.it/immobile/37200000/', lastDrop: null, ...o,
+  });
+
+  it('impara un punto di calibrazione Idealista dalla pagina "più recenti"', async () => {
+    const { db, svc } = setup(Date.UTC(2026, 9, 20, 12));
+    await svc.ingest([idealista({ sellerType: 'agency' })], { portal: 'idealista', portalId: 37200000 });
+    expect(await db.calibration.get(['idealista', 37200000])).toEqual({ portal: 'idealista', portalId: 37200000, createdAt: Date.UTC(2026, 9, 20) });
+  });
+
+  it('scarta un punto Idealista con ritmo anomalo', async () => {
+    const { db, svc } = setup(Date.UTC(2026, 9, 20, 12));
+    await svc.ingest([idealista({ portalId: 37150000 })], { portal: 'idealista', portalId: 37150000 });
+    expect(await db.calibration.count()).toBe(0);
+  });
+
+  it("stima l'età Idealista solo con i punti Idealista", async () => {
+    const { db, svc } = setup(Date.UTC(2026, 9, 13, 12));
+    await svc.ingest([idealista({ portalId: 36000000 })]);
+    expect((await db.listings.get('idealista:36000000'))!.estimatedCreatedAt).toBe(Date.UTC(2026, 5, 13));
   });
 });
