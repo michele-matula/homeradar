@@ -6,6 +6,8 @@ export interface RouterHooks {
   leadsChanged(): void;
 }
 
+const PAYLOAD_COUNTERS = { api: 'apiPayloads', 'next-data': 'nextDataPayloads', dom: 'domScans' } as const;
+
 export async function handleRequest(service: LeadService, req: Request, version: string, hooks: RouterHooks): Promise<unknown> {
   switch (req.type) {
     case 'ingest': {
@@ -38,12 +40,12 @@ export async function handleRequest(service: LeadService, req: Request, version:
       hooks.leadsChanged();
       return saved;
     }
-    case 'parseStatus':
-      await service.bumpCounter(req.source === 'api' ? 'apiPayloads' : 'nextDataPayloads');
+    case 'parseStatus': {
+      await service.bumpCounter(PAYLOAD_COUNTERS[req.source]);
       for (const e of req.errors.slice(0, 5)) await service.recordError(e);
-      await service.setAdapterWarning(!req.ok);
-      hooks.setWarning(!req.ok);
+      hooks.setWarning(await service.setAdapterWarning(req.portal, !req.ok));
       return null;
+    }
     case 'fallbackShown':
       await service.bumpCounter('fallbackShown');
       return null;

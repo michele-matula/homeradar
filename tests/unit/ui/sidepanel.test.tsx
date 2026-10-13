@@ -4,7 +4,7 @@ import { App } from '@/ui/sidepanel/App';
 import type { Api } from '@/ui/sidepanel/api';
 import { LeadItem } from '@/ui/sidepanel/LeadItem';
 import { Sparkline } from '@/ui/sidepanel/Sparkline';
-import { DEFAULT_SETTINGS, type LeadStatus, type LeadView, type Priority } from '@/shared/types';
+import { DEFAULT_SETTINGS, type Diagnostics, type LeadStatus, type LeadView, type Priority } from '@/shared/types';
 
 afterEach(cleanup);
 
@@ -28,7 +28,7 @@ function lead(id: number, priority: Priority, status: LeadStatus = 'new'): LeadV
   };
 }
 
-function fakeApi(leads: LeadView[], adapterWarning = false): Api {
+function fakeApi(leads: LeadView[], adapterWarning: Diagnostics['adapterWarning'] = {}): Api {
   return {
     listLeads: vi.fn(async () => leads),
     setLeadState: vi.fn(async (k, p) => ({ listingKey: k, status: p.status ?? 'new', notes: p.notes ?? '', statusChangedAt: 0 })),
@@ -81,6 +81,16 @@ describe('LeadItem', () => {
 });
 
 describe('App', () => {
+  it("nel banner nomina il portale con l'avviso", async () => {
+    render(<App api={fakeApi([], { immobiliare: false, idealista: true })} />);
+    expect(await screen.findByText('Idealista.it potrebbe essere cambiato: alcuni dati non sono stati letti.')).toBeTruthy();
+  });
+
+  it('con due portali li elenca entrambi', async () => {
+    render(<App api={fakeApi([], { immobiliare: true, idealista: true })} />);
+    expect(await screen.findByText('Immobiliare.it e Idealista.it potrebbero essere cambiati: alcuni dati non sono stati letti.')).toBeTruthy();
+  });
+
   it('mostra le schede con i conteggi e filtra per stato', async () => {
     render(<App api={fakeApi([lead(1, 'high'), lead(2, 'medium'), lead(3, 'medium', 'contacted')])} />);
     expect(await screen.findByRole('tab', { name: 'Nuovi (2)' })).toBeTruthy();
@@ -143,7 +153,7 @@ describe('App', () => {
   });
 
   it('mostra il banner quando l\'adattatore segnala un problema', async () => {
-    render(<App api={fakeApi([], true)} />);
+    render(<App api={fakeApi([], { immobiliare: true })} />);
     expect(await screen.findByText('Immobiliare.it potrebbe essere cambiato: alcuni dati non sono stati letti.')).toBeTruthy();
     expect(screen.getByText('Nessun lead in questa scheda. Naviga su Immobiliare.it per raccoglierne.')).toBeTruthy();
     expect(screen.queryByText(/Elimina tutti/)).toBeNull();

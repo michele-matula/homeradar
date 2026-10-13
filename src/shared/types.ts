@@ -1,5 +1,6 @@
 export type Portal = 'immobiliare' | 'idealista';
 export const PORTALS: Portal[] = ['immobiliare', 'idealista'];
+export const PORTAL_SITES: Record<Portal, string> = { immobiliare: 'Immobiliare.it', idealista: 'Idealista.it' };
 export type SellerType = 'private' | 'agency' | 'constructor' | 'unknown';
 export type PageKind = 'search' | 'detail' | 'other';
 export type ObservationSource = 'search' | 'detail';
@@ -135,7 +136,7 @@ export interface Diagnostics {
   version: string;
   counters: Record<string, number>;
   errors: { at: number; message: string }[];
-  adapterWarning: boolean;
+  adapterWarning: Partial<Record<Portal, boolean>>;
 }
 
 export function listingKey(portal: Portal, portalId: number): string {

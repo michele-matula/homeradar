@@ -1,7 +1,9 @@
 import { browser } from 'wxt/browser';
-import type { CalibrationHint, LeadStatus, ListingObservation, Settings } from '@/shared/types';
+import type { CalibrationHint, LeadStatus, ListingObservation, Portal, Settings } from '@/shared/types';
 
 export const LEADS_CHANGED = 'leadsChanged';
+
+export type ParseSource = 'next-data' | 'api' | 'dom';
 
 export type Request =
   | { type: 'ingest'; observations: ListingObservation[]; calibrationHint?: CalibrationHint }
@@ -12,7 +14,7 @@ export type Request =
   | { type: 'deleteAllListings' }
   | { type: 'getSettings' }
   | { type: 'saveSettings'; settings: Settings }
-  | { type: 'parseStatus'; ok: boolean; errors: string[]; source: 'next-data' | 'api' }
+  | { type: 'parseStatus'; portal: Portal; ok: boolean; errors: string[]; source: ParseSource }
   | { type: 'fallbackShown' }
   | { type: 'getDiagnostics' };
 

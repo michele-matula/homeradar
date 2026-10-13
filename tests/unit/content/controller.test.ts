@@ -30,7 +30,7 @@ describe('createController', () => {
       searchResult(realEstate()),
       searchResult(realEstate({ id: 2, advertiser: agencyAdvertiser }), 2),
     ]));
-    expect(send.mock.calls[0]![0]).toEqual({ type: 'parseStatus', ok: true, errors: [], source: 'next-data' });
+    expect(send.mock.calls[0]![0]).toEqual({ type: 'parseStatus', portal: 'immobiliare', ok: true, errors: [], source: 'next-data' });
     expect(send.mock.calls[1]![0]).toMatchObject({ type: 'ingest' });
     expect(document.querySelectorAll(`[${BADGE_ATTR}]`)).toHaveLength(1);
   });
@@ -40,7 +40,7 @@ describe('createController', () => {
     const c = createController({ adapter: immobiliareAdapter, send, root: document, getUrl: () => SEARCH_URL });
     await c.handle('api', 'https://www.immobiliare.it/api-next/search-list/listings/', { nope: true });
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send.mock.calls[0]![0]).toEqual({ type: 'parseStatus', ok: false, errors: ['search data not found'], source: 'api' });
+    expect(send.mock.calls[0]![0]).toEqual({ type: 'parseStatus', portal: 'immobiliare', ok: false, errors: ['search data not found'], source: 'api' });
   });
 
   it('ridisegna i badge dopo che il sito ha rigenerato le card', async () => {

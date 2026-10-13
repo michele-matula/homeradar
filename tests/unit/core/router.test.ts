@@ -19,19 +19,22 @@ describe('handleRequest', () => {
     expect((await svc.getDiagnostics('x')).counters.ingested).toBe(1);
   });
 
-  it('parseStatus accende e spegne l\'avviso e registra gli errori', async () => {
+  it("parseStatus gestisce l'avviso per portale e registra gli errori", async () => {
     const { svc } = setup();
     const h = hooks();
-    await handleRequest(svc, { type: 'parseStatus', ok: false, errors: ['search data not found'], source: 'api' }, '0.1.0', h);
+    await handleRequest(svc, { type: 'parseStatus', portal: 'immobiliare', ok: false, errors: ['search data not found'], source: 'api' }, '0.1.0', h);
     expect(h.setWarning).toHaveBeenLastCalledWith(true);
     let d = await svc.getDiagnostics('0.1.0');
-    expect(d.adapterWarning).toBe(true);
+    expect(d.adapterWarning).toEqual({ immobiliare: true });
     expect(d.errors.map((e) => e.message)).toEqual(['search data not found']);
-    await handleRequest(svc, { type: 'parseStatus', ok: true, errors: [], source: 'next-data' }, '0.1.0', h);
-    expect(h.setWarning).toHaveBeenLastCalledWith(false);
+    await handleRequest(svc, { type: 'parseStatus', portal: 'idealista', ok: false, errors: [], source: 'dom' }, '0.1.0', h);
+    await handleRequest(svc, { type: 'parseStatus', portal: 'immobiliare', ok: true, errors: [], source: 'next-data' }, '0.1.0', h);
+    expect(h.setWarning).toHaveBeenLastCalledWith(true); // Idealista ha ancora l'avviso
     d = await svc.getDiagnostics('0.1.0');
-    expect(d.adapterWarning).toBe(false);
-    expect(d.counters).toMatchObject({ apiPayloads: 1, nextDataPayloads: 1 });
+    expect(d.adapterWarning).toEqual({ immobiliare: false, idealista: true });
+    expect(d.counters).toMatchObject({ apiPayloads: 1, nextDataPayloads: 1, domScans: 1 });
+    await handleRequest(svc, { type: 'parseStatus', portal: 'idealista', ok: true, errors: [], source: 'dom' }, '0.1.0', h);
+    expect(h.setWarning).toHaveBeenLastCalledWith(false);
   });
 
   it('inoltra le richieste del pannello', async () => {

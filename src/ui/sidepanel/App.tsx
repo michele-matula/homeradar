@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
+import { warnedPortals } from '@/core/diagnostics';
 import { groupByStatus, PRIORITY_LABELS } from '@/core/leads';
-import { LEAD_STATUSES, type LeadStatus, type LeadView, type Priority } from '@/shared/types';
+import { LEAD_STATUSES, PORTAL_SITES, type LeadStatus, type LeadView, type Portal, type Priority } from '@/shared/types';
 import { defaultApi, type Api } from './api';
 import { ExportBar } from './ExportBar';
 import { AlertIcon, BackIcon, Logo, SearchIcon, SettingsIcon } from './Icons';
@@ -15,20 +16,27 @@ const byFilter = (leads: LeadView[], f: PriorityFilter) => (f === 'all' ? leads 
 const nAnnunci = (n: number) => `${n} ${n === 1 ? 'annuncio' : 'annunci'}`;
 const errorText = (e: unknown) => `Errore: ${e instanceof Error ? e.message : String(e)}`;
 
+function warningText(portals: Portal[]): string {
+  const sites = portals.map((p) => PORTAL_SITES[p]);
+  return sites.length === 1
+    ? `${sites[0]} potrebbe essere cambiato: alcuni dati non sono stati letti.`
+    : `${sites.join(' e ')} potrebbero essere cambiati: alcuni dati non sono stati letti.`;
+}
+
 export function App({ api = defaultApi }: { api?: Api }) {
   const [leads, setLeads] = useState<LeadView[]>([]);
   const [tab, setTab] = useState<LeadStatus>('new');
   const [filter, setFilter] = useState<PriorityFilter>('all');
   const [view, setView] = useState<'leads' | 'settings'>('leads');
   const [error, setError] = useState<string | null>(null);
-  const [warning, setWarning] = useState(false);
+  const [warned, setWarned] = useState<Portal[]>([]);
   const [confirmingAll, setConfirmingAll] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
       const [list, diag] = await Promise.all([api.listLeads(), api.getDiagnostics()]);
       setLeads(list);
-      setWarning(diag.adapterWarning);
+      setWarned(warnedPortals(diag.adapterWarning));
       setError(null);
     } catch (e) {
       setError(errorText(e));
@@ -70,10 +78,10 @@ export function App({ api = defaultApi }: { api?: Api }) {
           </button>
         )}
       </header>
-      {warning && (
+      {warned.length > 0 && (
         <p className="banner banner--warning">
           <AlertIcon />
-          <span>Immobiliare.it potrebbe essere cambiato: alcuni dati non sono stati letti.</span>
+          <span>{warningText(warned)}</span>
         </p>
       )}
       {error && (

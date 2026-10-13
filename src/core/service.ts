@@ -1,6 +1,7 @@
 import Dexie from 'dexie';
 import { acceptLearnedPoint, DEFAULT_CALIBRATION, estimateCreatedAt, LEARN_RATE_PER_DAY, mergeCalibration, utcDay } from '@/core/age';
 import type { HomeRadarDB } from '@/core/db';
+import { warnedPortals } from '@/core/diagnostics';
 import { sortLeads } from '@/core/leads';
 import { evaluate } from '@/core/rules';
 import { validateSettings } from '@/core/settings';
@@ -174,7 +175,15 @@ export class LeadService {
 
   private async diag(): Promise<Omit<Diagnostics, 'version'>> {
     const rec = await this.db.meta.get('diagnostics');
-    return (rec?.value as Omit<Diagnostics, 'version'>) ?? { counters: {}, errors: [], adapterWarning: false };
+    type Stored = Partial<Omit<Diagnostics, 'version' | 'adapterWarning'>> & { adapterWarning?: Diagnostics['adapterWarning'] | boolean };
+    const raw = (rec?.value ?? {}) as Stored;
+    const warning = raw.adapterWarning;
+    return {
+      counters: raw.counters ?? {},
+      errors: raw.errors ?? [],
+      // Le versioni precedenti salvavano un booleano: valeva per Immobiliare, l'unico portale.
+      adapterWarning: typeof warning === 'boolean' ? (warning ? { immobiliare: true } : {}) : (warning ?? {}),
+    };
   }
 
   private async updateDiag(fn: (d: Omit<Diagnostics, 'version'>) => void): Promise<void> {
@@ -198,10 +207,14 @@ export class LeadService {
     });
   }
 
-  setAdapterWarning(on: boolean): Promise<void> {
-    return this.updateDiag((d) => {
-      d.adapterWarning = on;
+  /** Aggiorna l'avviso del portale; restituisce true se almeno un portale ha l'avviso acceso. */
+  async setAdapterWarning(portal: Portal, on: boolean): Promise<boolean> {
+    let any = false;
+    await this.updateDiag((d) => {
+      d.adapterWarning = { ...d.adapterWarning, [portal]: on };
+      any = warnedPortals(d.adapterWarning).length > 0;
     });
+    return any;
   }
 
   async getDiagnostics(version: string): Promise<Diagnostics> {

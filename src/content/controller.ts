@@ -37,7 +37,7 @@ export function createController({ adapter, send, root, getUrl }: ControllerDeps
     const hasUnknownSeller = result.observations.some((o) => o.sellerType === 'unknown');
     const ok = !hasUnknownSeller && (total === 0 || result.errors.length <= total * 0.2);
     for (const o of result.observations) seen.add(o.portalId);
-    await send({ type: 'parseStatus', ok, errors: result.errors, source: kind });
+    await send({ type: 'parseStatus', portal: adapter.portal, ok, errors: result.errors, source: kind });
     if (!result.observations.length) return;
     const evs = (await send({ type: 'ingest', observations: result.observations })) as Evaluation[];
     for (const ev of evs) evaluations.set(ev.portalId, ev);

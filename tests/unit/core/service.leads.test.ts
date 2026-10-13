@@ -113,12 +113,18 @@ describe('LeadService diagnostica', () => {
     await svc.bumpCounter('apiPayloads');
     await svc.bumpCounter('apiPayloads', 2);
     for (let i = 0; i < 25; i++) await svc.recordError(`errore ${i}`);
-    await svc.setAdapterWarning(true);
+    expect(await svc.setAdapterWarning('immobiliare', true)).toBe(true);
     const d = await svc.getDiagnostics('0.1.0');
     expect(d.version).toBe('0.1.0');
     expect(d.counters.apiPayloads).toBe(3);
     expect(d.errors).toHaveLength(20);
     expect(d.errors[19]!.message).toBe('errore 24');
-    expect(d.adapterWarning).toBe(true);
+    expect(d.adapterWarning).toEqual({ immobiliare: true });
+  });
+
+  it('legge come avviso di Immobiliare il booleano salvato dalle versioni precedenti', async () => {
+    const { db, svc } = setup();
+    await db.meta.put({ key: 'diagnostics', value: { counters: {}, errors: [], adapterWarning: true } });
+    expect((await svc.getDiagnostics('v')).adapterWarning).toEqual({ immobiliare: true });
   });
 });
