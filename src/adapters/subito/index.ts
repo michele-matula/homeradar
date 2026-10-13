@@ -10,7 +10,7 @@ const obj = (v: unknown): Json => (v && typeof v === 'object' ? (v as Record<str
 const listOf = (v: unknown): unknown[] => (Array.isArray(v) ? v : obj(v) ? Object.values(obj(v)!) : []);
 
 type Format = 'next' | 'api';
-type Normalized = { ad: CommonAd; features: Record<string, string | undefined>; day: string | null };
+type Normalized = { ad: CommonAd; typology: string; features: Record<string, string | undefined>; day: string | null };
 
 const IMMOBILI = '6';
 const ROME_DAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -23,7 +23,9 @@ const issues = (e: z.ZodError) => e.issues.map((x) => `${x.path.join('.')} ${x.m
 /** Solo immobili in vendita; il resto (affitti, auto, …) si ignora senza errore. */
 function isRealEstateSale(raw: unknown): boolean {
   const r = obj(raw);
-  return obj(r?.type)?.key === 's' && obj(r?.category)?.parentId === IMMOBILI;
+  const cat = obj(r?.category);
+  // __NEXT_DATA__: parentId; API di hades: macrocategory_id.
+  return obj(r?.type)?.key === 's' && (cat?.parentId ?? cat?.macrocategory_id) === IMMOBILI;
 }
 
 /** "250000" → 250000, "5+" → 5; zero o testo → null. */
@@ -37,15 +39,15 @@ function normalize(raw: unknown, format: Format): Normalized | string {
   if (format === 'next') {
     const p = NextAdSchema.safeParse(raw);
     if (!p.success) return issues(p.error);
-    const { features, date, ...ad } = p.data;
+    const { features, date, category, ...ad } = p.data;
     const f = Object.fromEntries(Object.entries(features ?? {}).map(([uri, x]) => [uri, x.values[0]?.key]));
-    return { ad, features: f, day: date?.slice(0, 10) ?? null };
+    return { ad, typology: category.label, features: f, day: date?.slice(0, 10) ?? null };
   }
   const p = ApiAdSchema.safeParse(raw);
   if (!p.success) return issues(p.error);
-  const { features, dates, ...ad } = p.data;
+  const { features, dates, category, ...ad } = p.data;
   const f = Object.fromEntries((features ?? []).map((x) => [x.uri, x.values[0]?.key]));
-  return { ad, features: f, day: dates?.display.slice(0, 10) ?? null };
+  return { ad, typology: category.value, features: f, day: dates?.display.slice(0, 10) ?? null };
 }
 
 function sellerTypeOf(adv: CommonAd['advertiser']): SellerType {
@@ -53,7 +55,7 @@ function sellerTypeOf(adv: CommonAd['advertiser']): SellerType {
   return adv.type === 0 ? 'private' : 'unknown';
 }
 
-function toObservation({ ad, features }: Normalized, portalId: number): ListingObservation {
+function toObservation({ ad, typology, features }: Normalized, portalId: number): ListingObservation {
   return {
     portal: 'subito',
     portalId,
@@ -62,7 +64,7 @@ function toObservation({ ad, features }: Normalized, portalId: number): ListingO
     address: null,
     city: ad.geo?.town?.value ?? null,
     zone: ad.geo?.zone?.value ?? null,
-    typology: ad.category.label,
+    typology,
     surfaceM2: intOf(features['/size']),
     rooms: intOf(features['/room']),
     price: intOf(features['/price']),
@@ -115,10 +117,8 @@ const adapter: PortalAdapter = {
   parsePayload: (kind: PayloadKind, url: string, json: unknown) => (kind === 'next-data' ? parseNextData(json, url) : parseApi(url, json)),
   cardFor: (root, id) => root.querySelector<HTMLAnchorElement>(`article a[href$="-${id}.htm"]`)?.closest('article') ?? null,
   // Le classi del sito hanno un hash che cambia a ogni build: si usa la struttura, non le classi.
-  badgeHost(card) {
-    const img = card.querySelector('img');
-    return img?.closest<HTMLElement>('figure') ?? img?.parentElement ?? card;
-  },
+  // Il contenitore della foto (sfondo, figure, preferiti) è il genitore della figure.
+  badgeHost: (card) => card.querySelector('figure')?.parentElement ?? card.querySelector('img')?.parentElement ?? card,
   cardIds: (root) =>
     [...root.querySelectorAll<HTMLAnchorElement>(AD_LINK)]
       .map((a) => listingIdFromHref(a.getAttribute('href') ?? ''))

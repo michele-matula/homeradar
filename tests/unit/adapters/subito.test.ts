@@ -72,7 +72,17 @@ describe('parseApi', () => {
   it('legge la risposta di hades con features in array', () => {
     const r = A.parseApi(API_URL, apiResponse([apiAd()]), NOW);
     expect(r.errors).toEqual([]);
-    expect(r.observations[0]).toMatchObject({ portalId: 664304986, price: 250000, surfaceM2: 65, rooms: 2, sellerType: 'private' });
+    expect(r.observations[0]).toMatchObject({ portalId: 664304986, price: 250000, surfaceM2: 65, rooms: 2, sellerType: 'private', typology: 'Appartamenti' });
+  });
+
+  it('ignora gli annunci di altre macrocategorie e gli affitti', () => {
+    const r = A.parseApi(API_URL, apiResponse([
+      apiAd(1, { category: { key: '2', value: 'Auto', macrocategory_id: '1' } }),
+      apiAd(2, { type: { key: 'u', value: 'In affitto' } }),
+      apiAd(3),
+    ]), NOW);
+    expect(r.errors).toEqual([]);
+    expect(r.observations.map((o) => o.portalId)).toEqual([3]);
   });
 
   it('ignora le altre risposte', () => {
@@ -128,7 +138,8 @@ describe('card nel DOM', () => {
     expect(A.cardIds(document)).toEqual([11, 12]);
     const card = A.cardFor(document, 12)!;
     expect(card.tagName).toBe('ARTICLE');
-    expect(A.badgeHost(card).tagName).toBe('FIGURE');
+    // Il badge va nel contenitore della foto, non nella figure interna.
+    expect(A.badgeHost(card)).toBe(card.querySelector('figure')!.parentElement);
     expect(A.cardFor(document, 99)).toBeNull();
   });
 });

@@ -40,7 +40,7 @@ Successo: su una ricerca di immobili in vendita su Subito i privati ricevono il 
 
 - **Ricerca** (es. `/annunci-lombardia/vendita/appartamenti/milano/milano/`): Next.js *pages router*. `__NEXT_DATA__` → `props.pageProps.initialState.items` con `originalList` (30 annunci), `galleryList`, `boostedItems`, `total`, `totalPages`.
 - **Annuncio in `__NEXT_DATA__`:** `kind: "AdItem"`, `urn` `"id:ad:{uuid}:list:{listId}"`, `type {key: "s", value: "In vendita"}`, `category {id, label, parentId: "6", friendlyName}`, `subject`, `body`, `date` `"2026-10-13 15:16:38"` (ora di Roma), `features` come **oggetto** indicizzato per uri (`/price`, `/size`, `/room`, `/floor`, `/bathrooms`, …; ciascuno con `values[0].key`), `advertiser {name, type, userId, company}`, `geo {region, city (provincia), town (comune), zone?}`, `urls.default` (`https://www.subito.it/appartamenti/{slug}-{id}.htm`).
-- **Paginazione (`?o=2`) in SPA:** il sito chiama con `fetch` `https://hades.subito.it/v1/search/items?…`. Risposta `{count_all, lines, start, filters, checknew, ads}`; ogni annuncio ha `dates {display, expiration, display_iso8601, …}`, `features` come **array** di `{uri, values}`, `advertiser {user_id, name, phone, company, type, shop_id, shop_name}`.
+- **Paginazione (`?o=2`) in SPA:** il sito chiama con `fetch` `https://hades.subito.it/v1/search/items?…`. Risposta `{count_all, lines, start, filters, checknew, ads}`; ogni annuncio ha `dates {display, expiration, display_iso8601, …}`, `features` come **array** di `{uri, values}`, `category` come `{key, value, macrocategory_id}` (non `{id, label, parentId}`), `advertiser {user_id, name, phone, company, type, shop_id, shop_name}`.
 - **Venditore:** privato = `company: false, type: 0`; agenzia = `company: true, type: 1`; esiste anche `company: true, type: 2` (negozi "Impresa+").
 - **Nessuna data di pubblicazione.** `date`/`dates.display` è la data dell'ultimo **rinnovo**: annunci con ID vecchi (641M, 650M) compaiono con la data di oggi e l'ordinamento predefinito segue questa data. `expiration` = display + 1 anno. La scheda mostra la stessa data ("Ieri alle 10:45 · ID …").
 - **Nessun ribasso dichiarato** né in ricerca, né nell'API, né nella scheda.
@@ -74,7 +74,7 @@ Flusso Subito: `bridge (MAIN) → content script (ISOLATED) → subitoAdapter.pa
 
 ### Filtri
 
-Un annuncio viene letto solo se `type.key === 's'` (in vendita) **e** `category.parentId === '6'` (Immobili). Gli altri vengono ignorati senza contare come errori. Un annuncio che non rispetta lo schema è un errore (conta per l'avviso dell'adattatore).
+Un annuncio viene letto solo se `type.key === 's'` (in vendita) **e** la macrocategoria è Immobili (`'6'`): `category.parentId` in `__NEXT_DATA__`, `category.macrocategory_id` nell'API. Gli altri vengono ignorati senza contare come errori. Un annuncio che non rispetta lo schema è un errore (conta per l'avviso dell'adattatore).
 
 ### Tipo di venditore
 
@@ -89,7 +89,7 @@ Un annuncio viene letto solo se `type.key === 's'` (in vendita) **e** `category.
 | `portalId` | numero finale di `urn` (`…:list:{id}`) |
 | `url` | `urls.default` |
 | `title` | `subject` |
-| `typology` | `category.label` |
+| `typology` | `category.label` (`category.value` nell'API) |
 | `price` | `/price` `values[0].key` numerico; assente, non numerico o 0 → `null` |
 | `surfaceM2` | `/size` `values[0].key` numerico, altrimenti `null` |
 | `rooms` | `/room` `values[0].key` se numerico (formato esatto, es. "5+", da fissare sulla fixture), altrimenti `null` |

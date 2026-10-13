@@ -1,9 +1,9 @@
-// Uso: node scripts/sanitize-fixture.mjs <search|detail|api|idealista-search|idealista-detail> <input> <output>
-// Tiene solo la parte di JSON (Immobiliare) o di HTML (Idealista) che serve all'adattatore
+// Uso: node scripts/sanitize-fixture.mjs <search|detail|api|idealista-search|idealista-detail|subito-search|subito-api> <input> <output>
+// Tiene solo la parte di JSON (Immobiliare, Subito) o di HTML (Idealista) che serve all'adattatore
 // ed elimina dati personali e testi lunghi.
 import { readFileSync, writeFileSync } from 'node:fs';
 
-const KINDS = ['search', 'detail', 'api', 'idealista-search', 'idealista-detail'];
+const KINDS = ['search', 'detail', 'api', 'idealista-search', 'idealista-detail', 'subito-search', 'subito-api'];
 const [kind, input, output] = process.argv.slice(2);
 if (!KINDS.includes(kind) || !input || !output) {
   console.error(`Uso: node scripts/sanitize-fixture.mjs <${KINDS.join('|')}> <input> <output>`);
@@ -11,6 +11,57 @@ if (!KINDS.includes(kind) || !input || !output) {
 }
 
 const PHONE = /\b3\d{2}[ .]?\d{3}[ .]?\d{3,4}\b/g;
+
+if (kind.startsWith('subito-')) {
+  // Si tengono solo i campi letti dall'adattatore. Via e civico possono stare nel titolo e nello slug:
+  // titolo "{Categoria} in Via Esempio N", URL "/{categoria}/annuncio-{id}.htm".
+  const FEATURES = new Set(['/price', '/size', '/room', '/floor', '/bathrooms']);
+  const geoOf = (g) => g && Object.fromEntries(['region', 'city', 'town', 'zone'].filter((k) => g[k]).map((k) => [k, { id: g[k].id, value: g[k].value }]));
+  const urlOf = (u, id) => `https://www.subito.it/${new URL(u).pathname.split('/')[1]}/annuncio-${id}.htm`;
+  const ad = (x, n, api) => {
+    const id = /:list:(\d+)$/.exec(x.urn)?.[1];
+    const c = x.category ?? {};
+    const out = {
+      kind: x.kind,
+      urn: `id:ad:00000000-0000-0000-0000-000000000000:list:${id}`,
+      type: x.type && { key: x.type.key, value: x.type.value },
+      // __NEXT_DATA__: { id, label, parentId }; API: { key, value, macrocategory_id }.
+      category: api ? { key: c.key, value: c.value, macrocategory_id: c.macrocategory_id } : { id: c.id, label: c.label, parentId: c.parentId },
+      subject: `${c.label ?? c.value ?? 'Immobile'} in Via Esempio ${n}`,
+      advertiser: { company: x.advertiser?.company, type: x.advertiser?.type },
+      geo: geoOf(x.geo),
+      urls: { default: urlOf(x.urls.default, id) },
+    };
+    if (api) {
+      out.dates = { display: x.dates?.display };
+      out.features = (x.features ?? []).filter((f) => FEATURES.has(f.uri)).map((f) => ({ uri: f.uri, values: f.values.map((v) => ({ key: v.key })) }));
+    } else {
+      out.date = x.date;
+      out.features = Object.fromEntries(Object.entries(x.features ?? {}).filter(([k]) => FEATURES.has(k)).map(([k, f]) => [k, { uri: k, values: f.values.map((v) => ({ key: v.key })) }]));
+    }
+    return out;
+  };
+  let out;
+  if (kind === 'subito-search') {
+    const { JSDOM } = await import('jsdom');
+    const { document } = new JSDOM(readFileSync(input, 'utf8')).window;
+    const items = JSON.parse(document.getElementById('__NEXT_DATA__').textContent).props.pageProps.initialState.items;
+    let n = 0;
+    const list = (v) => (Array.isArray(v) ? v : Object.values(v ?? {})).map((x) => ad(x, ++n, false));
+    out = { props: { pageProps: { initialState: { items: {
+      total: items.total, originalList: list(items.originalList), galleryList: list(items.galleryList), boostedItems: list(items.boostedItems),
+    } } } } };
+  } else {
+    const raw = JSON.parse(readFileSync(input, 'utf8'));
+    out = { count_all: raw.count_all, lines: raw.lines, start: raw.start, ads: raw.ads.map((x, i) => ad(x, i + 1, true)) };
+  }
+  const text = JSON.stringify(out, null, 1);
+  const suspicious = text.match(PHONE);
+  if (suspicious) console.warn(`ATTENZIONE: possibili numeri di telefono, controlla prima del commit: ${suspicious.join(', ')}`);
+  writeFileSync(output, `${text}\n`);
+  console.log(`OK: ${output}`);
+  process.exit(0);
+}
 
 if (kind.startsWith('idealista-')) {
   const { JSDOM } = await import('jsdom');

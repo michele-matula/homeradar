@@ -39,6 +39,8 @@ export function nextAd(id = 664390119, over: Over = {}) {
 export function apiAd(id = 664304986, over: Over = {}) {
   return {
     ...base(id),
+    // Nell'API la categoria ha un'altra forma: value invece di label, macrocategory_id invece di parentId.
+    category: { key: '7', value: 'Appartamenti', friendly_name: 'appartamenti', macrocategory_id: '6', weight: 9 },
     dates: { display: '2026-10-12 20:53:01', expiration: '2027-10-12 20:53:01', display_iso8601: '2026-10-12T20:53:01.136+0200' },
     features: Object.entries(feats).map(([uri, key]) => ({ uri, values: [{ key, value: key }] })),
     advertiser: { user_id: '1', name: 'Mario', phone: '3331234567', company: false, type: 0, shop_id: null, shop_name: null },
@@ -52,6 +54,9 @@ export const nextData = (originalList: unknown[], extra: Over = {}) => ({
 
 export const apiResponse = (ads: unknown[]) => ({ count_all: ads.length, lines: ads.length, start: 30, ads });
 
-/** Card con la struttura del DOM di Subito (classi con hash omesse). */
+/**
+ * Card con la struttura del DOM di Subito verificata il 2026-10-13 (classi con hash omesse):
+ * contenitore foto (sfondo + figure + preferiti), link sovrapposto vuoto, testi.
+ */
 export const cardHtml = (id: number) =>
-  `<article><a href="https://www.subito.it/appartamenti/annuncio-${id}.htm"><div><figure><img src="data:,"></figure></div><h2>Titolo</h2></a></article>`;
+  `<article><div><img src="data:,"><figure><img src="data:,"><span></span></figure><button></button></div><a href="https://www.subito.it/appartamenti/annuncio-${id}.htm"></a><section><h3>Titolo</h3></section></article>`;

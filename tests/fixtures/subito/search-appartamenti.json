@@ -1,0 +1,2909 @@
+{
+ "props": {
+  "pageProps": {
+   "initialState": {
+    "items": {
+     "total": 3999,
+     "originalList": [
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664419045",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 1",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664419045.htm"
+       },
+       "date": "2026-10-13 17:55:53",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "720"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "10"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "30"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664395700",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 2",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664395700.htm"
+       },
+       "date": "2026-10-13 15:16:38",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "850"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "6"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "50"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664390119",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 3",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664390119.htm"
+       },
+       "date": "2026-10-13 14:31:05",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "250000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "45"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664384272",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 4",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664384272.htm"
+       },
+       "date": "2026-10-13 14:05:45",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "560000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "5"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "95"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664383728",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 5",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664383728.htm"
+       },
+       "date": "2026-10-13 14:05:18",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "870"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "7"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "45"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:661313643",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 6",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-661313643.htm"
+       },
+       "date": "2026-10-13 13:30:06",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "1100"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "7"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "50"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664364168",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 7",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664364168.htm"
+       },
+       "date": "2026-10-13 12:40:47",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "930"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "7"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "35"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:650927383",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 8",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-650927383.htm"
+       },
+       "date": "2026-10-13 12:15:53",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "145000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "4"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "30"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664353152",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 9",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664353152.htm"
+       },
+       "date": "2026-10-13 11:09:02",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "369000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "10"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "51"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664352836",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 10",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664352836.htm"
+       },
+       "date": "2026-10-13 11:08:46",
+       "features": {
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "7"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "65"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "208000"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664352505",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 11",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664352505.htm"
+       },
+       "date": "2026-10-13 11:08:30",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "319000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "87"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664352262",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 12",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664352262.htm"
+       },
+       "date": "2026-10-13 11:08:16",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "320000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "60"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664352246",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 13",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664352246.htm"
+       },
+       "date": "2026-10-13 11:08:15",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "218000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "5"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "45"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664352140",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 14",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664352140.htm"
+       },
+       "date": "2026-10-13 11:08:12",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "250000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "5"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "97"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664352179",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 15",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664352179.htm"
+       },
+       "date": "2026-10-13 11:08:11",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "1500000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "7"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "134"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664351849",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 16",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664351849.htm"
+       },
+       "date": "2026-10-13 11:07:55",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "390000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "5"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "93"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664351802",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 17",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664351802.htm"
+       },
+       "date": "2026-10-13 11:07:53",
+       "features": {
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "110"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "319000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "7"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664351765",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 18",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664351765.htm"
+       },
+       "date": "2026-10-13 11:07:51",
+       "features": {
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "5"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "57"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "249000"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664351760",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 19",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664351760.htm"
+       },
+       "date": "2026-10-13 11:07:50",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "349000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "10"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "80"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664351762",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 20",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664351762.htm"
+       },
+       "date": "2026-10-13 11:07:49",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "638240"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "11"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "128"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664351309",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 21",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664351309.htm"
+       },
+       "date": "2026-10-13 11:07:33",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "240000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "7"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "60"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664351384",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 22",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664351384.htm"
+       },
+       "date": "2026-10-13 11:07:31",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "150000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "40"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664351306",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 23",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664351306.htm"
+       },
+       "date": "2026-10-13 11:07:30",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "4"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "7"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "220"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664351103",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 24",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664351103.htm"
+       },
+       "date": "2026-10-13 11:07:17",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "598000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "45"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664351102",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 25",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664351102.htm"
+       },
+       "date": "2026-10-13 11:07:13",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "299000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "7"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "93"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664351065",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 26",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664351065.htm"
+       },
+       "date": "2026-10-13 11:07:11",
+       "features": {
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "100"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "670000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "11"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664351025",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 27",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664351025.htm"
+       },
+       "date": "2026-10-13 11:07:09",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "1780000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "5"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "6"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "190"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664347439",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 28",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664347439.htm"
+       },
+       "date": "2026-10-13 10:42:40",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "760"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "5"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "60"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664345838",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 29",
+       "advertiser": {
+        "company": true,
+        "type": 2
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-664345838.htm"
+       },
+       "date": "2026-10-13 10:20:41",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "330000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "4"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "9"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "102"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:646751940",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 30",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-646751940.htm"
+       },
+       "date": "2026-10-13 10:17:14",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "310000"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "4"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "6"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "162"
+          }
+         ]
+        }
+       }
+      }
+     ],
+     "galleryList": [
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:659186914",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 31",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-659186914.htm"
+       },
+       "date": "2026-10-13 01:49:35",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "17"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "750"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "8"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:660728019",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 32",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-660728019.htm"
+       },
+       "date": "2026-10-13 01:52:07",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "76"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "235000"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:661313643",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 33",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-661313643.htm"
+       },
+       "date": "2026-10-13 13:30:06",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "1100"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "7"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "50"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:646751940",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 34",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-646751940.htm"
+       },
+       "date": "2026-10-13 10:17:14",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "310000"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "6"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "162"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "4"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:650927383",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 35",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-650927383.htm"
+       },
+       "date": "2026-10-13 12:15:53",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "30"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "145000"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "4"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:485841300",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 36",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-485841300.htm"
+       },
+       "date": "2026-10-08 10:04:33",
+       "features": {
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "110"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "315000"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "4"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:651032950",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 37",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-651032950.htm"
+       },
+       "date": "2026-10-08 18:42:07",
+       "features": {
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "7"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "780000"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "6"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "234"
+          }
+         ]
+        }
+       }
+      }
+     ],
+     "boostedItems": [
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:503684089",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "7",
+        "label": "Appartamenti",
+        "parentId": "6"
+       },
+       "subject": "Appartamenti in Via Esempio 38",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "1",
+         "value": "Bergamo"
+        },
+        "town": {
+         "id": "016116",
+         "value": "Gorno"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/appartamenti/annuncio-503684089.htm"
+       },
+       "date": "2026-10-10 15:51:43",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "36000"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "5"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "85"
+          }
+         ]
+        }
+       }
+      }
+     ]
+    }
+   }
+  }
+ }
+}
