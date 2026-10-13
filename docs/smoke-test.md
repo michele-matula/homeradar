@@ -12,8 +12,11 @@ Durata: ~5 minuti. Usa `npm run build` e carica `.output/chrome-mv3` in Chrome.
    - [ ] Nessun errore; nel pannello quell'annuncio non mostra più "~" davanti ai giorni.
 5. Apri il pannello laterale.
    - [ ] Schede con conteggi; cambia lo stato di un lead e scrivi una nota; ricarica il pannello: dati mantenuti.
+   - [ ] Filtro per badge: scegli "Da verificare" e restano solo quei lead; i conteggi dei filtri corrispondono alla scheda; cambiando scheda il filtro resta attivo e i filtri senza annunci sono disattivati.
+   - [ ] Con un filtro attivo il pulsante dice "Elimina tutti «…» (n)" e n è il numero dei lead filtrati (premi "Annulla", non confermare).
 6. Export.
    - [ ] XLSX si apre in Excel; CSV si apre in Excel con colonne separate e accenti corretti.
+   - [ ] Con un filtro attivo il file contiene solo i lead filtrati.
 7. Impostazioni → "Copia report diagnostico".
    - [ ] Il testo copiato non contiene indirizzi, titoli o telefoni.
 8. Icona dell'estensione.
