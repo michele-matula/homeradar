@@ -48,4 +48,23 @@ Naviga a mano, senza automazione: Idealista usa DataDome.
 17. Console di Chrome sulla pagina di ricerca.
     - [ ] Nessun errore `[HomeRadar]`.
 
-Se il sito è cambiato: ricattura le fixture (Immobiliare: piano MVP, Task 4; Idealista: piano 2026-10-13, Task 8), aggiorna schemi o selettori, riesegui `npm test`.
+## Subito.it
+
+18. Apri `https://www.subito.it/annunci-lombardia/vendita/appartamenti/milano/milano/` e scorri fino in fondo.
+    - [ ] Badge sulla foto di ogni privato, anche sugli annunci in evidenza; nessun badge sulle agenzie e sulle pubblicità.
+19. Vai alla pagina 2 con il pulsante del sito (la pagina non si ricarica).
+    - [ ] Nuovi badge; nessun banner "ricarica".
+20. Cambia categoria dai filtri del sito (es. ville, uffici).
+    - [ ] Badge anche lì.
+21. Torna indietro con il browser.
+    - [ ] Nessun falso banner "ricarica".
+22. Apri la scheda di un annuncio.
+    - [ ] Nessun banner, nessun errore `[HomeRadar]` in console.
+23. Pannello.
+    - [ ] Lead con etichetta "Subito" ed età con "~"; vicino alla soglia "Età incerta".
+24. Export XLSX/CSV.
+    - [ ] Colonna "Portale" con "Subito.it"; nessun nome o telefono del venditore.
+25. Impostazioni → "Copia report diagnostico".
+    - [ ] Nessun avviso adattatore per Subito.it.
+
+Se il sito è cambiato: ricattura le fixture (Immobiliare: piano MVP, Task 4; Idealista: piano 2026-10-13, Task 8; Subito: piano 2026-10-13-subito-adapter, Task 5), aggiorna schemi o selettori, riesegui `npm test`.
