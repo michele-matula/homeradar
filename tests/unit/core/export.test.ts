@@ -32,6 +32,17 @@ describe('toExportRows', () => {
   });
 });
 
+describe('toExportRows per Idealista', () => {
+  it('chiama "Età incerta" la priorità da verificare', () => {
+    const idealista: LeadView = {
+      ...lead,
+      listing: { ...lead.listing, key: 'idealista:1', portal: 'idealista' },
+      evaluation: { ...lead.evaluation, priority: 'verify' },
+    };
+    expect(toExportRows([idealista])[0]).toMatchObject({ 'Priorità': 'Età incerta', 'Portale': 'Idealista.it' });
+  });
+});
+
 describe('toCsv', () => {
   it('usa ; come separatore, BOM UTF-8 e virgola decimale', () => {
     const csv = toCsv(toExportRows([lead]));

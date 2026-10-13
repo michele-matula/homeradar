@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { PRIORITY_LABELS, STATUS_LABELS } from '@/core/leads';
+import { priorityLabel, STATUS_LABELS } from '@/core/leads';
 import { formatEuro } from '@/shared/format';
 import { LEAD_STATUSES, PORTAL_TAGS, type LeadStatus, type LeadView } from '@/shared/types';
 import { ExternalIcon, TrashIcon } from './Icons';
@@ -25,7 +25,7 @@ export function LeadItem({ lead, onChange, onDelete }: Props) {
       <div className="lead__top">
         <div className="lead__tags">
           {evaluation.priority !== 'none' && (
-            <span className={`pill pill--${evaluation.priority}`}>{PRIORITY_LABELS[evaluation.priority]}</span>
+            <span className={`pill pill--${evaluation.priority}`}>{priorityLabel(evaluation.priority, listing.portal)}</span>
           )}
           <span className="portal-tag">{PORTAL_TAGS[listing.portal]}</span>
         </div>

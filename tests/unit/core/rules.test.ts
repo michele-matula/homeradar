@@ -25,6 +25,8 @@ describe('evaluate', () => {
     expect(e.priority).toBe('verify');
     expect(e.reasons).toContain('Età stimata vicina alla soglia');
     expect(e.reasons).not.toContain("Età da verificare: apri l'annuncio");
+    // La scheda di Idealista non ha la data: il badge non deve invitare ad aprirla.
+    expect(e.badgeText).toBe('◐ Età incerta · ~125 gg');
   });
 
   it('per un ribasso con data stimata dice "rilevato il"', () => {

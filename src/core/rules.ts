@@ -1,3 +1,4 @@
+import { priorityLabel } from '@/core/leads';
 import { formatDayMonth, formatEuro, formatPercent } from '@/shared/format';
 import {
   DAY_MS, type Evaluation, type ListingRecord, type Portal, type PriceSnapshot, type Priority, type Settings,
@@ -60,7 +61,7 @@ export function evaluate(listing: ListingRecord, snapshots: PriceSnapshot[], set
   }
 
   const dropPart = signalB ? `−${formatPercent(dropPercent)}%` : null;
-  const head = { high: '● Alta', medium: '● Media', verify: '◐ Da verificare', none: 'Privato' }[priority];
+  const head = { high: '● Alta', medium: '● Media', verify: `◐ ${priorityLabel('verify', listing.portal)}`, none: 'Privato' }[priority];
   const parts = priority === 'high' || priority === 'medium' ? [head, agePart, dropPart] : [head, agePart];
 
   return {

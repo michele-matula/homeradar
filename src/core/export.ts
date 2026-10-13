@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { PRIORITY_LABELS, STATUS_LABELS } from '@/core/leads';
+import { priorityLabel, STATUS_LABELS } from '@/core/leads';
 import { formatDate } from '@/shared/format';
 import { PORTAL_SITES, type LeadView } from '@/shared/types';
 
@@ -13,7 +13,7 @@ export type ExportRow = Record<(typeof EXPORT_COLUMNS)[number], string | number>
 
 export function toExportRows(leads: LeadView[]): ExportRow[] {
   return leads.map(({ listing: l, evaluation: e, state: s }) => ({
-    'Priorità': PRIORITY_LABELS[e.priority],
+    'Priorità': priorityLabel(e.priority, l.portal),
     'Stato': STATUS_LABELS[s.status],
     'Portale': PORTAL_SITES[l.portal],
     'Titolo': l.title,

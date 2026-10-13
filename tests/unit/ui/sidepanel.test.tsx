@@ -54,6 +54,14 @@ describe('Sparkline', () => {
 });
 
 describe('LeadItem', () => {
+  it('per Idealista chiama "Età incerta" la priorità da verificare', () => {
+    const l = lead(1, 'verify');
+    const fromIdealista = { ...l, listing: { ...l.listing, key: 'idealista:1', portal: 'idealista' as const } };
+    render(<ul><LeadItem lead={fromIdealista} onChange={() => {}} onDelete={() => {}} /></ul>);
+    expect(screen.getByText('Età incerta')).toBeTruthy();
+    expect(screen.queryByText('Da verificare')).toBeNull();
+  });
+
   it('mostra il portale di provenienza', () => {
     const l = lead(1, 'high');
     const fromIdealista = { ...l, listing: { ...l.listing, key: 'idealista:1', portal: 'idealista' as const } };
