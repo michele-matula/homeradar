@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { idealistaAdapter as A } from '@/adapters/idealista';
 import { parseTitle } from '@/adapters/idealista/parse';
 import { isNewestFirst, listingIdFromHref, pageKind } from '@/adapters/idealista/urls';
-import { AD_SLOT, card, DESCRIPTION, DETAIL_URL, NEWEST_URL, renderDetail, SEARCH_URL, searchBody, SELLER_NAME } from './idealista-builders';
+import { AD_SLOT, GEO_REACH_CARD, card, DESCRIPTION, DETAIL_URL, NEWEST_URL, renderDetail, SEARCH_URL, searchBody, SELLER_NAME } from './idealista-builders';
 
 const read = (url = SEARCH_URL) => A.readDocument!(document, url);
 
@@ -93,6 +93,13 @@ describe('ricerca', () => {
     expect(r.errors).toEqual(['card[1]: id o titolo mancanti']);
   });
 
+  it('salta gli annunci suggeriti delle zone vicine senza segnalare errori', () => {
+    document.body.innerHTML = searchBody([card({ id: 1 }), GEO_REACH_CARD, card({ id: 2 })]);
+    expect(read()).toMatchObject({ errors: [], observations: [{ portalId: 1 }, { portalId: 2 }] });
+    expect(A.cardIds(document)).toEqual([1, 2]);
+    expect(A.cardFor(document, 30490345)).toBeNull();
+  });
+
   it('pagina senza card (es. blocco anti-bot): nessun errore', () => {
     document.body.innerHTML = '<p>Ops! Al momento non siamo disponibili</p>';
     expect(read()).toEqual({ observations: [], errors: [] });
@@ -150,7 +157,7 @@ describe('scheda', () => {
 
   it('senza blocco prezzo segnala un errore', () => {
     renderDetail(document);
-    document.querySelector('.info-data')!.remove();
+    document.querySelectorAll('.info-data').forEach((e) => e.remove());
     expect(read(DETAIL_URL).errors).toEqual(['detail: prezzo non trovato']);
   });
 });

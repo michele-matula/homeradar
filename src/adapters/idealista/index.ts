@@ -1,5 +1,5 @@
 import type { PortalAdapter } from '@/adapters/types';
-import { parseDetail, parseSearch } from './parse';
+import { CARD_SELECTOR, parseDetail, parseSearch } from './parse';
 import { isNewestFirst, pageKind } from './urls';
 
 export const idealistaAdapter: PortalAdapter = {
@@ -15,10 +15,10 @@ export const idealistaAdapter: PortalAdapter = {
     }
     return result;
   },
-  cardFor: (root, id) => root.querySelector<HTMLElement>(`article.item[data-element-id="${id}"]`),
+  cardFor: (root, id) => root.querySelector<HTMLElement>(`${CARD_SELECTOR}[data-element-id="${id}"]`),
   badgeHost: (card) => card.querySelector<HTMLElement>('.item-multimedia') ?? card.querySelector('picture')?.parentElement ?? card,
   cardIds: (root) =>
-    [...root.querySelectorAll('article.item[data-element-id]')]
+    [...root.querySelectorAll(`${CARD_SELECTOR}[data-element-id]`)]
       .map((a) => Number(a.getAttribute('data-element-id')))
       .filter((id) => id > 0),
 };

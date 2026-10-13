@@ -10,6 +10,9 @@ const STREET = /^(via|viale|piazza|piazzale|corso|largo|vicolo|strada|località|
 
 export const listingUrl = (id: number) => `https://www.idealista.it/immobile/${id}/`;
 
+/** Card degli annunci in elenco; esclude gli annunci suggeriti delle zone vicine (.geo-reach-card), senza flag privato/agenzia. */
+export const CARD_SELECTOR = 'article.item:not(.geo-reach-card)';
+
 export interface TitleParts {
   typology: string | null;
   address: string | null;
@@ -65,7 +68,7 @@ function sellerOfCard(card: Element): SellerType {
 
 export function parseSearch(root: ParentNode): ParseResult {
   const out: ParseResult = { observations: [], errors: [] };
-  root.querySelectorAll('article.item').forEach((card, i) => {
+  root.querySelectorAll(CARD_SELECTOR).forEach((card, i) => {
     const id = Number(card.getAttribute('data-element-id'));
     const link = card.querySelector('a.item-link');
     const title = link?.getAttribute('title')?.trim() || text(link);
@@ -89,7 +92,8 @@ export function parseDetail(root: ParentNode, url: string): ParseResult {
   const fullTitle = docOf(root).title.split(' — ')[0]!.trim();
   if (!id || !fullTitle) return { observations: [], errors: ['detail: id o titolo mancanti'] };
   if (!fullTitle.includes(' in vendita in ')) return { observations: [], errors: [] }; // solo vendita
-  const info = root.querySelector('.info-data');
+  // La scheda ha due .info-data: quello riassuntivo in alto non ha il ribasso; si usa quello con .info-data-price.
+  const info = root.querySelector('.info-data-price')?.closest('.info-data');
   if (!info) return { observations: [], errors: ['detail: prezzo non trovato'] };
   const price = parseEuro(text(info.querySelector('.info-data-price')));
   const features = [...root.querySelectorAll('.info-features > span')].map((s) => text(s));
