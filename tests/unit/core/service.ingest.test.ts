@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { VISIT_GAP_MS } from '@/core/service';
-import type { ListingObservation } from '@/shared/types';
+import { DAY_MS, type ListingObservation } from '@/shared/types';
 import { obs, setup } from './helpers';
 
 const KEY = 'immobiliare:128416572';
@@ -98,5 +98,26 @@ describe('LeadService.ingest', () => {
     const { db, svc } = setup(Date.UTC(2026, 9, 13, 12));
     await svc.ingest([idealista({ portalId: 36000000 })]);
     expect((await db.listings.get('idealista:36000000'))!.estimatedCreatedAt).toBe(Date.UTC(2026, 5, 13));
+  });
+
+  it('dà al ribasso senza data il giorno in cui è stato visto e lo conserva alle visite successive', async () => {
+    const { db, svc, advance } = setup();
+    const lastDrop = { fromPrice: 645000, toPrice: 625000, percent: 3.1, date: null };
+    await svc.ingest([idealista({ portalId: 37011951, price: 625000, lastDrop })]);
+    const key = 'idealista:37011951';
+    expect((await db.listings.get(key))!.lastDrop).toEqual({ ...lastDrop, date: Date.UTC(2026, 9, 10), dateEstimated: true });
+    advance(3 * DAY_MS);
+    await svc.ingest([idealista({ portalId: 37011951, price: 625000, lastDrop })]);
+    expect((await db.listings.get(key))!.lastDrop!.date).toBe(Date.UTC(2026, 9, 10));
+    const declared = (await db.priceSnapshots.where('listingKey').equals(key).toArray()).filter((s) => s.source === 'declared');
+    expect(declared).toHaveLength(2);
+  });
+
+  it('un nuovo ribasso senza data prende il giorno in cui compare', async () => {
+    const { db, svc, advance } = setup();
+    await svc.ingest([idealista({ portalId: 37011951, price: 625000, lastDrop: { fromPrice: 645000, toPrice: 625000, percent: 3.1, date: null } })]);
+    advance(3 * DAY_MS);
+    await svc.ingest([idealista({ portalId: 37011951, price: 600000, lastDrop: { fromPrice: 625000, toPrice: 600000, percent: 4, date: null } })]);
+    expect((await db.listings.get('idealista:37011951'))!.lastDrop).toMatchObject({ toPrice: 600000, date: Date.UTC(2026, 9, 13), dateEstimated: true });
   });
 });

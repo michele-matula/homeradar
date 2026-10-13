@@ -20,6 +20,18 @@ const lastDrop = { fromPrice: 249000, toPrice: 235000, percent: 5.6, date: DROP_
 const ev = (l: ListingRecord, s: PriceSnapshot[] = [], settings = DEFAULT_SETTINGS) => evaluate(l, s, settings, NOW);
 
 describe('evaluate', () => {
+  it("su Idealista l'età incerta non rimanda alla scheda", () => {
+    const e = ev(listing({ key: 'idealista:1', portal: 'idealista', estimatedCreatedAt: daysAgo(125) }));
+    expect(e.priority).toBe('verify');
+    expect(e.reasons).toContain('Età stimata vicina alla soglia');
+    expect(e.reasons).not.toContain("Età da verificare: apri l'annuncio");
+  });
+
+  it('per un ribasso con data stimata dice "rilevato il"', () => {
+    const e = ev(listing({ portalCreatedAt: daysAgo(45), lastDrop: { ...lastDrop, dateEstimated: true } }), declaredDrop);
+    expect(e.reasons.at(-1)).toBe('Ribassato del 5,6% (249.000 → 235.000 €) rilevato il 21/09');
+  });
+
   it('Alta: data reale oltre soglia e ribasso dichiarato', () => {
     const e = ev(listing({ portalCreatedAt: daysAgo(173), lastDrop }), declaredDrop);
     expect(e.priority).toBe('high');

@@ -6,10 +6,18 @@ import { evaluate } from '@/core/rules';
 import { validateSettings } from '@/core/settings';
 import {
   DAY_MS, listingKey, type CalibrationHint, type Diagnostics, type Evaluation, type LeadState, type LeadStatus, type LeadView,
-  type ListingObservation, type ListingRecord, type Portal, type PriceSnapshot, type Settings,
+  type ListingObservation, type ListingRecord, type ObservedPriceDrop, type Portal, type PriceDrop, type PriceSnapshot, type Settings,
 } from '@/shared/types';
 
 export const VISIT_GAP_MS = 30 * 60_000;
+
+/** Dà una data al ribasso: quella del portale, quella già registrata per lo stesso ribasso o oggi. */
+function resolveDrop(drop: ObservedPriceDrop | null, prev: PriceDrop | null, now: number): PriceDrop | null {
+  if (!drop) return null;
+  if (drop.date != null) return { ...drop, date: drop.date };
+  if (prev && prev.fromPrice === drop.fromPrice && prev.toPrice === drop.toPrice) return prev;
+  return { ...drop, date: utcDay(now), dateEstimated: true };
+}
 
 export class LeadService {
   constructor(
@@ -47,6 +55,7 @@ export class LeadService {
         if (o.sellerType !== 'private') continue;
         const key = listingKey(o.portal, o.portalId);
         const prev = await listings.get(key);
+        const drop = resolveDrop(o.lastDrop, prev?.lastDrop ?? null, now);
         const record: ListingRecord = {
           key,
           portal: o.portal,
@@ -62,7 +71,7 @@ export class LeadService {
           currentPrice: o.price ?? prev?.currentPrice ?? null,
           portalCreatedAt: o.portalCreatedAt ?? prev?.portalCreatedAt ?? null,
           estimatedCreatedAt: estimateCreatedAt(o.portalId, pointsFor(o.portal)),
-          lastDrop: o.lastDrop ?? prev?.lastDrop ?? null,
+          lastDrop: drop ?? prev?.lastDrop ?? null,
           firstSeenAt: prev?.firstSeenAt ?? now,
           lastSeenAt: now,
           seenCount: !prev ? 1 : now - prev.lastSeenAt >= VISIT_GAP_MS ? prev.seenCount + 1 : prev.seenCount,
@@ -71,7 +80,7 @@ export class LeadService {
         // spezzerebbero all'infinito la finestra di VISIT_GAP_MS.
         if (prev && now - prev.lastSeenAt < VISIT_GAP_MS) record.lastSeenAt = prev.lastSeenAt;
         await listings.put(record);
-        await this.recordSnapshots(key, o, now);
+        await this.recordSnapshots(key, drop, o.price, now);
         if (!(await leadStates.get(key))) {
           await leadStates.add({ listingKey: key, status: 'new', notes: '', statusChangedAt: now });
         }
@@ -199,22 +208,22 @@ export class LeadService {
     return { version, ...(await this.diag()) };
   }
 
-  private async recordSnapshots(key: string, o: ListingObservation, now: number): Promise<void> {
+  private async recordSnapshots(key: string, drop: PriceDrop | null, price: number | null, now: number): Promise<void> {
     const { priceSnapshots } = this.db;
-    if (o.lastDrop) {
+    if (drop) {
       const declared = [
-        { price: o.lastDrop.fromPrice, at: o.lastDrop.date - 1 },
-        { price: o.lastDrop.toPrice, at: o.lastDrop.date },
+        { price: drop.fromPrice, at: drop.date - 1 },
+        { price: drop.toPrice, at: drop.date },
       ];
       for (const s of declared) {
         const exists = await priceSnapshots.where('[listingKey+at]').equals([key, s.at]).first();
         if (!exists) await priceSnapshots.add({ listingKey: key, price: s.price, at: s.at, source: 'declared' });
       }
     }
-    if (o.price != null) {
+    if (price != null) {
       const last = await priceSnapshots.where('[listingKey+at]').between([key, Dexie.minKey], [key, Dexie.maxKey]).last();
-      if (!last || last.price !== o.price) {
-        await priceSnapshots.add({ listingKey: key, price: o.price, at: now, source: 'observed' });
+      if (!last || last.price !== price) {
+        await priceSnapshots.add({ listingKey: key, price, at: now, source: 'observed' });
       }
     }
   }

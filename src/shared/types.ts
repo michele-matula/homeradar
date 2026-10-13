@@ -12,6 +12,16 @@ export interface PriceDrop {
   percent: number;
   /** ms epoch, mezzanotte UTC del giorno del ribasso */
   date: number;
+  /** true se il portale non dichiara la data: è il giorno in cui HomeRadar ha visto il ribasso. */
+  dateEstimated?: boolean;
+}
+
+/** Ribasso come letto dal portale: Idealista non ne dichiara la data. */
+export interface ObservedPriceDrop {
+  fromPrice: number;
+  toPrice: number;
+  percent: number;
+  date: number | null;
 }
 
 export interface ListingObservation {
@@ -28,7 +38,7 @@ export interface ListingObservation {
   price: number | null;
   sellerType: SellerType;
   portalCreatedAt: number | null;
-  lastDrop: PriceDrop | null;
+  lastDrop: ObservedPriceDrop | null;
   source: ObservationSource;
 }
 

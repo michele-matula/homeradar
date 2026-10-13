@@ -1,11 +1,17 @@
 import { formatDayMonth, formatEuro, formatPercent } from '@/shared/format';
 import {
-  DAY_MS, type Evaluation, type ListingRecord, type PriceSnapshot, type Priority, type Settings,
+  DAY_MS, type Evaluation, type ListingRecord, type Portal, type PriceSnapshot, type Priority, type Settings,
 } from '@/shared/types';
 
 export const UNCERTAINTY_DAYS = 15;
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
+
+// Su Immobiliare la scheda contiene la data vera; su Idealista no.
+const VERIFY_REASON: Record<Portal, string> = {
+  immobiliare: "Età da verificare: apri l'annuncio",
+  idealista: 'Età stimata vicina alla soglia',
+};
 
 export function evaluate(listing: ListingRecord, snapshots: PriceSnapshot[], settings: Settings, now: number): Evaluation {
   // Segnale A: anzianità
@@ -42,12 +48,13 @@ export function evaluate(listing: ListingRecord, snapshots: PriceSnapshot[], set
   const agePart = ageDays != null ? `${ageEstimated ? '~' : ''}${ageDays} gg` : null;
   const reasons: string[] = [];
   if (agePart) reasons.push(`Online da ${agePart}`);
-  if (ageUncertain) reasons.push("Età da verificare: apri l'annuncio");
+  if (ageUncertain) reasons.push(VERIFY_REASON[listing.portal]);
   if (signalB && current != null && maxKnownPrice != null) {
     if (dropCount >= 2) {
       reasons.push(`${dropCount} ribassi, −${formatPercent(dropPercent)}% totale`);
     } else {
-      const when = listing.lastDrop && listing.lastDrop.toPrice === current ? ` il ${formatDayMonth(listing.lastDrop.date)}` : '';
+      const d = listing.lastDrop;
+      const when = d && d.toPrice === current ? ` ${d.dateEstimated ? 'rilevato il' : 'il'} ${formatDayMonth(d.date)}` : '';
       reasons.push(`Ribassato del ${formatPercent(dropPercent)}% (${formatEuro(maxKnownPrice)} → ${formatEuro(current)} €)${when}`);
     }
   }
