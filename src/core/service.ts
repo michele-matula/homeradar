@@ -207,14 +207,19 @@ export class LeadService {
     });
   }
 
-  /** Aggiorna l'avviso del portale; restituisce true se almeno un portale ha l'avviso acceso. */
-  async setAdapterWarning(portal: Portal, on: boolean): Promise<boolean> {
+  /**
+   * Aggiorna l'avviso del portale. `any`: almeno un portale ha l'avviso acceso;
+   * `changed`: l'avviso di questo portale è cambiato.
+   */
+  async setAdapterWarning(portal: Portal, on: boolean): Promise<{ any: boolean; changed: boolean }> {
     let any = false;
+    let changed = false;
     await this.updateDiag((d) => {
+      changed = Boolean(d.adapterWarning[portal]) !== on;
       d.adapterWarning = { ...d.adapterWarning, [portal]: on };
       any = warnedPortals(d.adapterWarning).length > 0;
     });
-    return any;
+    return { any, changed };
   }
 
   async getDiagnostics(version: string): Promise<Diagnostics> {

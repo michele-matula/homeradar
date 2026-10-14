@@ -37,6 +37,21 @@ describe('handleRequest', () => {
     expect(h.setWarning).toHaveBeenLastCalledWith(false);
   });
 
+  it("parseStatus aggiorna il pannello solo quando l'avviso del portale cambia", async () => {
+    const { svc } = setup();
+    const h = hooks();
+    const status = (ok: boolean) => handleRequest(svc, { type: 'parseStatus', portal: 'subito', ok, errors: [], source: 'next-data' }, 'v', h);
+    await status(true);
+    expect(h.leadsChanged).not.toHaveBeenCalled();
+    await status(false);
+    expect(h.leadsChanged).toHaveBeenCalledTimes(1);
+    await status(false);
+    expect(h.leadsChanged).toHaveBeenCalledTimes(1);
+    // Avviso spento senza nuovi lead: il pannello deve toglierlo subito.
+    await status(true);
+    expect(h.leadsChanged).toHaveBeenCalledTimes(2);
+  });
+
   it('inoltra le richieste del pannello', async () => {
     const { svc } = setup();
     const h = hooks();

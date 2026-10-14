@@ -43,7 +43,11 @@ export async function handleRequest(service: LeadService, req: Request, version:
     case 'parseStatus': {
       await service.bumpCounter(PAYLOAD_COUNTERS[req.source]);
       for (const e of req.errors.slice(0, 5)) await service.recordError(e);
-      hooks.setWarning(await service.setAdapterWarning(req.portal, !req.ok));
+      const warning = await service.setAdapterWarning(req.portal, !req.ok);
+      hooks.setWarning(warning.any);
+      // Il pannello rilegge l'avviso solo su leadsChanged: senza questo, un avviso spento
+      // senza nuovi lead resterebbe a video fino alla riapertura.
+      if (warning.changed) hooks.leadsChanged();
       return null;
     }
     case 'fallbackShown':
