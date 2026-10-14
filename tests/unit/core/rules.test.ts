@@ -20,6 +20,13 @@ const lastDrop = { fromPrice: 249000, toPrice: 235000, percent: 5.6, date: DROP_
 const ev = (l: ListingRecord, s: PriceSnapshot[] = [], settings = DEFAULT_SETTINGS) => evaluate(l, s, settings, NOW);
 
 describe('evaluate', () => {
+  it("su Subito l'età incerta non rimanda alla scheda", () => {
+    const e = ev(listing({ key: 'subito:1', portal: 'subito', estimatedCreatedAt: daysAgo(125) }));
+    expect(e.priority).toBe('verify');
+    expect(e.reasons).toContain('Età stimata vicina alla soglia');
+    expect(e.badgeText).toBe('◐ Età incerta · ~125 gg');
+  });
+
   it("su Idealista l'età incerta non rimanda alla scheda", () => {
     const e = ev(listing({ key: 'idealista:1', portal: 'idealista', estimatedCreatedAt: daysAgo(125) }));
     expect(e.priority).toBe('verify');

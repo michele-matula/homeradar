@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { acceptLearnedPoint, DEFAULT_CALIBRATION, estimateCreatedAt, mergeCalibration, utcDay } from '@/core/age';
+import { acceptLearnedPoint, DEFAULT_CALIBRATION, estimateCreatedAt, LEARN_RATE_PER_DAY, mergeCalibration, utcDay } from '@/core/age';
 
 const pts = [
   { portalId: 100, createdAt: 0 },
@@ -29,6 +29,9 @@ describe('estimateCreatedAt', () => {
   it('con la calibrazione predefinita colloca un ID noto alla sua data', () => {
     expect(estimateCreatedAt(131597836, DEFAULT_CALIBRATION.immobiliare)).toBe(1786025032000);
     expect(estimateCreatedAt(36_000_000, DEFAULT_CALIBRATION.idealista)).toBe(Date.UTC(2026, 5, 13));
+  });
+  it('con la calibrazione di Subito colloca un ID noto alla sua data', () => {
+    expect(estimateCreatedAt(630_881_728, DEFAULT_CALIBRATION.subito)).toBe(Date.UTC(2026, 0, 10));
   });
 });
 
@@ -71,5 +74,18 @@ describe('acceptLearnedPoint', () => {
   });
   it('senza punti di riferimento non accetta nulla', () => {
     expect(acceptLearnedPoint({ portalId: 37_200_000, createdAt: at(20) }, [], RATE)).toBe(false);
+  });
+});
+
+describe('acceptLearnedPoint su Subito', () => {
+  const pts = DEFAULT_CALIBRATION.subito; // ultimo punto: 664.395.700 il 13/10/2026
+  const RATE = LEARN_RATE_PER_DAY.subito!;
+  const at = (day: number) => Date.UTC(2026, 9, day);
+
+  it('accetta un annuncio nuovo una settimana dopo', () => {
+    expect(acceptLearnedPoint({ portalId: 665_250_000, createdAt: at(20) }, pts, RATE)).toBe(true);
+  });
+  it('rifiuta un annuncio vecchio rinnovato oggi', () => {
+    expect(acceptLearnedPoint({ portalId: 650_000_000, createdAt: at(20) }, pts, RATE)).toBe(false);
   });
 });

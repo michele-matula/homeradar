@@ -101,9 +101,9 @@ describe('App', () => {
     expect(await screen.findByText('Idealista.it potrebbe essere cambiato: alcuni dati non sono stati letti.')).toBeTruthy();
   });
 
-  it('con due portali li elenca entrambi', async () => {
-    render(<App api={fakeApi([], { immobiliare: true, idealista: true })} />);
-    expect(await screen.findByText('Immobiliare.it e Idealista.it potrebbero essere cambiati: alcuni dati non sono stati letti.')).toBeTruthy();
+  it('con più portali li elenca tutti', async () => {
+    render(<App api={fakeApi([], { immobiliare: true, idealista: true, subito: true })} />);
+    expect(await screen.findByText('Immobiliare.it, Idealista.it e Subito.it potrebbero essere cambiati: alcuni dati non sono stati letti.')).toBeTruthy();
   });
 
   it('mostra le schede con i conteggi e filtra per stato', async () => {
@@ -170,7 +170,7 @@ describe('App', () => {
   it('mostra il banner quando l\'adattatore segnala un problema', async () => {
     render(<App api={fakeApi([], { immobiliare: true })} />);
     expect(await screen.findByText('Immobiliare.it potrebbe essere cambiato: alcuni dati non sono stati letti.')).toBeTruthy();
-    expect(screen.getByText('Nessun lead in questa scheda. Naviga su Immobiliare.it o Idealista.it per raccoglierne.')).toBeTruthy();
+    expect(screen.getByText('Nessun lead in questa scheda. Naviga su Immobiliare.it, Idealista.it o Subito.it per raccoglierne.')).toBeTruthy();
     expect(screen.queryByText(/Elimina tutti/)).toBeNull();
   });
 

@@ -113,7 +113,8 @@ describe('LeadService diagnostica', () => {
     await svc.bumpCounter('apiPayloads');
     await svc.bumpCounter('apiPayloads', 2);
     for (let i = 0; i < 25; i++) await svc.recordError(`errore ${i}`);
-    expect(await svc.setAdapterWarning('immobiliare', true)).toBe(true);
+    expect(await svc.setAdapterWarning('immobiliare', true)).toEqual({ any: true, changed: true });
+    expect(await svc.setAdapterWarning('immobiliare', true)).toEqual({ any: true, changed: false });
     const d = await svc.getDiagnostics('0.1.0');
     expect(d.version).toBe('0.1.0');
     expect(d.counters.apiPayloads).toBe(3);

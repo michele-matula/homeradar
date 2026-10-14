@@ -1,0 +1,2051 @@
+{
+ "props": {
+  "pageProps": {
+   "initialState": {
+    "items": {
+     "total": 93,
+     "originalList": [
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664215067",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 1",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-664215067.htm"
+       },
+       "date": "2026-10-12 10:48:38",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "1925000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "1573"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "6"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664215072",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 2",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-664215072.htm"
+       },
+       "date": "2026-10-12 10:48:36",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "880000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "744"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "6"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:664215060",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 3",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-664215060.htm"
+       },
+       "date": "2026-10-12 10:48:35",
+       "features": {
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "6"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "417000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "347"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:663202223",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 4",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-663202223.htm"
+       },
+       "date": "2026-10-10 14:51:06",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "2700000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "417"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "8"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "4"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:663894876",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 5",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-663894876.htm"
+       },
+       "date": "2026-10-09 13:55:13",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "450000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "75"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:663868477",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 6",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-663868477.htm"
+       },
+       "date": "2026-10-09 10:49:50",
+       "features": {
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "4"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "2635000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "236"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:627988735",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 7",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-627988735.htm"
+       },
+       "date": "2026-10-08 17:22:07",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "337"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "6"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:663733520",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 8",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-663733520.htm"
+       },
+       "date": "2026-10-08 11:12:01",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "398000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "90"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:658703046",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 9",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-658703046.htm"
+       },
+       "date": "2026-10-08 01:09:47",
+       "features": {
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "6"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "950000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "180"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:663686733",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 10",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-663686733.htm"
+       },
+       "date": "2026-10-07 20:47:10",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "760000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "550"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "5"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:663686569",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 11",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-663686569.htm"
+       },
+       "date": "2026-10-07 20:47:05",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "760000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "550"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "5"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:663603620",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 12",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-663603620.htm"
+       },
+       "date": "2026-10-07 10:53:23",
+       "features": {
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "600"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "6"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:663466369",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 13",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-663466369.htm"
+       },
+       "date": "2026-10-06 10:49:30",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "980000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "250"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "5"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:663458950",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 14",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-663458950.htm"
+       },
+       "date": "2026-10-06 09:45:49",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "115000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "95"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:663200051",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 15",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-663200051.htm"
+       },
+       "date": "2026-10-03 23:18:11",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "139000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "100"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "7"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "4"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:662844978",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 16",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-662844978.htm"
+       },
+       "date": "2026-10-01 10:42:28",
+       "features": {
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "678"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "6"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:662813594",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 17",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-662813594.htm"
+       },
+       "date": "2026-10-01 07:12:49",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "4"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "489000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "4147"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "8"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "5"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:662713070",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 18",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-662713070.htm"
+       },
+       "date": "2026-09-30 10:51:54",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "458000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "199"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "5"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:662712950",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 19",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-662712950.htm"
+       },
+       "date": "2026-09-30 10:51:46",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "199000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "117"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:662572172",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 20",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-662572172.htm"
+       },
+       "date": "2026-09-29 10:52:01",
+       "features": {
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "4"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "805000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "154"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:662456456",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 21",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-662456456.htm"
+       },
+       "date": "2026-09-28 14:22:03",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "221240"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "73"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:662214719",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 22",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-662214719.htm"
+       },
+       "date": "2026-09-26 12:04:16",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "1220000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "240"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "6"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:662039501",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 23",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-662039501.htm"
+       },
+       "date": "2026-09-24 20:52:41",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "420000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "60"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:661629462",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 24",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-661629462.htm"
+       },
+       "date": "2026-09-22 03:31:24",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "1"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "400000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "500"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:661404460",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 25",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-661404460.htm"
+       },
+       "date": "2026-09-20 10:34:46",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "279000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "114"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:661389458",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 26",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-661389458.htm"
+       },
+       "date": "2026-09-20 02:22:10",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "1200000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "154"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "6"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "4"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:661207446",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 27",
+       "advertiser": {
+        "company": false,
+        "type": 0
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-661207446.htm"
+       },
+       "date": "2026-09-18 14:37:30",
+       "features": {
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "4"
+          }
+         ]
+        },
+        "/floor": {
+         "uri": "/floor",
+         "values": [
+          {
+           "key": "5"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "200000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "100"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:661052622",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 28",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-661052622.htm"
+       },
+       "date": "2026-09-17 11:13:09",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "1260000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "160"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "4"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:660928272",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 29",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-660928272.htm"
+       },
+       "date": "2026-09-16 11:33:44",
+       "features": {
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "2"
+          }
+         ]
+        },
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "595000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "314"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "5"
+          }
+         ]
+        }
+       }
+      },
+      {
+       "kind": "AdItem",
+       "urn": "id:ad:00000000-0000-0000-0000-000000000000:list:660787280",
+       "type": {
+        "key": "s",
+        "value": "In vendita"
+       },
+       "category": {
+        "id": "29",
+        "label": "Ville singole e a schiera",
+        "parentId": "6"
+       },
+       "subject": "Ville singole e a schiera in Via Esempio 30",
+       "advertiser": {
+        "company": true,
+        "type": 1
+       },
+       "geo": {
+        "region": {
+         "id": "4",
+         "value": "Lombardia"
+        },
+        "city": {
+         "id": "8",
+         "value": "Milano"
+        },
+        "town": {
+         "id": "015146",
+         "value": "Milano"
+        }
+       },
+       "urls": {
+        "default": "https://www.subito.it/ville-singole-e-a-schiera/annuncio-660787280.htm"
+       },
+       "date": "2026-09-15 10:58:59",
+       "features": {
+        "/price": {
+         "uri": "/price",
+         "values": [
+          {
+           "key": "1176000"
+          }
+         ]
+        },
+        "/size": {
+         "uri": "/size",
+         "values": [
+          {
+           "key": "210"
+          }
+         ]
+        },
+        "/room": {
+         "uri": "/room",
+         "values": [
+          {
+           "key": "4"
+          }
+         ]
+        },
+        "/bathrooms": {
+         "uri": "/bathrooms",
+         "values": [
+          {
+           "key": "3"
+          }
+         ]
+        }
+       }
+      }
+     ],
+     "galleryList": [],
+     "boostedItems": []
+    }
+   }
+  }
+ }
+}

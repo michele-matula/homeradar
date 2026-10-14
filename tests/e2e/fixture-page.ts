@@ -34,3 +34,30 @@ document.getElementById('nav-no-data').addEventListener('click', function () {
 });
 </script></body></html>`;
 }
+
+type SubitoAd = { urn: string; subject: string; urls: { default: string } };
+type SubitoNextData = { props: { pageProps: { initialState: { items: { originalList: SubitoAd[]; galleryList?: SubitoAd[]; boostedItems?: SubitoAd[] } } } } };
+
+// Struttura della card verificata su Subito.it il 2026-10-13: contenitore foto, link sovrapposto, testi.
+const subitoCard = (url: string, title: string) =>
+  `<article><div><img src="${GIF}" width="150" height="100"><figure><img src="${GIF}"></figure><button></button></div><a href="${url}"></a><section><h3>${esc(title)}</h3></section></article>`;
+
+export function buildSubitoSearchHtml(nextData: SubitoNextData): string {
+  const { originalList, galleryList = [], boostedItems = [] } = nextData.props.pageProps.initialState.items;
+  const cards = [...boostedItems, ...galleryList, ...originalList].map((a) => subitoCard(a.urls.default, a.subject)).join('');
+  const json = JSON.stringify(nextData).replace(/</g, '\u003c');
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Fixture Subito</title></head><body>
+<div id="list">${cards}</div>
+<button id="next">Pagina 2</button>
+<script id="__NEXT_DATA__" type="application/json">${json}</script>
+<script>
+document.getElementById('next').addEventListener('click', function () {
+  fetch('https://hades.subito.it/v1/search/items?c=7&r=4&t=s&start=30').then(function (r) { return r.json(); }).then(function (d) {
+    document.getElementById('list').innerHTML = d.ads.map(function (a) {
+      return '<article><div><img src="${GIF}"><figure><img src="${GIF}"></figure></div><a href="' + a.urls.default + '"></a><section><h3>x</h3></section></article>';
+    }).join('');
+    history.pushState({}, '', '/annunci-lombardia/vendita/appartamenti/milano/milano/?o=2');
+  });
+});
+</script></body></html>`;
+}

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { warnedPortals } from '@/core/diagnostics';
 import { groupByStatus, PRIORITY_LABELS } from '@/core/leads';
-import { LEAD_STATUSES, PORTAL_SITES, type LeadStatus, type LeadView, type Portal, type Priority } from '@/shared/types';
+import { joinList } from '@/shared/format';
+import { LEAD_STATUSES, PORTAL_SITES, PORTALS, type LeadStatus, type LeadView, type Portal, type Priority } from '@/shared/types';
 import { defaultApi, type Api } from './api';
 import { ExportBar } from './ExportBar';
 import { AlertIcon, BackIcon, Logo, SearchIcon, SettingsIcon } from './Icons';
@@ -17,10 +18,10 @@ const nAnnunci = (n: number) => `${n} ${n === 1 ? 'annuncio' : 'annunci'}`;
 const errorText = (e: unknown) => `Errore: ${e instanceof Error ? e.message : String(e)}`;
 
 function warningText(portals: Portal[]): string {
-  const sites = portals.map((p) => PORTAL_SITES[p]);
-  return sites.length === 1
-    ? `${sites[0]} potrebbe essere cambiato: alcuni dati non sono stati letti.`
-    : `${sites.join(' e ')} potrebbero essere cambiati: alcuni dati non sono stati letti.`;
+  const sites = joinList(portals.map((p) => PORTAL_SITES[p]), 'e');
+  return portals.length === 1
+    ? `${sites} potrebbe essere cambiato: alcuni dati non sono stati letti.`
+    : `${sites} potrebbero essere cambiati: alcuni dati non sono stati letti.`;
 }
 
 export function App({ api = defaultApi }: { api?: Api }) {
@@ -156,7 +157,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
           {visible.length === 0 ? (
             <div className="empty">
               <SearchIcon />
-              <p>{filter === 'all' ? 'Nessun lead in questa scheda. Naviga su Immobiliare.it o Idealista.it per raccoglierne.' : `Nessun lead${filterTag} in questa scheda.`}</p>
+              <p>{filter === 'all' ? `Nessun lead in questa scheda. Naviga su ${joinList(PORTALS.map((p) => PORTAL_SITES[p]), 'o')} per raccoglierne.` : `Nessun lead${filterTag} in questa scheda.`}</p>
             </div>
           ) : (
             <ul className="leads">

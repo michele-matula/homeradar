@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatDayMonth, formatEuro, formatPercent } from '@/shared/format';
+import { formatDate, formatDayMonth, formatEuro, formatPercent, joinList } from '@/shared/format';
 
 describe('format', () => {
   it('formatta gli euro con il punto delle migliaia', () => {
@@ -16,5 +16,13 @@ describe('format', () => {
   it('formatta le date in UTC', () => {
     expect(formatDate(Date.UTC(2026, 8, 21))).toBe('21/09/2026');
     expect(formatDayMonth(Date.UTC(2026, 8, 1))).toBe('01/09');
+  });
+});
+
+describe('joinList', () => {
+  it('unisce gli elementi con virgole e la congiunzione finale', () => {
+    expect(joinList(['A'], 'e')).toBe('A');
+    expect(joinList(['A', 'B'], 'e')).toBe('A e B');
+    expect(joinList(['A', 'B', 'C'], 'o')).toBe('A, B o C');
   });
 });

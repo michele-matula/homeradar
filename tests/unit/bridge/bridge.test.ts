@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { isInterceptedUrl } from '@/adapters/subito/urls';
 import { BRIDGE_SOURCE, installBridge, isBridgeMessage, type BridgeWindow } from '@/bridge/bridge';
 
 interface FakeXHR extends EventTarget {
@@ -77,6 +78,15 @@ describe('installBridge', () => {
     await expect(res.json()).resolves.toEqual({ results: [1] });
     await vi.waitFor(() => expect(postMessage).toHaveBeenCalledTimes(1));
     expect(postMessage.mock.calls[0]![0]).toMatchObject({ kind: 'api', payload: { results: [1] } });
+  });
+
+  it('inoltra la fetch cross-origin della ricerca di Subito', async () => {
+    const { win, postMessage } = fakeWindow();
+    installBridge(win, isInterceptedUrl);
+    await win.fetch('https://hades.subito.it/v1/search/items?start=30');
+    await win.fetch('https://hades.subito.it/v1/vouchers/banners');
+    await vi.waitFor(() => expect(postMessage).toHaveBeenCalledTimes(1));
+    expect(postMessage.mock.calls[0]![0]).toMatchObject({ kind: 'api', url: 'https://hades.subito.it/v1/search/items?start=30' });
   });
 
   it('restituisce sempre la risposta originale anche se il ponte va in errore', async () => {

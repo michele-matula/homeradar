@@ -2,11 +2,11 @@ import { LEAD_STATUSES, type LeadStatus, type LeadView, type Portal, type Priori
 
 export const PRIORITY_LABELS: Record<Priority, string> = { high: 'Alta', medium: 'Media', verify: 'Da verificare', none: '' };
 /**
- * Etichetta della priorità per un annuncio del portale. Su Idealista l'età è sempre stimata e la scheda
+ * Etichetta della priorità per un annuncio del portale. Su Idealista e Subito l'età è sempre stimata e la scheda
  * non ha la data: "Da verificare" inviterebbe ad aprirla per nulla, quindi diventa "Età incerta".
  */
 export function priorityLabel(priority: Priority, portal: Portal): string {
-  return priority === 'verify' && portal === 'idealista' ? 'Età incerta' : PRIORITY_LABELS[priority];
+  return priority === 'verify' && portal !== 'immobiliare' ? 'Età incerta' : PRIORITY_LABELS[priority];
 }
 
 export const STATUS_LABELS: Record<LeadStatus, string> = { new: 'Nuovo', to_contact: 'Da contattare', contacted: 'Contattato', discarded: 'Scartato' };

@@ -17,3 +17,9 @@ export function formatDayMonth(ms: number): string {
 export function formatDate(ms: number): string {
   return `${formatDayMonth(ms)}/${new Date(ms).getUTCFullYear()}`;
 }
+
+/** "A", "A e B", "A, B e C". */
+export function joinList(items: string[], conj: 'e' | 'o'): string {
+  if (items.length <= 1) return items.join('');
+  return `${items.slice(0, -1).join(', ')} ${conj} ${items.at(-1)}`;
+}
