@@ -1,8 +1,11 @@
-import { useEffect, useId, useState, type ReactNode } from 'react';
+import { useEffect, useId, useState, type ChangeEvent, type ReactNode } from 'react';
+import { backupFileName, importSummaryText, NOT_A_BACKUP } from '@/core/backup';
 import { formatDiagnostics } from '@/core/diagnostics';
 import { UNCERTAINTY_DAYS } from '@/core/rules';
-import { PORTAL_SITES, PORTALS, type Portal, type Settings } from '@/shared/types';
+import { formatDateTime } from '@/shared/format';
+import { PORTAL_SITES, PORTALS, type BackupStatus, type Portal, type Settings } from '@/shared/types';
 import type { Api } from './api';
+import { downloadBlob } from './download';
 import { InfoTip } from './InfoTip';
 
 type NumberKey = 'minAgeDays' | 'minDropPercent' | 'retentionDays';
@@ -41,13 +44,28 @@ const PORTAL_HELP: Record<Portal, string> = {
     "Legge i risultati delle ricerche nella categoria Immobili di Subito.it. La data mostrata da Subito è quella dell'ultimo rinnovo, non della pubblicazione: l'età è stimata (indicata con «~»).",
 };
 
-export function SettingsView({ api, onSaved }: { api: Api; onSaved(): void }) {
+/** `File.text()` manca in alcuni ambienti (jsdom): in quel caso si passa da FileReader. */
+function readText(file: File): Promise<string> {
+  if (typeof file.text === 'function') return file.text();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsText(file);
+  });
+}
+
+export function SettingsView({ api, onSaved, download = downloadBlob }: { api: Api; onSaved(): void; download?: (b: Blob, name: string) => void }) {
   const [form, setForm] = useState<Settings | null>(null);
   /** Ultime impostazioni salvate: gli interruttori salvano subito, senza le modifiche ancora in sospeso nei campi. */
   const [saved, setSaved] = useState<Settings | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [confirmingReset, setConfirmingReset] = useState(false);
+  const [backup, setBackup] = useState<BackupStatus | null>(null);
   const ids = useId();
+  useEffect(() => {
+    api.getBackupStatus().then(setBackup, () => {});
+  }, [api]);
   useEffect(() => {
     api.getSettings().then((s) => {
       setSaved(s);
@@ -82,18 +100,66 @@ export function SettingsView({ api, onSaved }: { api: Api; onSaved(): void }) {
     }
   }
 
-  async function togglePortal(portal: Portal) {
-    const on = !form!.enabledPortals[portal];
+  /** Gli interruttori salvano subito, partendo dalle impostazioni salvate e non dai campi in sospeso. */
+  async function saveNow(patch: Partial<Settings>, ok: string) {
     try {
-      const result = await api.saveSettings({ ...saved!, enabledPortals: { ...saved!.enabledPortals, [portal]: on } });
+      const result = await api.saveSettings({ ...saved!, ...patch });
       setSaved(result);
-      setForm((f) => f && { ...f, enabledPortals: result.enabledPortals });
-      setMessage(`${PORTAL_SITES[portal]} ${on ? 'attivato' : 'disattivato'}`);
+      setForm((f) => f && { ...f, enabledPortals: result.enabledPortals, autoBackup: result.autoBackup });
+      setMessage(ok);
       onSaved();
     } catch (e) {
       setMessage(`Errore: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
+
+  function togglePortal(portal: Portal) {
+    const on = !form!.enabledPortals[portal];
+    return saveNow({ enabledPortals: { ...saved!.enabledPortals, [portal]: on } }, `${PORTAL_SITES[portal]} ${on ? 'attivato' : 'disattivato'}`);
+  }
+
+  function toggleAutoBackup() {
+    const on = !form!.autoBackup;
+    return saveNow({ autoBackup: on }, `Backup automatico ${on ? 'attivato' : 'disattivato'}`);
+  }
+
+  async function exportBackup() {
+    try {
+      const file = await api.exportBackup();
+      download(new Blob([JSON.stringify(file)], { type: 'application/json' }), backupFileName(Date.now()));
+      setBackup(await api.getBackupStatus());
+      setMessage('Backup esportato');
+    } catch (e) {
+      setMessage(`Errore: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+
+  async function importBackup(e: ChangeEvent<HTMLInputElement>) {
+    const input = e.currentTarget;
+    const file = input.files?.[0];
+    // Azzerato subito: riscegliere lo stesso file deve riattivare l'importazione.
+    input.value = '';
+    if (!file) return;
+    let json: unknown;
+    try {
+      json = JSON.parse(await readText(file));
+    } catch {
+      setMessage(`Errore: ${NOT_A_BACKUP}`);
+      return;
+    }
+    try {
+      const summary = await api.importBackup(json);
+      const s = await api.getSettings();
+      setSaved(s);
+      setForm(s);
+      setMessage(importSummaryText(summary));
+      onSaved();
+    } catch (err) {
+      setMessage(`Errore: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
+  const backupFailed = backup?.lastAutoFailedAt != null && (backup.lastAt === null || backup.lastAutoFailedAt > backup.lastAt);
 
   async function copyReport() {
     try {
@@ -154,6 +220,51 @@ export function SettingsView({ api, onSaved }: { api: Api; onSaved(): void }) {
             </label>
           </div>
         ))}
+      </div>
+      <div className="card">
+        <h2 className="card__title">Backup</h2>
+        <p className="card__text">
+          {backup?.lastAt ? `Ultimo backup: ${formatDateTime(backup.lastAt)}` : 'Ultimo backup: mai'}
+        </p>
+        {backupFailed && <p className="card__text backup__warn">Ultimo backup automatico non riuscito</p>}
+        <div className="settings__row switch">
+          <label id={`${ids}-autoBackup-label`} htmlFor={`${ids}-autoBackup`} className="switch__label">Backup automatico settimanale</label>
+          <InfoTip label="Backup automatico settimanale">
+            Una volta a settimana salva una copia di annunci, stati, note e storico prezzi nella cartella
+            Download/HomeRadar, a rotazione su 4 file (circa un mese di storia). Il file resta sul tuo computer e
+            contiene gli indirizzi degli annunci e le tue note.
+          </InfoTip>
+          <label className="switch__control">
+            <input
+              id={`${ids}-autoBackup`}
+              type="checkbox"
+              role="switch"
+              className="switch__input"
+              aria-labelledby={`${ids}-autoBackup-label`}
+              checked={form.autoBackup}
+              onChange={() => void toggleAutoBackup()}
+            />
+            <span className="switch__track" aria-hidden="true" />
+          </label>
+        </div>
+        <div className="settings__row">
+          <button type="button" className="btn" onClick={exportBackup}>Esporta backup ora</button>
+          <InfoTip label="Esporta backup ora">
+            Scarica subito un file di backup, per esempio prima di cambiare computer. Su un altro browser lo riapri con
+            «Importa backup».
+          </InfoTip>
+        </div>
+        <div className="settings__row">
+          <label className="btn">
+            Importa backup
+            <input type="file" accept=".json,application/json" className="visually-hidden" onChange={(e) => void importBackup(e)} />
+          </label>
+          <InfoTip label="Importa backup">
+            Unisce un backup ai dati di questo browser senza cancellare nulla: aggiunge gli annunci mancanti e, per
+            lo stesso annuncio, tiene lo stato e le note modificati più di recente. Le impostazioni del backup si
+            usano solo se qui non le hai mai cambiate.
+          </InfoTip>
+        </div>
       </div>
       <div className="card">
         <h2 className="card__title">Assistenza</h2>
