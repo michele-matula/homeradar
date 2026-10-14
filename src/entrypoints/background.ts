@@ -64,8 +64,10 @@ export default defineBackground(() => {
 
   void (async () => {
     if (!(await browser.alarms.get('purge'))) browser.alarms.create('purge', { delayInMinutes: 1, periodInMinutes: 24 * 60 });
+    if (!(await browser.alarms.get('backup'))) browser.alarms.create('backup', { delayInMinutes: 5, periodInMinutes: 24 * 60 });
   })();
   browser.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === 'purge') void service.purge();
+    if (alarm.name === 'backup') void autoBackup().catch((err: unknown) => service.recordError(`Backup automatico: ${err instanceof Error ? err.message : String(err)}`)).catch(() => {});
   });
 });
