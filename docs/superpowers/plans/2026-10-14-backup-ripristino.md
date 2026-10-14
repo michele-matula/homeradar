@@ -294,7 +294,7 @@ git commit -m "feat(settings): impostazione backup automatico e tipi dello stato
 
 **Files:**
 - Create: `src/core/backup.ts`
-- Test: `tests/unit/core/backup.test.ts`
+- Test: `tests/unit/core/backup.test.ts`, `tests/unit/core/backup-builders.ts`
 
 **Interfaces:**
 - Consumes: `validateSettings` (`src/core/settings.ts`), `listingKey`, `PORTALS`, `LEAD_STATUSES`, tipi da `src/shared/types.ts`.
@@ -312,14 +312,12 @@ git commit -m "feat(settings): impostazione backup automatico e tipi dello stato
 
 - [ ] **Step 1: test**
 
-`tests/unit/core/backup.test.ts`:
+`tests/unit/core/backup-builders.ts` (condiviso con il Task 4):
 
 ```ts
-import { describe, expect, it } from 'vitest';
-import { autoBackupFileName, backupFileName, buildBackup, importSummaryText, NOT_A_BACKUP, parseBackup, TOO_NEW, type BackupData } from '@/core/backup';
-import { DEFAULT_SETTINGS, type ListingRecord } from '@/shared/types';
+import type { ListingRecord } from '@/shared/types';
 
-const NOW = Date.UTC(2026, 9, 14, 8);
+export const NOW = Date.UTC(2026, 9, 14, 8);
 
 export function listing(o: Partial<ListingRecord> = {}): ListingRecord {
   return {
@@ -330,6 +328,15 @@ export function listing(o: Partial<ListingRecord> = {}): ListingRecord {
     firstSeenAt: NOW - 1000, lastSeenAt: NOW, seenCount: 2, ...o,
   };
 }
+```
+
+`tests/unit/core/backup.test.ts`:
+
+```ts
+import { describe, expect, it } from 'vitest';
+import { autoBackupFileName, backupFileName, buildBackup, importSummaryText, NOT_A_BACKUP, parseBackup, TOO_NEW, type BackupData } from '@/core/backup';
+import { DEFAULT_SETTINGS } from '@/shared/types';
+import { listing, NOW } from './backup-builders';
 
 function data(): BackupData {
   return {
@@ -580,7 +587,7 @@ Expected: PASS.
 - [ ] **Step 5: commit**
 
 ```bash
-git add src/core/backup.ts tests/unit/core/backup.test.ts
+git add src/core/backup.ts tests/unit/core/backup.test.ts tests/unit/core/backup-builders.ts
 git commit -m "feat(backup): formato del file con schema zod come lista dei campi ammessi"
 ```
 
@@ -605,10 +612,9 @@ git commit -m "feat(backup): formato del file con schema zod come lista dei camp
 import { describe, expect, it } from 'vitest';
 import { mergeBackup, type BackupData, type CurrentData } from '@/core/backup';
 import { DEFAULT_SETTINGS, type LeadState } from '@/shared/types';
-import { listing } from './backup.test';
+import { listing, NOW } from './backup-builders';
 
 const K = 'immobiliare:128416572';
-const NOW = Date.UTC(2026, 9, 14, 8);
 const state = (o: Partial<LeadState> = {}): LeadState => ({ listingKey: K, status: 'new', notes: '', statusChangedAt: 1, updatedAt: 1, ...o });
 const empty = (): CurrentData => ({ listings: [], priceSnapshots: [], leadStates: [], calibration: [], settingsSaved: false });
 const file = (o: Partial<BackupData> = {}): BackupData => ({ listings: [listing()], priceSnapshots: [], leadStates: [state()], calibration: [], ...o });
@@ -689,8 +695,6 @@ describe('mergeBackup', () => {
   });
 });
 ```
-
-Nota: il file importa `listing` da `./backup.test`. Se Vitest esegue due volte i test di `backup.test.ts` per via dell'import, sposta `listing` in `tests/unit/core/backup-builders.ts` e importalo da lì in entrambi i file.
 
 - [ ] **Step 2: verifica che falliscano**
 
