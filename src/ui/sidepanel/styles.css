@@ -132,6 +132,10 @@ button, input, select { font: inherit; color: inherit; }
 .chip--medium.chip--on { border-color: var(--medium-border); background: var(--medium-soft); color: var(--medium); }
 .chip--verify.chip--on { border-color: var(--verify-border); background: var(--verify-soft); color: var(--verify); }
 
+.sort { display: flex; align-items: center; gap: 8px; padding: 8px 12px 0; }
+.sort__label { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.sort .field--select { flex: 1; min-width: 0; max-width: 240px; }
+
 .bulk { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 40px; padding: 4px 12px; }
 .bulk__count { color: var(--muted); font-size: 12px; }
 .bulk__actions { display: flex; gap: 6px; }

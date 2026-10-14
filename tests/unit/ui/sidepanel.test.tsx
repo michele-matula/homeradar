@@ -6,7 +6,10 @@ import { LeadItem } from '@/ui/sidepanel/LeadItem';
 import { Sparkline } from '@/ui/sidepanel/Sparkline';
 import { DEFAULT_SETTINGS, type Diagnostics, type LeadStatus, type LeadView, type Portal, type Priority } from '@/shared/types';
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  localStorage.clear();
+});
 
 function lead(id: number, priority: Priority, status: LeadStatus = 'new'): LeadView {
   const key = `immobiliare:${id}`;
@@ -101,6 +104,42 @@ describe('LeadItem', () => {
 });
 
 describe('App', () => {
+  const titles = () => screen.getAllByText(/^Bilocale \d+$/).map((e) => e.textContent);
+  const withPrice = (l: LeadView, currentPrice: number): LeadView => ({ ...l, listing: { ...l.listing, currentPrice } });
+
+  it('ordina la lista col criterio scelto, ricordandolo per scheda anche alla riapertura', async () => {
+    const leads = [withPrice(lead(1, 'high'), 300000), withPrice(lead(2, 'medium'), 100000), withPrice(lead(3, 'high', 'contacted'), 50000), withPrice(lead(4, 'high', 'contacted'), 90000)];
+    const { unmount } = render(<App api={fakeApi(leads)} />);
+    const sort = (await screen.findByLabelText('Ordina per')) as HTMLSelectElement;
+    expect(sort.value).toBe('priority');
+    expect(titles()).toEqual(['Bilocale 1', 'Bilocale 2']);
+    fireEvent.change(sort, { target: { value: 'price_asc' } });
+    expect(titles()).toEqual(['Bilocale 2', 'Bilocale 1']);
+    // L'altra scheda mantiene il proprio ordinamento.
+    fireEvent.click(screen.getByRole('tab', { name: 'Contattati (2)' }));
+    expect((screen.getByLabelText('Ordina per') as HTMLSelectElement).value).toBe('priority');
+    fireEvent.change(screen.getByLabelText('Ordina per'), { target: { value: 'price_desc' } });
+    expect(titles()).toEqual(['Bilocale 4', 'Bilocale 3']);
+    unmount();
+
+    render(<App api={fakeApi(leads)} />);
+    await screen.findByText('Bilocale 1');
+    expect((screen.getByLabelText('Ordina per') as HTMLSelectElement).value).toBe('price_asc');
+    expect(titles()).toEqual(['Bilocale 2', 'Bilocale 1']);
+    fireEvent.click(screen.getByRole('tab', { name: 'Contattati (2)' }));
+    expect((screen.getByLabelText('Ordina per') as HTMLSelectElement).value).toBe('price_desc');
+  });
+
+  it('con un ordinamento salvato illeggibile torna alla priorità', async () => {
+    localStorage.setItem('homeradar.sortByTab', '{"new":"boh"');
+    render(<App api={fakeApi([lead(1, 'high')])} />);
+    expect(((await screen.findByLabelText('Ordina per')) as HTMLSelectElement).value).toBe('priority');
+    localStorage.setItem('homeradar.sortByTab', '{"new":"boh","contacted":"drop"}');
+    cleanup();
+    render(<App api={fakeApi([lead(1, 'high')])} />);
+    expect(((await screen.findByLabelText('Ordina per')) as HTMLSelectElement).value).toBe('priority');
+  });
+
   it('filtra per sito, anche più siti insieme, combinandosi con il filtro per badge', async () => {
     const api = fakeApi([lead(1, 'high'), from('subito', lead(2, 'high')), from('idealista', lead(3, 'medium')), from('subito', lead(4, 'medium'))]);
     render(<App api={api} />);

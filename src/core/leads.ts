@@ -13,11 +13,59 @@ export const STATUS_LABELS: Record<LeadStatus, string> = { new: 'Nuovo', to_cont
 
 const PRIORITY_ORDER: Record<Priority, number> = { high: 0, medium: 1, verify: 2, none: 3 };
 
+function byPriority(a: LeadView, b: LeadView): number {
+  const p = PRIORITY_ORDER[a.evaluation.priority] - PRIORITY_ORDER[b.evaluation.priority];
+  if (p !== 0) return p;
+  return (b.evaluation.ageDays ?? -1) - (a.evaluation.ageDays ?? -1);
+}
+
 export function sortLeads(leads: LeadView[]): LeadView[] {
+  return [...leads].sort(byPriority);
+}
+
+export type SortKey = 'priority' | 'oldest' | 'newest' | 'drop' | 'price_asc' | 'price_desc' | 'price_m2' | 'first_seen' | 'last_seen' | 'status_changed';
+export const SORT_KEYS: SortKey[] = ['priority', 'oldest', 'newest', 'drop', 'price_asc', 'price_desc', 'price_m2', 'first_seen', 'last_seen', 'status_changed'];
+export const SORT_LABELS: Record<SortKey, string> = {
+  priority: 'Priorità',
+  oldest: 'Più vecchi online',
+  newest: 'Più recenti online',
+  drop: 'Ribasso maggiore',
+  price_asc: 'Prezzo crescente',
+  price_desc: 'Prezzo decrescente',
+  price_m2: '€/m² più basso',
+  first_seen: 'Scoperti di recente',
+  last_seen: 'Visti di recente',
+  status_changed: 'Stato cambiato di recente',
+};
+
+const pricePerM2 = ({ listing: { currentPrice: p, surfaceM2: m2 } }: LeadView) => (p != null && m2 ? p / m2 : null);
+
+/** Valore da confrontare e verso (1 crescente, -1 decrescente) per ogni criterio diverso dalla priorità. */
+const SORT_VALUES: Record<Exclude<SortKey, 'priority'>, [(l: LeadView) => number | null, 1 | -1]> = {
+  oldest: [(l) => l.evaluation.ageDays, -1],
+  newest: [(l) => l.evaluation.ageDays, 1],
+  drop: [(l) => l.evaluation.dropPercent, -1],
+  price_asc: [(l) => l.listing.currentPrice, 1],
+  price_desc: [(l) => l.listing.currentPrice, -1],
+  price_m2: [pricePerM2, 1],
+  first_seen: [(l) => l.listing.firstSeenAt, -1],
+  last_seen: [(l) => l.listing.lastSeenAt, -1],
+  status_changed: [(l) => l.state.statusChangedAt, -1],
+};
+
+/** Ordina per il criterio scelto: i valori mancanti vanno sempre in fondo, a parità vale l'ordine per priorità. */
+export function sortLeadsBy(leads: LeadView[], key: SortKey): LeadView[] {
+  if (key === 'priority') return sortLeads(leads);
+  const [value, dir] = SORT_VALUES[key];
   return [...leads].sort((a, b) => {
-    const p = PRIORITY_ORDER[a.evaluation.priority] - PRIORITY_ORDER[b.evaluation.priority];
-    if (p !== 0) return p;
-    return (b.evaluation.ageDays ?? -1) - (a.evaluation.ageDays ?? -1);
+    const va = value(a);
+    const vb = value(b);
+    if (va !== vb) {
+      if (va == null) return 1;
+      if (vb == null) return -1;
+      return dir * (va - vb);
+    }
+    return byPriority(a, b);
   });
 }
 
