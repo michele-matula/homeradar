@@ -30,6 +30,16 @@ describe('estimateCreatedAt', () => {
     expect(estimateCreatedAt(131597836, DEFAULT_CALIBRATION.immobiliare)).toBe(1786025032000);
     expect(estimateCreatedAt(36_000_000, DEFAULT_CALIBRATION.idealista)).toBe(Date.UTC(2026, 5, 13));
   });
+  it('Idealista: gli ID vecchi si interpolano sui punti storici, non si estrapolano dal 2025', () => {
+    const pts = DEFAULT_CALIBRATION.idealista;
+    for (let i = 1; i < pts.length; i++) {
+      expect(pts[i]!.portalId).toBeGreaterThan(pts[i - 1]!.portalId);
+      expect(pts[i]!.createdAt).toBeGreaterThan(pts[i - 1]!.createdAt);
+    }
+    expect(pts[0]!.portalId).toBeLessThanOrEqual(5_100_000);
+    // ID 10.028.343 catturato dal Wayback Machine il 2016-09-29.
+    expect(estimateCreatedAt(10_028_343, pts)).toBe(Date.UTC(2016, 8, 29));
+  });
   it('con la calibrazione di Subito colloca un ID noto alla sua data', () => {
     expect(estimateCreatedAt(630_881_728, DEFAULT_CALIBRATION.subito)).toBe(Date.UTC(2026, 0, 10));
   });

@@ -72,6 +72,19 @@ describe('evaluate', () => {
     expect(e.badgeText).toBe('● Media · ~170 gg');
   });
 
+  it('età stimata di anni: mostra gli anni compiuti, non i giorni', () => {
+    const e = ev(listing({ estimatedCreatedAt: daysAgo(5026) }));
+    expect(e.ageDays).toBe(5026);
+    expect(e.reasons).toEqual(['Online da oltre 13 anni']);
+    expect(e.badgeText).toBe('● Media · oltre 13 anni');
+    expect(ev(listing({ estimatedCreatedAt: daysAgo(1095) })).badgeText).toBe('● Media · oltre 3 anni');
+    expect(ev(listing({ estimatedCreatedAt: daysAgo(1094) })).badgeText).toBe('● Media · ~1094 gg');
+  });
+
+  it('età esatta di anni: resta in giorni', () => {
+    expect(ev(listing({ portalCreatedAt: daysAgo(1200) })).badgeText).toBe('● Media · 1200 gg');
+  });
+
   it('Da verificare: età stimata vicina alla soglia, senza ribasso', () => {
     const e = ev(listing({ estimatedCreatedAt: daysAgo(112) }));
     expect(e.priority).toBe('verify');
