@@ -62,9 +62,11 @@ export function SettingsView({ api, onSaved, download = downloadBlob }: { api: A
   const [message, setMessage] = useState<string | null>(null);
   const [confirmingReset, setConfirmingReset] = useState(false);
   const [backup, setBackup] = useState<BackupStatus | null>(null);
+  /** Lo stato del backup non si è potuto leggere: non si sa se ce n'è uno. */
+  const [backupUnknown, setBackupUnknown] = useState(false);
   const ids = useId();
   useEffect(() => {
-    api.getBackupStatus().then(setBackup, () => {});
+    api.getBackupStatus().then(setBackup, () => setBackupUnknown(true));
   }, [api]);
   useEffect(() => {
     api.getSettings().then((s) => {
@@ -127,7 +129,13 @@ export function SettingsView({ api, onSaved, download = downloadBlob }: { api: A
     try {
       const file = await api.exportBackup();
       download(new Blob([JSON.stringify(file)], { type: 'application/json' }), backupFileName(Date.now()));
-      setBackup(await api.getBackupStatus());
+      // Il file è già stato scaricato: se l'aggiornamento della data fallisce l'esportazione resta riuscita.
+      try {
+        setBackup(await api.getBackupStatus());
+        setBackupUnknown(false);
+      } catch {
+        /* ignorato */
+      }
       setMessage('Backup esportato');
     } catch (e) {
       setMessage(`Errore: ${e instanceof Error ? e.message : String(e)}`);
@@ -223,9 +231,11 @@ export function SettingsView({ api, onSaved, download = downloadBlob }: { api: A
       </div>
       <div className="card">
         <h2 className="card__title">Backup</h2>
-        <p className="card__text">
-          {backup?.lastAt ? `Ultimo backup: ${formatDateTime(backup.lastAt)}` : 'Ultimo backup: mai'}
-        </p>
+        {(backup || backupUnknown) && (
+          <p className="card__text">
+            {backup ? (backup.lastAt ? `Ultimo backup: ${formatDateTime(backup.lastAt)}` : 'Ultimo backup: mai') : 'Ultimo backup: non disponibile'}
+          </p>
+        )}
         {backupFailed && <p className="card__text backup__warn">Ultimo backup automatico non riuscito</p>}
         <div className="settings__row switch">
           <label id={`${ids}-autoBackup-label`} htmlFor={`${ids}-autoBackup`} className="switch__label">Backup automatico settimanale</label>

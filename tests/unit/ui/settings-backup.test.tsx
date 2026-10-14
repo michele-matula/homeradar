@@ -54,6 +54,26 @@ describe('impostazioni: backup', () => {
     expect(await screen.findByText('Ultimo backup: 12/10 alle 09:30')).toBeTruthy();
   });
 
+  it('se lo stato del backup non si legge mostra "non disponibile", non "mai"', async () => {
+    const a = api();
+    vi.mocked(a.getBackupStatus).mockRejectedValue(new Error('boom'));
+    render(<SettingsView api={a} onSaved={vi.fn()} />);
+    expect(await screen.findByText('Ultimo backup: non disponibile')).toBeTruthy();
+    expect(screen.queryByText('Ultimo backup: mai')).toBeNull();
+  });
+
+  it("se dopo il download la data non si aggiorna, l'esportazione resta riuscita", async () => {
+    const a = api();
+    const download = vi.fn();
+    render(<SettingsView api={a} onSaved={vi.fn()} download={download} />);
+    await screen.findByText('Ultimo backup: mai');
+    vi.mocked(a.getBackupStatus).mockRejectedValue(new Error('boom'));
+    fireEvent.click(screen.getByRole('button', { name: 'Esporta backup ora' }));
+    expect(await screen.findByText('Backup esportato')).toBeTruthy();
+    expect(download).toHaveBeenCalled();
+    expect(screen.queryByText(/^Errore/)).toBeNull();
+  });
+
   it('importa un file, mostra il riepilogo e ricarica i lead; lo stesso file si può riscegliere', async () => {
     const a = api();
     const onSaved = vi.fn();
