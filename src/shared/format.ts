@@ -18,6 +18,12 @@ export function formatDate(ms: number): string {
   return `${formatDayMonth(ms)}/${new Date(ms).getUTCFullYear()}`;
 }
 
+/** Ora locale dell'agente: "12/10 alle 09:30". */
+export function formatDateTime(ms: number): string {
+  const d = new Date(ms);
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)} alle ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 /** "A", "A e B", "A, B e C". */
 export function joinList(items: string[], conj: 'e' | 'o'): string {
   if (items.length <= 1) return items.join('');

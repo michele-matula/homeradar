@@ -98,6 +98,8 @@ export interface Settings {
   minAgeDays: number;
   minDropPercent: number;
   retentionDays: number;
+  /** Backup settimanale automatico nella cartella Download/HomeRadar. */
+  autoBackup: boolean;
   /** Portali su cui l'estensione lavora: su un portale spento non legge né salva nulla. */
   enabledPortals: Record<Portal, boolean>;
 }
@@ -106,6 +108,7 @@ export const DEFAULT_SETTINGS: Settings = {
   minAgeDays: 120,
   minDropPercent: 0,
   retentionDays: 90,
+  autoBackup: true,
   enabledPortals: { immobiliare: true, idealista: true, subito: true },
 };
 
@@ -153,4 +156,19 @@ export interface Diagnostics {
 
 export function listingKey(portal: Portal, portalId: number): string {
   return `${portal}:${portalId}`;
+}
+
+export interface BackupStatus {
+  /** Ultimo backup riuscito, automatico o manuale. */
+  lastAt: number | null;
+  /** Ultimo tentativo automatico fallito. */
+  lastAutoFailedAt: number | null;
+  /** Slot (1–4) del prossimo backup automatico. */
+  nextSlot: number;
+}
+
+export interface ImportSummary {
+  added: number;
+  updated: number;
+  unchanged: number;
 }

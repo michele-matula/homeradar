@@ -15,6 +15,14 @@ describe('validateSettings', () => {
     expect(() => validateSettings({ retentionDays: 3 })).toThrow('Conservazione non valida');
     expect(() => validateSettings({ enabledPortals: { immobiliare: true, idealista: 'no' as unknown as boolean, subito: true } })).toThrow('Portali attivi non validi');
   });
+  it('attiva il backup automatico di default, anche per impostazioni salvate prima', () => {
+    expect(DEFAULT_SETTINGS.autoBackup).toBe(true);
+    expect(validateSettings({ minAgeDays: 90 }).autoBackup).toBe(true);
+    expect(validateSettings({ autoBackup: false }).autoBackup).toBe(false);
+  });
+  it('rifiuta un valore non booleano', () => {
+    expect(() => validateSettings({ autoBackup: 'sì' as unknown as boolean })).toThrow('Backup automatico non valido');
+  });
   it('completa i portali attivi uno per uno e scarta chiavi sconosciute', () => {
     const s = validateSettings({ enabledPortals: { subito: false, altro: true } as unknown as Settings['enabledPortals'] });
     expect(s.enabledPortals).toEqual({ immobiliare: true, idealista: true, subito: false });
