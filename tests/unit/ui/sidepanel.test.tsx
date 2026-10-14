@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { buildBackup } from '@/core/backup';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from '@/ui/sidepanel/App';
 import type { Api } from '@/ui/sidepanel/api';
@@ -47,6 +48,9 @@ function fakeApi(leads: LeadView[], adapterWarning: Diagnostics['adapterWarning'
     saveSettings: vi.fn(async (s) => s),
     getDiagnostics: vi.fn(async () => ({ version: '0.1.0', counters: {}, errors: [], adapterWarning })),
     onLeadsChanged: vi.fn(() => () => {}),
+    exportBackup: vi.fn(async () => buildBackup({ listings: [], priceSnapshots: [], leadStates: [], calibration: [] }, 0, '0.1.0')),
+    importBackup: vi.fn(async () => ({ added: 0, updated: 0, unchanged: 0 })),
+    getBackupStatus: vi.fn(async () => ({ lastAt: null, lastAutoFailedAt: null, nextSlot: 1 })),
   };
 }
 

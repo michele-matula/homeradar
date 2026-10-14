@@ -66,6 +66,18 @@ export async function handleRequest(service: LeadService, req: Request, version:
       return null;
     case 'getDiagnostics':
       return service.getDiagnostics(version);
+    case 'exportBackup': {
+      const file = await service.exportBackup(version);
+      await service.recordBackup();
+      return file;
+    }
+    case 'importBackup': {
+      const summary = await service.importBackup(req.backup);
+      hooks.leadsChanged();
+      return summary;
+    }
+    case 'getBackupStatus':
+      return service.backupStatus();
     default:
       throw new Error(`Richiesta sconosciuta: ${(req as { type?: string }).type}`);
   }
