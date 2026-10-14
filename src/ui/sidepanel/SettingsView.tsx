@@ -1,18 +1,23 @@
 import { useEffect, useState } from 'react';
 import { formatDiagnostics } from '@/core/diagnostics';
-import type { Settings } from '@/shared/types';
+import { PORTAL_SITES, PORTALS, type Portal, type Settings } from '@/shared/types';
 import type { Api } from './api';
 
 export function SettingsView({ api, onSaved }: { api: Api; onSaved(): void }) {
   const [form, setForm] = useState<Settings | null>(null);
+  /** Ultime impostazioni salvate: gli interruttori salvano subito, senza le modifiche ancora in sospeso nei campi. */
+  const [saved, setSaved] = useState<Settings | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [confirmingReset, setConfirmingReset] = useState(false);
   useEffect(() => {
-    api.getSettings().then(setForm, (e: unknown) => setMessage(`Errore: ${e instanceof Error ? e.message : String(e)}`));
+    api.getSettings().then((s) => {
+      setSaved(s);
+      setForm(s);
+    }, (e: unknown) => setMessage(`Errore: ${e instanceof Error ? e.message : String(e)}`));
   }, [api]);
   if (!form) return <p className="settings__loading">{message ?? 'Caricamento…'}</p>;
 
-  const field = (key: keyof Settings, label: string) => (
+  const field = (key: 'minAgeDays' | 'minDropPercent' | 'retentionDays', label: string) => (
     <label className="settings__field">
       <span>{label}</span>
       <input className="field" type="number" value={form[key]} onChange={(e) => setForm({ ...form, [key]: Number(e.target.value) })} />
@@ -21,8 +26,21 @@ export function SettingsView({ api, onSaved }: { api: Api; onSaved(): void }) {
 
   async function save() {
     try {
-      await api.saveSettings(form!);
+      setSaved(await api.saveSettings(form!));
       setMessage('Impostazioni salvate');
+      onSaved();
+    } catch (e) {
+      setMessage(`Errore: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
+
+  async function togglePortal(portal: Portal) {
+    const on = !form!.enabledPortals[portal];
+    try {
+      const result = await api.saveSettings({ ...saved!, enabledPortals: { ...saved!.enabledPortals, [portal]: on } });
+      setSaved(result);
+      setForm((f) => f && { ...f, enabledPortals: result.enabledPortals });
+      setMessage(`${PORTAL_SITES[portal]} ${on ? 'attivato' : 'disattivato'}`);
       onSaved();
     } catch (e) {
       setMessage(`Errore: ${e instanceof Error ? e.message : String(e)}`);
@@ -58,6 +76,23 @@ export function SettingsView({ api, onSaved }: { api: Api; onSaved(): void }) {
         {field('minDropPercent', 'Ribasso minimo (%)')}
         {field('retentionDays', 'Conservazione annunci non lavorati (giorni)')}
         <button type="button" className="btn btn--primary" onClick={save}>Salva</button>
+      </div>
+      <div className="card">
+        <h2 className="card__title">Portali attivi</h2>
+        <p className="card__text">Su un portale spento HomeRadar non legge né salva alcun dato. Gli annunci già salvati restano.</p>
+        {PORTALS.map((p) => (
+          <label key={p} className="switch">
+            <span className="switch__label">{PORTAL_SITES[p]}</span>
+            <input
+              type="checkbox"
+              role="switch"
+              className="switch__input"
+              checked={form.enabledPortals[p]}
+              onChange={() => void togglePortal(p)}
+            />
+            <span className="switch__track" aria-hidden="true" />
+          </label>
+        ))}
       </div>
       <div className="card">
         <h2 className="card__title">Assistenza</h2>

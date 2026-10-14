@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { handleRequest } from '@/core/router';
+import { DEFAULT_SETTINGS } from '@/shared/types';
 import { obs, setup } from './helpers';
 
 function hooks() {
@@ -52,13 +53,31 @@ describe('handleRequest', () => {
     expect(h.leadsChanged).toHaveBeenCalledTimes(2);
   });
 
+  it('un portale spento non salva annunci né avvisi', async () => {
+    const { svc } = setup();
+    const h = hooks();
+    await handleRequest(svc, { type: 'parseStatus', portal: 'subito', ok: false, errors: [], source: 'api' }, 'v', h);
+    await handleRequest(svc, { type: 'saveSettings', settings: { ...DEFAULT_SETTINGS, enabledPortals: { ...DEFAULT_SETTINGS.enabledPortals, subito: false } } }, 'v', h);
+    // Spegnere il portale toglie il suo avviso, che altrimenti resterebbe acceso per sempre.
+    expect(h.setWarning).toHaveBeenLastCalledWith(false);
+    expect((await svc.getDiagnostics('v')).adapterWarning.subito).toBe(false);
+    const fromSubito = obs({ portal: 'subito', portalId: 5, url: 'https://www.subito.it/x-5.htm' });
+    const evs = await handleRequest(svc, { type: 'ingest', observations: [fromSubito, obs()], calibrationHint: { portal: 'subito', portalId: 5 } }, 'v', h);
+    expect((evs as unknown[]).length).toBe(1);
+    expect((await svc.listLeads()).map((l) => l.listing.key)).toEqual(['immobiliare:128416572']);
+    await handleRequest(svc, { type: 'parseStatus', portal: 'subito', ok: false, errors: ['x'], source: 'api' }, 'v', h);
+    const d = await svc.getDiagnostics('v');
+    expect(d.adapterWarning.subito).toBe(false);
+    expect(d.errors).toEqual([]);
+  });
+
   it('inoltra le richieste del pannello', async () => {
     const { svc } = setup();
     const h = hooks();
     await svc.ingest([obs()]);
     expect(((await handleRequest(svc, { type: 'listLeads' }, 'v', h)) as unknown[]).length).toBe(1);
     expect(await handleRequest(svc, { type: 'setLeadState', listingKey: 'immobiliare:128416572', status: 'contacted' }, 'v', h)).toMatchObject({ status: 'contacted' });
-    expect(await handleRequest(svc, { type: 'saveSettings', settings: { minAgeDays: 150, minDropPercent: 0, retentionDays: 90 } }, 'v', h)).toMatchObject({ minAgeDays: 150 });
+    expect(await handleRequest(svc, { type: 'saveSettings', settings: { ...DEFAULT_SETTINGS, minAgeDays: 150 } }, 'v', h)).toMatchObject({ minAgeDays: 150 });
     expect(await handleRequest(svc, { type: 'getSettings' }, 'v', h)).toMatchObject({ minAgeDays: 150 });
     await handleRequest(svc, { type: 'fallbackShown' }, 'v', h);
     expect(await handleRequest(svc, { type: 'getDiagnostics' }, 'v', h)).toMatchObject({ version: 'v', counters: { fallbackShown: 1 } });

@@ -31,6 +31,7 @@ Flusso Subito: `bridge (MAIN world) → content script (ISOLATED) → adapter.pa
 - `src/adapters/types.ts`: `PortalAdapter` con modalità `parsePayload` (bridge) o `readDocument` (DOM), più `cardFor`/`badgeHost`/`cardIds` per i badge.
 - `src/core/`: logica pura e testabile. `rules.ts` (priorità e badge), `age.ts` (stima età da ID), `service.ts` (`LeadService`, unico scrittore su Dexie), `router.ts` (dispatch dei messaggi), `export.ts`. Lo schema Dexie è in `db.ts` con versioni incrementali: per cambiarlo aggiungi una `version(n+1)` con migrazione, non modificare quelle esistenti.
 - `src/entrypoints/`: solo cablaggio WXT (background, content script per portale, side panel); la logica sta nei moduli sopra.
+- Portali attivi: `Settings.enabledPortals`. Il controller chiede `isPortalEnabled` prima di ogni lettura (spento: non legge e toglie i badge); il router scarta comunque `ingest`/`parseStatus` dei portali spenti. Il bridge resta installato (`document_start`, non può leggere le impostazioni) ma inoltra solo dentro la pagina.
 - `src/content/`: badge sulle card (`li` con link `/annunci/{id}/`), `RouteWatcher` che mostra il banner "ricarica" se dopo un cambio rotta non arrivano dati.
 - `src/ui/sidepanel/`: React; parla col background solo tramite `api.ts`.
 - Tipi condivisi in `src/shared/types.ts`; messaggi in `src/shared/messages.ts`.

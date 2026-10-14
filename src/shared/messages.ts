@@ -18,6 +18,11 @@ export type Request =
   | { type: 'fallbackShown' }
   | { type: 'getDiagnostics' };
 
+/** Per i content script: il portale è acceso nelle impostazioni? */
+export async function isPortalEnabled(portal: Portal): Promise<boolean> {
+  return (await send<Settings>({ type: 'getSettings' })).enabledPortals[portal];
+}
+
 export type Response<T> = { ok: true; data: T } | { ok: false; error: string };
 
 const TRANSIENT = /Receiving end does not exist|Could not establish connection|Nessuna risposta dal background/;

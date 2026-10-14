@@ -49,3 +49,8 @@ export function renderBadge(
   }
   return result;
 }
+
+/** Toglie tutti i badge di HomeRadar (portale spento dalle impostazioni). */
+export function removeBadges(root: ParentNode): void {
+  for (const badge of root.querySelectorAll(`[${BADGE_ATTR}]`)) badge.remove();
+}

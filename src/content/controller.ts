@@ -1,5 +1,5 @@
 import type { PayloadKind, PortalAdapter } from '@/adapters/types';
-import { renderBadge } from '@/content/badges';
+import { removeBadges, renderBadge } from '@/content/badges';
 import type { ParseSource, Request } from '@/shared/messages';
 import type { Evaluation, ParseResult } from '@/shared/types';
 
@@ -9,9 +9,14 @@ export interface ControllerDeps {
   root: ParentNode;
   /** URL della pagina corrente (iniettato per testabilità). */
   getUrl: () => string;
+  /**
+   * true se il portale è acceso nelle impostazioni. Si chiede a ogni lettura, così l'interruttore vale
+   * subito anche sulle schede già aperte. Predefinito: sempre acceso (il background scarta comunque i dati).
+   */
+  isPortalEnabled?: () => Promise<boolean>;
 }
 
-export function createController({ adapter, send, root, getUrl }: ControllerDeps) {
+export function createController({ adapter, send, root, getUrl, isPortalEnabled = async () => true }: ControllerDeps) {
   const evaluations = new Map<number, Evaluation>();
   /** ID di tutti gli annunci ricevuti, agenzie comprese. */
   const seen = new Set<number>();
@@ -19,6 +24,16 @@ export function createController({ adapter, send, root, getUrl }: ControllerDeps
   const sent = new Set<number>();
   const sentErrors = new Set<string>();
   let scannedUrl: string | null = null;
+
+  /** Portale spento: niente lettura, e via i badge già mostrati. */
+  async function isEnabled(): Promise<boolean> {
+    const on = await isPortalEnabled();
+    if (!on && evaluations.size) {
+      evaluations.clear();
+      removeBadges(root);
+    }
+    return on;
+  }
 
   function applyAll(): void {
     for (const ev of evaluations.values()) renderBadge(root, ev, adapter);
@@ -46,12 +61,14 @@ export function createController({ adapter, send, root, getUrl }: ControllerDeps
     if (!adapter.parsePayload) return;
     // Le risposte api valgono solo sulle pagine di ricerca: /annunci/{id}/ serve anche gli affitti.
     if (kind === 'api' && adapter.pageKind(getUrl()) !== 'search') return;
+    if (!(await isEnabled())) return;
     await process(adapter.parsePayload(kind, url, payload), kind);
   }
 
   /** Modalità DOM: invia le card nuove; se non ce ne sono si limita a riapplicare i badge. */
   async function scan(): Promise<void> {
     if (!adapter.readDocument) return;
+    if (!(await isEnabled())) return;
     const url = getUrl();
     const isNewUrl = url !== scannedUrl;
     if (isNewUrl) {
@@ -73,5 +90,5 @@ export function createController({ adapter, send, root, getUrl }: ControllerDeps
     await process({ ...result, observations: fresh, errors: freshErrors }, 'dom');
   }
 
-  return { handle, scan, applyAll, hasUnseenListings };
+  return { handle, scan, applyAll, hasUnseenListings, isEnabled };
 }
