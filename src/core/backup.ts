@@ -133,3 +133,90 @@ const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : 
 export function importSummaryText(s: ImportSummary): string {
   return `Backup importato: ${count(s.added, 'annuncio nuovo', 'annunci nuovi')}, ${count(s.updated, 'aggiornato', 'aggiornati')}, ${count(s.unchanged, 'già presente', 'già presenti')}`;
 }
+
+export interface CurrentData {
+  listings: ListingRecord[];
+  priceSnapshots: BackupSnapshot[];
+  leadStates: LeadState[];
+  calibration: CalibrationPoint[];
+  /** Le impostazioni sono state salvate almeno una volta in questo browser. */
+  settingsSaved: boolean;
+}
+
+export interface MergeResult {
+  listings: ListingRecord[];
+  priceSnapshots: BackupSnapshot[];
+  leadStates: LeadState[];
+  calibration: CalibrationPoint[];
+  settings: Settings | null;
+  summary: ImportSummary;
+}
+
+/** JSON con le chiavi ordinate: Dexie e zod restituiscono gli stessi oggetti con chiavi in ordine diverso. */
+function stable(v: unknown): string {
+  return JSON.stringify(v, (_k, x: unknown) =>
+    x && typeof x === 'object' && !Array.isArray(x) ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) : x,
+  );
+}
+
+const snapId = (s: BackupSnapshot) => `${s.listingKey}|${s.at}|${s.price}|${s.source}`;
+const calId = (c: CalibrationPoint) => `${c.portal}|${c.portalId}`;
+
+/** Unione che non cancella mai nulla: restituisce solo i record da scrivere. */
+export function mergeBackup(current: CurrentData, incoming: BackupData, now: number): MergeResult {
+  const out: MergeResult = { listings: [], priceSnapshots: [], leadStates: [], calibration: [], settings: null, summary: { added: 0, updated: 0, unchanged: 0 } };
+  const curListings = new Map(current.listings.map((l) => [l.key, l]));
+  const curStates = new Map(current.leadStates.map((s) => [s.listingKey, s]));
+  const incListings = new Map(incoming.listings.map((l) => [l.key, l]));
+  const incStates = new Map(incoming.leadStates.filter((s) => incListings.has(s.listingKey)).map((s) => [s.listingKey, s]));
+  /** Annunci già presenti a cui l'importazione aggiunge storico o cambia lo stato. */
+  const touched = new Set<string>();
+
+  const seenSnaps = new Set(current.priceSnapshots.map(snapId));
+  for (const s of incoming.priceSnapshots) {
+    if (!incListings.has(s.listingKey) || seenSnaps.has(snapId(s))) continue;
+    seenSnaps.add(snapId(s));
+    out.priceSnapshots.push(s);
+    touched.add(s.listingKey);
+  }
+
+  for (const [key, s] of incStates) {
+    const cur = curStates.get(key);
+    if (cur && (s.updatedAt <= cur.updatedAt || stable(s) === stable(cur))) continue;
+    out.leadStates.push(s);
+    touched.add(key);
+  }
+
+  for (const inc of incListings.values()) {
+    const cur = curListings.get(inc.key);
+    if (!cur) {
+      out.listings.push(inc);
+      out.summary.added++;
+      if (!incStates.has(inc.key) && !curStates.has(inc.key)) {
+        out.leadStates.push({ listingKey: inc.key, status: 'new', notes: '', statusChangedAt: now, updatedAt: now });
+      }
+      continue;
+    }
+    const newer = inc.lastSeenAt > cur.lastSeenAt ? inc : cur;
+    const merged: ListingRecord = {
+      ...newer,
+      firstSeenAt: Math.min(cur.firstSeenAt, inc.firstSeenAt),
+      lastSeenAt: Math.max(cur.lastSeenAt, inc.lastSeenAt),
+      seenCount: Math.max(cur.seenCount, inc.seenCount),
+    };
+    const changed = stable(merged) !== stable(cur);
+    if (changed) out.listings.push(merged);
+    if (changed || touched.has(inc.key)) out.summary.updated++;
+    else out.summary.unchanged++;
+  }
+
+  const seenCal = new Set(current.calibration.map(calId));
+  for (const c of incoming.calibration) {
+    if (seenCal.has(calId(c))) continue;
+    seenCal.add(calId(c));
+    out.calibration.push(c);
+  }
+
+  if (!current.settingsSaved && incoming.settings) out.settings = incoming.settings;
+  return out;
+}
