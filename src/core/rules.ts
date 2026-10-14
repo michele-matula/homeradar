@@ -5,6 +5,8 @@ import {
 } from '@/shared/types';
 
 export const UNCERTAINTY_DAYS = 15;
+/** Oltre questa età una stima in giorni suggerirebbe una precisione che l'ID non dà. */
+const ESTIMATED_YEARS_FROM_DAYS = 3 * 365;
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
@@ -47,7 +49,10 @@ export function evaluate(listing: ListingRecord, snapshots: PriceSnapshot[], set
   else if (signalA || signalB) priority = 'medium';
   else if (ageUncertain) priority = 'verify';
 
-  const agePart = ageDays != null ? `${ageEstimated ? '~' : ''}${ageDays} gg` : null;
+  const agePart =
+    ageDays == null ? null
+    : ageEstimated && ageDays >= ESTIMATED_YEARS_FROM_DAYS ? `oltre ${Math.floor(ageDays / 365)} anni`
+    : `${ageEstimated ? '~' : ''}${ageDays} gg`;
   const reasons: string[] = [];
   if (agePart) reasons.push(`Online da ${agePart}`);
   if (ageUncertain) reasons.push(VERIFY_REASON[listing.portal]);
