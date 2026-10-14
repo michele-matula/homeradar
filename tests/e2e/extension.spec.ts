@@ -86,6 +86,13 @@ test("esporta un backup e lo reimporta dopo aver azzerato l'archivio", async ({ 
   await panel.goto(`chrome-extension://${extensionId}/sidepanel.html`);
   const nuovi = panel.getByRole('tab', { name: /^Nuovi \(\d+\)$/ });
   await expect(panel.getByRole('tab', { name: /^Nuovi \([1-9]\d*\)$/ })).toBeVisible();
+
+  // Il primo lead passa a «Da contattare» con una nota: dopo il ripristino devono esserci ancora.
+  const first = panel.getByRole('listitem').first();
+  await first.getByLabel('Note', { exact: true }).fill('richiamare giovedì');
+  await first.getByLabel('Note', { exact: true }).blur();
+  await first.getByLabel('Stato', { exact: true }).selectOption({ label: 'Da contattare' });
+  await expect(panel.getByRole('tab', { name: /^Da contattare \(1\)$/ })).toBeVisible();
   const before = await nuovi.textContent();
 
   await panel.getByRole('button', { name: 'Impostazioni', exact: true }).click();
@@ -102,4 +109,7 @@ test("esporta un backup e lo reimporta dopo aver azzerato l'archivio", async ({ 
 
   await panel.getByRole('button', { name: 'Torna ai lead', exact: true }).click();
   await expect(nuovi).toHaveText(before!);
+  await panel.getByRole('tab', { name: /^Da contattare \(1\)$/ }).click();
+  await expect(panel.getByLabel('Note', { exact: true })).toHaveValue('richiamare giovedì');
+  await expect(panel.getByLabel('Stato', { exact: true })).toHaveValue('to_contact');
 });
