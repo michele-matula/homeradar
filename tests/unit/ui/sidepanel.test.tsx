@@ -147,6 +147,24 @@ describe('App', () => {
     expect((screen.getByRole('switch', { name: 'Subito.it' }) as HTMLInputElement).checked).toBe(false);
   });
 
+  it('spiega ogni impostazione con un tooltip che compare al focus e si chiude con Esc', async () => {
+    render(<App api={fakeApi([])} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Impostazioni' }));
+    const names = [
+      'Regole dei lead', 'Soglia anzianità (giorni)', 'Ribasso minimo (%)', 'Conservazione annunci non lavorati (giorni)',
+      'Immobiliare.it', 'Idealista.it', 'Subito.it', 'Copia report diagnostico', 'Azzera archivio annunci',
+    ];
+    for (const name of names) expect(await screen.findByRole('button', { name: `Informazioni: ${name}` })).toBeTruthy();
+    expect(screen.queryByRole('tooltip')).toBeNull();
+    const info = screen.getByRole('button', { name: 'Informazioni: Conservazione annunci non lavorati (giorni)' });
+    fireEvent.focus(info);
+    expect(screen.getByRole('tooltip').textContent).toContain('non vengono mai eliminati');
+    fireEvent.keyDown(info, { key: 'Escape' });
+    expect(screen.queryByRole('tooltip')).toBeNull();
+    // Il campo resta etichettato dal suo testo, non dal tooltip.
+    expect(screen.getByLabelText('Soglia anzianità (giorni)')).toBeTruthy();
+  });
+
   it("nel banner nomina il portale con l'avviso", async () => {
     render(<App api={fakeApi([], { immobiliare: false, idealista: true })} />);
     expect(await screen.findByText('Idealista.it potrebbe essere cambiato: alcuni dati non sono stati letti.')).toBeTruthy();
