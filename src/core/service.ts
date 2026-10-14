@@ -186,7 +186,7 @@ export class LeadService {
   async exportBackup(extensionVersion: string): Promise<BackupFile> {
     const now = this.clock();
     const { listings, priceSnapshots, leadStates, calibration, meta } = this.db;
-    return this.db.transaction('r', [listings, priceSnapshots, leadStates, calibration, meta], async () => {
+    const file = await this.db.transaction('r', [listings, priceSnapshots, leadStates, calibration, meta], async () => {
       const saved = await meta.get('settings');
       return buildBackup(
         {
@@ -200,6 +200,13 @@ export class LeadService {
         extensionVersion,
       );
     });
+    // Un backup che poi non si può ripristinare non deve risultare riuscito: lo si rilegge come farebbe l'importazione.
+    try {
+      parseBackup(JSON.parse(JSON.stringify(file)));
+    } catch (err) {
+      throw new Error(`Backup non ripristinabile: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    return file;
   }
 
   /** Unisce un backup ai dati presenti, in un'unica transazione: o tutto o niente. */

@@ -6,7 +6,8 @@ export const AUTO_BACKUP_INTERVAL_MS = 7 * DAY_MS;
 /** Con il database vuoto non si salva: un browser appena pulito non sovrascrive i backup buoni. */
 export function isBackupDue(status: BackupStatus, settings: Settings, listingCount: number, now: number): boolean {
   if (!settings.autoBackup || listingCount === 0) return false;
-  return status.lastAt === null || now - status.lastAt >= AUTO_BACKUP_INTERVAL_MS;
+  // Una data nel futuro (orologio andato avanti e poi corretto) non deve bloccare i backup.
+  return status.lastAt === null || status.lastAt > now || now - status.lastAt >= AUTO_BACKUP_INTERVAL_MS;
 }
 
 export interface AutoBackupDeps {

@@ -12,6 +12,7 @@ describe('isBackupDue', () => {
     ['mai fatto', never, DEFAULT_SETTINGS, 5, true],
     ['meno di 7 giorni', { ...never, lastAt: NOW - 6 * DAY_MS }, DEFAULT_SETTINGS, 5, false],
     ['7 giorni esatti', { ...never, lastAt: NOW - AUTO_BACKUP_INTERVAL_MS }, DEFAULT_SETTINGS, 5, true],
+    ['data nel futuro (orologio corretto)', { ...never, lastAt: NOW + DAY_MS }, DEFAULT_SETTINGS, 5, true],
     ['database vuoto', never, DEFAULT_SETTINGS, 0, false],
     ['backup automatico spento', never, { ...DEFAULT_SETTINGS, autoBackup: false }, 5, false],
   ])('%s', (_name, status, settings, count, due) => {
@@ -55,6 +56,16 @@ describe('runAutoBackup', () => {
     expect(await svc.backupStatus()).toEqual({ lastAt: null, lastAutoFailedAt: now(), nextSlot: 1 });
     // Riprova al prossimo allarme.
     expect(await runAutoBackup({ ...d, saveFile: vi.fn(async (_json: string, _filename: string) => {}) })).toBe('done');
+  });
+
+  it('un backup non ripristinabile risulta fallito e non viene salvato', async () => {
+    const { svc, db, now } = setup();
+    await svc.ingest([obs()]);
+    await db.listings.toCollection().modify({ url: 'javascript:alert(1)' });
+    const saveFile = vi.fn(async (_json: string, _filename: string) => {});
+    expect(await runAutoBackup(deps(svc, now, saveFile))).toBe('failed');
+    expect(saveFile).not.toHaveBeenCalled();
+    expect(await svc.backupStatus()).toEqual({ lastAt: null, lastAutoFailedAt: now(), nextSlot: 1 });
   });
 
   it('con il database vuoto non salva nulla', async () => {

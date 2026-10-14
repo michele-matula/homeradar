@@ -18,6 +18,13 @@ async function filled() {
 }
 
 describe('LeadService backup', () => {
+  it('rifiuta di esportare un backup che non si potrebbe ripristinare', async () => {
+    const { svc, db } = setup();
+    await svc.ingest([obs()]);
+    await db.listings.toCollection().modify({ url: 'javascript:alert(1)' });
+    await expect(svc.exportBackup('v')).rejects.toThrow('Backup non ripristinabile: Backup non valido (annunci)');
+  });
+
   it('esporta e reimporta in un browser vuoto: stessi lead, stati, storico e impostazioni', async () => {
     const a = await filled();
     const file = json(await a.svc.exportBackup('0.1.0'));
