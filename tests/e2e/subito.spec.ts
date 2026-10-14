@@ -61,3 +61,22 @@ test("Subito: i lead compaiono nel pannello con l'etichetta del portale", async 
   await panel.goto(`chrome-extension://${extensionId}/sidepanel.html`);
   await expect(panel.locator('.lead .portal-tag', { hasText: 'Subito' }).first()).toBeVisible();
 });
+
+test('Subito spento dalle impostazioni: nessun badge, nessun lead, nessun banner', async ({ context, extensionId }) => {
+  const panel = await context.newPage();
+  await panel.goto(`chrome-extension://${extensionId}/sidepanel.html`);
+  await panel.getByRole('button', { name: 'Impostazioni' }).click();
+  await panel.getByRole('switch', { name: 'Subito.it' }).click({ force: true });
+  await expect(panel.getByText('Subito.it disattivato')).toBeVisible();
+
+  const page = await context.newPage();
+  await page.goto(SEARCH);
+  await page.click('#next');
+  await expect(page).toHaveURL(/\?o=2$/);
+  await page.waitForTimeout(6000); // oltre il timeout del RouteWatcher
+  await expect(page.locator('[data-homeradar-badge]')).toHaveCount(0);
+  await expect(page.locator('#homeradar-banner')).toHaveCount(0);
+
+  await panel.getByRole('button', { name: 'Torna ai lead' }).click();
+  await expect(panel.getByRole('button', { name: 'Subito (0)' })).toBeVisible();
+});

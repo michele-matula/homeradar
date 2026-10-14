@@ -96,9 +96,16 @@ export interface Settings {
   minAgeDays: number;
   minDropPercent: number;
   retentionDays: number;
+  /** Portali su cui l'estensione lavora: su un portale spento non legge né salva nulla. */
+  enabledPortals: Record<Portal, boolean>;
 }
 
-export const DEFAULT_SETTINGS: Settings = { minAgeDays: 120, minDropPercent: 0, retentionDays: 90 };
+export const DEFAULT_SETTINGS: Settings = {
+  minAgeDays: 120,
+  minDropPercent: 0,
+  retentionDays: 90,
+  enabledPortals: { immobiliare: true, idealista: true, subito: true },
+};
 
 export interface CalibrationPoint {
   portal: Portal;

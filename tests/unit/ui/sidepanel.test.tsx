@@ -4,7 +4,7 @@ import { App } from '@/ui/sidepanel/App';
 import type { Api } from '@/ui/sidepanel/api';
 import { LeadItem } from '@/ui/sidepanel/LeadItem';
 import { Sparkline } from '@/ui/sidepanel/Sparkline';
-import { DEFAULT_SETTINGS, type Diagnostics, type LeadStatus, type LeadView, type Priority } from '@/shared/types';
+import { DEFAULT_SETTINGS, type Diagnostics, type LeadStatus, type LeadView, type Portal, type Priority } from '@/shared/types';
 
 afterEach(cleanup);
 
@@ -26,6 +26,11 @@ function lead(id: number, priority: Priority, status: LeadStatus = 'new'): LeadV
       { listingKey: key, price: 235000, at: 2, source: 'declared' },
     ],
   };
+}
+
+function from(portal: Portal, l: LeadView): LeadView {
+  const key = `${portal}:${l.listing.portalId}`;
+  return { ...l, listing: { ...l.listing, key, portal }, evaluation: { ...l.evaluation, listingKey: key }, state: { ...l.state, listingKey: key } };
 }
 
 function fakeApi(leads: LeadView[], adapterWarning: Diagnostics['adapterWarning'] = {}): Api {
@@ -96,6 +101,52 @@ describe('LeadItem', () => {
 });
 
 describe('App', () => {
+  it('filtra per sito, anche più siti insieme, combinandosi con il filtro per badge', async () => {
+    const api = fakeApi([lead(1, 'high'), from('subito', lead(2, 'high')), from('idealista', lead(3, 'medium')), from('subito', lead(4, 'medium'))]);
+    render(<App api={api} />);
+    const site = (name: string) => screen.getByRole('button', { name });
+    expect((await screen.findByRole('button', { name: 'Tutti i siti' })).getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(site('Subito (2)'));
+    expect(screen.getByText('Bilocale 2')).toBeTruthy();
+    expect(screen.getByText('Bilocale 4')).toBeTruthy();
+    expect(screen.queryByText('Bilocale 1')).toBeNull();
+    expect(screen.getByRole('radio', { name: 'Alta (1)' })).toBeTruthy();
+    fireEvent.click(site('Idealista (1)'));
+    expect(screen.getByText('Bilocale 3')).toBeTruthy();
+    expect(screen.queryByText('Bilocale 1')).toBeNull();
+    fireEvent.click(screen.getByRole('radio', { name: 'Media (2)' }));
+    expect(site('Immobiliare (0)').hasAttribute('disabled')).toBe(true);
+    fireEvent.click(screen.getByText('Elimina tutti «Media, Idealista e Subito» (2)'));
+    fireEvent.click(screen.getByText('Conferma: elimina 2 annunci «Media, Idealista e Subito»'));
+    expect(api.deleteListings).toHaveBeenCalledWith(['idealista:3', 'subito:4']);
+    // Togliere un sito lo esclude; "Tutti i siti" azzera il filtro.
+    fireEvent.click(site('Subito (1)'));
+    expect(screen.queryByText('Bilocale 4')).toBeNull();
+    fireEvent.click(site('Tutti i siti'));
+    expect(screen.getByText('Bilocale 4')).toBeTruthy();
+  });
+
+  it('selezionare tutti i siti equivale a "Tutti i siti"', async () => {
+    render(<App api={fakeApi([lead(1, 'high'), from('subito', lead(2, 'high')), from('idealista', lead(3, 'high'))])} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Immobiliare (1)' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Idealista (1)' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Subito (1)' }));
+    expect(screen.getByRole('button', { name: 'Tutti i siti' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('button', { name: 'Subito (1)' }).getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('spegne un portale dalle impostazioni salvando subito', async () => {
+    const api = fakeApi([]);
+    render(<App api={api} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Impostazioni' }));
+    const subito = await screen.findByRole('switch', { name: 'Subito.it' });
+    expect((subito as HTMLInputElement).checked).toBe(true);
+    fireEvent.click(subito);
+    expect(await screen.findByText('Subito.it disattivato')).toBeTruthy();
+    expect(api.saveSettings).toHaveBeenCalledWith({ ...DEFAULT_SETTINGS, enabledPortals: { immobiliare: true, idealista: true, subito: false } });
+    expect((screen.getByRole('switch', { name: 'Subito.it' }) as HTMLInputElement).checked).toBe(false);
+  });
+
   it("nel banner nomina il portale con l'avviso", async () => {
     render(<App api={fakeApi([], { immobiliare: false, idealista: true })} />);
     expect(await screen.findByText('Idealista.it potrebbe essere cambiato: alcuni dati non sono stati letti.')).toBeTruthy();

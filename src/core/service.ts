@@ -93,7 +93,8 @@ export class LeadService {
   }
 
   async saveSettings(input: Partial<Settings>): Promise<Settings> {
-    const s = validateSettings({ ...(await this.getSettings()), ...input });
+    const current = await this.getSettings();
+    const s = validateSettings({ ...current, ...input, enabledPortals: { ...current.enabledPortals, ...input.enabledPortals } });
     await this.db.meta.put({ key: 'settings', value: s });
     return s;
   }

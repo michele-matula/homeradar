@@ -27,6 +27,30 @@ function fakeSend() {
 }
 
 describe('createController', () => {
+  it('su un portale spento non legge nulla e toglie i badge già mostrati', async () => {
+    const send = fakeSend();
+    let on = true;
+    const c = createController({ adapter: immobiliareAdapter, send, root: document, getUrl: () => SEARCH_URL, isPortalEnabled: async () => on });
+    const payload = searchNextData([searchResult(realEstate())]);
+    await c.handle('next-data', SEARCH_URL, payload);
+    expect(document.querySelectorAll(`[${BADGE_ATTR}]`)).toHaveLength(1);
+    on = false;
+    send.mockClear();
+    await c.handle('next-data', SEARCH_URL, payload);
+    expect(send).not.toHaveBeenCalled();
+    expect(document.querySelectorAll(`[${BADGE_ATTR}]`)).toHaveLength(0);
+    c.applyAll();
+    expect(document.querySelectorAll(`[${BADGE_ATTR}]`)).toHaveLength(0);
+  });
+
+  it('su Idealista spento non legge le card', async () => {
+    document.body.innerHTML = searchBody([idealistaCard({ id: 1 })]);
+    const send = fakeSend();
+    const c = createController({ adapter: idealistaAdapter, send, root: document, getUrl: () => NEWEST_URL, isPortalEnabled: async () => false });
+    await c.scan();
+    expect(send).not.toHaveBeenCalled();
+  });
+
   it('invia lo stato del parsing, ingerisce e disegna i badge solo per i privati', async () => {
     const send = fakeSend();
     const c = createController({ adapter: immobiliareAdapter, send, root: document, getUrl: () => SEARCH_URL });

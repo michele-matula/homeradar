@@ -209,4 +209,17 @@ button, input, select { font: inherit; color: inherit; }
 .card--danger .card__title { color: var(--high); }
 .settings__field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 500; }
 .settings__confirm { display: flex; gap: 6px; }
+.switch { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.switch__input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.switch__track {
+  position: relative; flex: none; width: 34px; height: 20px; border-radius: 999px;
+  background: var(--border-strong); transition: background 0.15s;
+}
+.switch__track::after {
+  content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.2); transition: transform 0.15s;
+}
+.switch__input:checked + .switch__track { background: var(--brand); }
+.switch__input:checked + .switch__track::after { transform: translateX(14px); }
+.switch__input:focus-visible + .switch__track { box-shadow: var(--focus); }
 .settings__confirm .btn { flex: 1; }

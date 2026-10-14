@@ -1,6 +1,6 @@
 import { idealistaAdapter } from '@/adapters/idealista';
 import { createController } from '@/content/controller';
-import { send } from '@/shared/messages';
+import { isPortalEnabled, send } from '@/shared/messages';
 
 // Idealista è renderizzato lato server: si legge il DOM già mostrato, senza bridge.
 // La pagina non viene modificata, se non per aggiungere i badge.
@@ -8,7 +8,9 @@ export default defineContentScript({
   matches: ['https://www.idealista.it/*'],
   runAt: 'document_idle',
   main(ctx) {
-    const controller = createController({ adapter: idealistaAdapter, send, root: document, getUrl: () => location.href });
+    const controller = createController({
+      adapter: idealistaAdapter, send, root: document, getUrl: () => location.href, isPortalEnabled: () => isPortalEnabled('idealista'),
+    });
     const scan = () => controller.scan().catch((err) => console.warn('[HomeRadar]', err));
     scan();
 

@@ -91,6 +91,14 @@ describe('LeadService impostazioni', () => {
     await expect(svc.saveSettings({ minAgeDays: -1 })).rejects.toThrow('Soglia giorni non valida');
     expect((await svc.getSettings()).minAgeDays).toBe(3000);
   });
+
+  it('salva i portali attivi senza toccare gli altri', async () => {
+    const { svc } = setup();
+    expect((await svc.getSettings()).enabledPortals).toEqual({ immobiliare: true, idealista: true, subito: true });
+    await svc.saveSettings({ enabledPortals: { subito: false } as never });
+    await svc.saveSettings({ enabledPortals: { idealista: false } as never });
+    expect((await svc.getSettings()).enabledPortals).toEqual({ immobiliare: true, idealista: false, subito: false });
+  });
 });
 
 describe('LeadService.purge', () => {

@@ -3,7 +3,7 @@ import { isBridgeMessage } from '@/bridge/bridge';
 import { FALLBACK_TEXT, showBanner } from '@/content/banner';
 import { createController } from '@/content/controller';
 import { RouteWatcher } from '@/content/route-watcher';
-import { send } from '@/shared/messages';
+import { isPortalEnabled, send } from '@/shared/messages';
 
 /** La parte del contesto WXT che serve qui. */
 export interface ScriptContext {
@@ -17,7 +17,9 @@ export interface ScriptContext {
  * non arrivano dati.
  */
 export function runPayloadContentScript(ctx: ScriptContext, adapter: PortalAdapter): void {
-  const controller = createController({ adapter, send, root: document, getUrl: () => location.href });
+  const controller = createController({
+    adapter, send, root: document, getUrl: () => location.href, isPortalEnabled: () => isPortalEnabled(adapter.portal),
+  });
   const watcher = new RouteWatcher({
     getUrl: () => location.href,
     isRelevant: (url) => adapter.pageKind(url) !== 'other',
@@ -27,8 +29,12 @@ export function runPayloadContentScript(ctx: ScriptContext, adapter: PortalAdapt
       // Il sito riusa i risultati già in cache (es. tornando indietro): se tutti gli annunci
       // in pagina sono già noti non manca nulla e il banner sarebbe un falso allarme.
       if (!controller.hasUnseenListings()) return;
-      showBanner(document, FALLBACK_TEXT);
-      send({ type: 'fallbackShown' }).catch(() => {});
+      // Su un portale spento i dati non si leggono apposta: nessun banner.
+      controller.isEnabled().then((on) => {
+        if (!on) return;
+        showBanner(document, FALLBACK_TEXT);
+        send({ type: 'fallbackShown' }).catch(() => {});
+      }, () => {});
     },
   });
 

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { warnedPortals } from '@/core/diagnostics';
 import { groupByStatus, PRIORITY_LABELS } from '@/core/leads';
 import { joinList } from '@/shared/format';
-import { LEAD_STATUSES, PORTAL_SITES, PORTALS, type LeadStatus, type LeadView, type Portal, type Priority } from '@/shared/types';
+import { LEAD_STATUSES, PORTAL_SITES, PORTAL_TAGS, PORTALS, type LeadStatus, type LeadView, type Portal, type Priority } from '@/shared/types';
 import { defaultApi, type Api } from './api';
 import { ExportBar } from './ExportBar';
 import { AlertIcon, BackIcon, Logo, SearchIcon, SettingsIcon } from './Icons';
@@ -14,6 +14,8 @@ type PriorityFilter = 'all' | Exclude<Priority, 'none'>;
 const PRIORITY_FILTERS: PriorityFilter[] = ['all', 'high', 'medium', 'verify'];
 const FILTER_LABELS: Record<PriorityFilter, string> = { all: 'Tutti', high: PRIORITY_LABELS.high, medium: PRIORITY_LABELS.medium, verify: PRIORITY_LABELS.verify };
 const byFilter = (leads: LeadView[], f: PriorityFilter) => (f === 'all' ? leads : leads.filter((l) => l.evaluation.priority === f));
+/** Filtro per sito: lista vuota = tutti i siti. */
+const byPortals = (leads: LeadView[], ps: Portal[]) => (ps.length ? leads.filter((l) => ps.includes(l.listing.portal)) : leads);
 const nAnnunci = (n: number) => `${n} ${n === 1 ? 'annuncio' : 'annunci'}`;
 const errorText = (e: unknown) => `Errore: ${e instanceof Error ? e.message : String(e)}`;
 
@@ -28,6 +30,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
   const [leads, setLeads] = useState<LeadView[]>([]);
   const [tab, setTab] = useState<LeadStatus>('new');
   const [filter, setFilter] = useState<PriorityFilter>('all');
+  const [portals, setPortals] = useState<Portal[]>([]);
   const [view, setView] = useState<'leads' | 'settings'>('leads');
   const [error, setError] = useState<string | null>(null);
   const [warned, setWarned] = useState<Portal[]>([]);
@@ -54,10 +57,22 @@ export function App({ api = defaultApi }: { api?: Api }) {
   };
 
   const groups = groupByStatus(leads);
-  const visible = byFilter(groups[tab], filter);
-  const filterTag = filter === 'all' ? '' : ` «${FILTER_LABELS[filter]}»`;
+  const inPortals = byPortals(groups[tab], portals);
+  const visible = byFilter(inPortals, filter);
+  const tagParts = [
+    ...(filter === 'all' ? [] : [FILTER_LABELS[filter]]),
+    ...(portals.length ? [joinList(portals.map((p) => PORTAL_TAGS[p]), 'e')] : []),
+  ];
+  const filterTag = tagParts.length ? ` «${tagParts.join(', ')}»` : '';
 
-  useEffect(() => setConfirmingAll(false), [tab, filter, visible.length]);
+  // Selezionare tutti i siti equivale a nessun filtro: si torna a "Tutti i siti".
+  const togglePortal = (p: Portal) =>
+    setPortals((ps) => {
+      const next = PORTALS.filter((x) => (x === p ? !ps.includes(x) : ps.includes(x)));
+      return next.length === PORTALS.length ? [] : next;
+    });
+
+  useEffect(() => setConfirmingAll(false), [tab, filter, portals, visible.length]);
 
   return (
     <main className="panel">
@@ -113,7 +128,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
           </nav>
           <div className="filters" role="radiogroup" aria-label="Filtra per badge">
             {PRIORITY_FILTERS.map((f) => {
-              const count = byFilter(groups[tab], f).length;
+              const count = byFilter(inPortals, f).length;
               const on = f === filter;
               return (
                 <button
@@ -127,6 +142,33 @@ export function App({ api = defaultApi }: { api?: Api }) {
                   onClick={() => setFilter(f)}
                 >
                   {FILTER_LABELS[f]} <span className="chip__count">{count}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="filters" role="group" aria-label="Filtra per sito">
+            <button
+              type="button"
+              aria-pressed={portals.length === 0}
+              className={`chip${portals.length === 0 ? ' chip--on' : ''}`}
+              onClick={() => setPortals([])}
+            >
+              Tutti i siti
+            </button>
+            {PORTALS.map((p) => {
+              const count = byFilter(groups[tab], filter).filter((l) => l.listing.portal === p).length;
+              const on = portals.includes(p);
+              return (
+                <button
+                  key={p}
+                  type="button"
+                  aria-pressed={on}
+                  aria-label={`${PORTAL_TAGS[p]} (${count})`}
+                  className={`chip${on ? ' chip--on' : ''}`}
+                  disabled={count === 0 && !on}
+                  onClick={() => togglePortal(p)}
+                >
+                  {PORTAL_TAGS[p]} <span className="chip__count">{count}</span>
                 </button>
               );
             })}
@@ -157,7 +199,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
           {visible.length === 0 ? (
             <div className="empty">
               <SearchIcon />
-              <p>{filter === 'all' ? `Nessun lead in questa scheda. Naviga su ${joinList(PORTALS.map((p) => PORTAL_SITES[p]), 'o')} per raccoglierne.` : `Nessun lead${filterTag} in questa scheda.`}</p>
+              <p>{!filterTag ? `Nessun lead in questa scheda. Naviga su ${joinList(PORTALS.map((p) => PORTAL_SITES[p]), 'o')} per raccoglierne.` : `Nessun lead${filterTag} in questa scheda.`}</p>
             </div>
           ) : (
             <ul className="leads">
