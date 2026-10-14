@@ -1,12 +1,13 @@
 import Dexie from 'dexie';
 import { acceptLearnedPoint, DEFAULT_CALIBRATION, estimateCreatedAt, LEARN_RATE_PER_DAY, mergeCalibration, utcDay } from '@/core/age';
+import { AUTO_BACKUP_SLOTS, buildBackup, mergeBackup, parseBackup, type BackupFile } from '@/core/backup';
 import type { HomeRadarDB } from '@/core/db';
 import { warnedPortals } from '@/core/diagnostics';
 import { sortLeads } from '@/core/leads';
 import { evaluate } from '@/core/rules';
 import { validateSettings } from '@/core/settings';
 import {
-  DAY_MS, listingKey, type CalibrationHint, type Diagnostics, type Evaluation, type LeadState, type LeadStatus, type LeadView,
+  DAY_MS, listingKey, type BackupStatus, type CalibrationHint, type Diagnostics, type Evaluation, type ImportSummary, type LeadState, type LeadStatus, type LeadView,
   type ListingObservation, type ListingRecord, type ObservedPriceDrop, type Portal, type PriceDrop, type PriceSnapshot, type Settings,
 } from '@/shared/types';
 
@@ -176,6 +177,85 @@ export class LeadService {
       removed++;
     }
     return removed;
+  }
+
+  listingCount(): Promise<number> {
+    return this.db.listings.count();
+  }
+
+  async exportBackup(extensionVersion: string): Promise<BackupFile> {
+    const now = this.clock();
+    const { listings, priceSnapshots, leadStates, calibration, meta } = this.db;
+    return this.db.transaction('r', [listings, priceSnapshots, leadStates, calibration, meta], async () => {
+      const saved = await meta.get('settings');
+      return buildBackup(
+        {
+          settings: saved ? validateSettings(saved.value as Partial<Settings>) : undefined,
+          listings: await listings.toArray(),
+          priceSnapshots: await priceSnapshots.toArray(),
+          leadStates: await leadStates.toArray(),
+          calibration: await calibration.toArray(),
+        },
+        now,
+        extensionVersion,
+      );
+    });
+  }
+
+  /** Unisce un backup ai dati presenti, in un'unica transazione: o tutto o niente. */
+  async importBackup(json: unknown): Promise<ImportSummary> {
+    const file = parseBackup(json);
+    const now = this.clock();
+    const { listings, priceSnapshots, leadStates, calibration, meta } = this.db;
+    return this.db.transaction('rw', [listings, priceSnapshots, leadStates, calibration, meta], async () => {
+      const m = mergeBackup(
+        {
+          listings: await listings.toArray(),
+          priceSnapshots: await priceSnapshots.toArray(),
+          leadStates: await leadStates.toArray(),
+          calibration: await calibration.toArray(),
+          settingsSaved: Boolean(await meta.get('settings')),
+        },
+        file,
+        now,
+      );
+      await listings.bulkPut(m.listings);
+      await priceSnapshots.bulkAdd(m.priceSnapshots);
+      await leadStates.bulkPut(m.leadStates);
+      await calibration.bulkPut(m.calibration);
+      if (m.settings) await meta.put({ key: 'settings', value: m.settings });
+      return m.summary;
+    });
+  }
+
+  async backupStatus(): Promise<BackupStatus> {
+    const rec = await this.db.meta.get('backup');
+    return { lastAt: null, lastAutoFailedAt: null, nextSlot: 1, ...(rec?.value as Partial<BackupStatus> | undefined) };
+  }
+
+  private async updateBackupStatus(fn: (s: BackupStatus) => void): Promise<void> {
+    await this.db.transaction('rw', this.db.meta, async () => {
+      const s = await this.backupStatus();
+      fn(s);
+      await this.db.meta.put({ key: 'backup', value: s });
+    });
+  }
+
+  /** Backup riuscito; `slotUsed` solo per quelli automatici, che ruotano sugli slot. */
+  recordBackup(slotUsed?: number): Promise<void> {
+    const at = this.clock();
+    return this.updateBackupStatus((s) => {
+      s.lastAt = at;
+      if (slotUsed !== undefined) s.nextSlot = (slotUsed % AUTO_BACKUP_SLOTS) + 1;
+    });
+  }
+
+  async recordBackupFailure(message: string): Promise<void> {
+    const at = this.clock();
+    await this.updateBackupStatus((s) => {
+      s.lastAutoFailedAt = at;
+    });
+    await this.recordError(`Backup automatico non riuscito: ${message}`);
   }
 
   private async diag(): Promise<Omit<Diagnostics, 'version'>> {
