@@ -90,6 +90,8 @@ export interface LeadState {
   status: LeadStatus;
   notes: string;
   statusChangedAt: number;
+  /** Ultimo cambio di stato o di note: decide quale versione vince quando si importa un backup. */
+  updatedAt: number;
 }
 
 export interface Settings {

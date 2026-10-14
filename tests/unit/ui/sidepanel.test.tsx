@@ -23,7 +23,7 @@ function lead(id: number, priority: Priority, status: LeadStatus = 'new'): LeadV
       listingKey: key, portalId: id, priority, ageDays: 173, ageEstimated: false, ageUncertain: false, dropPercent: 5.6,
       dropCount: 1, maxKnownPrice: 249000, reasons: ['Online da 173 gg', 'Ribassato del 5,6%'], badgeText: '',
     },
-    state: { listingKey: key, status, notes: '', statusChangedAt: 0 },
+    state: { listingKey: key, status, notes: '', statusChangedAt: 0, updatedAt: 0 },
     prices: [
       { listingKey: key, price: 249000, at: 1, source: 'declared' },
       { listingKey: key, price: 235000, at: 2, source: 'declared' },
@@ -39,7 +39,7 @@ function from(portal: Portal, l: LeadView): LeadView {
 function fakeApi(leads: LeadView[], adapterWarning: Diagnostics['adapterWarning'] = {}): Api {
   return {
     listLeads: vi.fn(async () => leads),
-    setLeadState: vi.fn(async (k, p) => ({ listingKey: k, status: p.status ?? 'new', notes: p.notes ?? '', statusChangedAt: 0 })),
+    setLeadState: vi.fn(async (k, p) => ({ listingKey: k, status: p.status ?? 'new', notes: p.notes ?? '', statusChangedAt: 0, updatedAt: 0 })),
     deleteListing: vi.fn(async () => {}),
     deleteListings: vi.fn(async () => {}),
     deleteAllListings: vi.fn(async () => leads.length),

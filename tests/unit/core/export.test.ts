@@ -15,7 +15,7 @@ const lead: LeadView = {
     listingKey: 'immobiliare:128416572', portalId: 128416572, priority: 'high', ageDays: 173, ageEstimated: true, ageUncertain: false,
     dropPercent: 5.6, dropCount: 1, maxKnownPrice: 249000, reasons: [], badgeText: '',
   },
-  state: { listingKey: 'immobiliare:128416572', status: 'to_contact', notes: 'chiamare la sera', statusChangedAt: 0 },
+  state: { listingKey: 'immobiliare:128416572', status: 'to_contact', notes: 'chiamare la sera', statusChangedAt: 0, updatedAt: 0 },
   prices: [],
 };
 

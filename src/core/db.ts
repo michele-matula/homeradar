@@ -30,5 +30,13 @@ export class HomeRadarDB extends Dexie {
         await tx.table('calibration').bulkPut(old.map((p) => ({ portal: 'immobiliare', portalId: p.portalId, createdAt: p.createdAt })));
       });
     this.version(3).stores({ idCalibration: null });
+    // v4: data di ultima modifica del lead, per risolvere i conflitti all'importazione di un backup.
+    this.version(4)
+      .stores({ leadStates: 'listingKey, status' })
+      .upgrade(async (tx) => {
+        await tx.table<Partial<LeadState>>('leadStates').toCollection().modify((s) => {
+          s.updatedAt ??= s.statusChangedAt ?? 0;
+        });
+      });
   }
 }
