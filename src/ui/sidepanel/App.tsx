@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { warnedPortals } from '@/core/diagnostics';
-import { groupByStatus, PRIORITY_LABELS } from '@/core/leads';
+import { groupByStatus, PRIORITY_LABELS, SORT_KEYS, SORT_LABELS, sortLeadsBy, type SortKey } from '@/core/leads';
 import { joinList } from '@/shared/format';
 import { LEAD_STATUSES, PORTAL_SITES, PORTAL_TAGS, PORTALS, type LeadStatus, type LeadView, type Portal, type Priority } from '@/shared/types';
 import { defaultApi, type Api } from './api';
@@ -8,6 +8,7 @@ import { ExportBar } from './ExportBar';
 import { AlertIcon, BackIcon, Logo, SearchIcon, SettingsIcon } from './Icons';
 import { LeadItem } from './LeadItem';
 import { SettingsView } from './SettingsView';
+import { loadSortByTab, saveSortByTab, type SortByTab } from './sortPrefs';
 
 const TAB_LABELS: Record<LeadStatus, string> = { new: 'Nuovi', to_contact: 'Da contattare', contacted: 'Contattati', discarded: 'Scartati' };
 type PriorityFilter = 'all' | Exclude<Priority, 'none'>;
@@ -35,6 +36,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
   const [error, setError] = useState<string | null>(null);
   const [warned, setWarned] = useState<Portal[]>([]);
   const [confirmingAll, setConfirmingAll] = useState(false);
+  const [sortByTab, setSortByTab] = useState<SortByTab>(loadSortByTab);
 
   const refresh = useCallback(async () => {
     try {
@@ -58,7 +60,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
 
   const groups = groupByStatus(leads);
   const inPortals = byPortals(groups[tab], portals);
-  const visible = byFilter(inPortals, filter);
+  const visible = sortLeadsBy(byFilter(inPortals, filter), sortByTab[tab]);
   const tagParts = [
     ...(filter === 'all' ? [] : [FILTER_LABELS[filter]]),
     ...(portals.length ? [joinList(portals.map((p) => PORTAL_TAGS[p]), 'e')] : []),
@@ -70,6 +72,14 @@ export function App({ api = defaultApi }: { api?: Api }) {
     setPortals((ps) => {
       const next = PORTALS.filter((x) => (x === p ? !ps.includes(x) : ps.includes(x)));
       return next.length === PORTALS.length ? [] : next;
+    });
+
+  // L'ordinamento è ricordato per scheda: "Contattati" può seguire un criterio diverso da "Nuovi".
+  const setSort = (key: SortKey) =>
+    setSortByTab((prev) => {
+      const next = { ...prev, [tab]: key };
+      saveSortByTab(next);
+      return next;
     });
 
   useEffect(() => setConfirmingAll(false), [tab, filter, portals, visible.length]);
@@ -173,6 +183,14 @@ export function App({ api = defaultApi }: { api?: Api }) {
               );
             })}
           </div>
+          <label className="sort">
+            <span className="sort__label">Ordina per</span>
+            <select className="field field--select" value={sortByTab[tab]} onChange={(e) => setSort(e.target.value as SortKey)}>
+              {SORT_KEYS.map((k) => (
+                <option key={k} value={k}>{SORT_LABELS[k]}</option>
+              ))}
+            </select>
+          </label>
           {visible.length > 0 && (
             <div className="bulk">
               <span className="bulk__count">{nAnnunci(visible.length)}</span>
