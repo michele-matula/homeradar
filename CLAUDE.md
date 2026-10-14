@@ -49,3 +49,4 @@ Flusso Subito: `bridge (MAIN world) → content script (ISOLATED) → adapter.pa
 - Specifica: `docs/superpowers/specs/2026-10-10-homeradar-mvp-design.md`
 - Piano: `docs/superpowers/plans/2026-10-10-homeradar-mvp.md`
 - Checklist prima di un rilascio al pilota: `docs/smoke-test.md`
+- Roadmap prima del pilota (ordine e avanzamento; si riparte dal primo punto "da fare"): `docs/roadmap.md`
