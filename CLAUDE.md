@@ -9,6 +9,7 @@ HomeRadar è un'estensione Chrome (MV3, WXT + React + TypeScript) per agenti imm
 ```bash
 npm run dev          # Chrome con estensione in hot reload
 npm run build        # build in .output/chrome-mv3
+npm run zip          # zip per il pilota
 npm run typecheck
 npm test             # unit test (Vitest, jsdom + fake-indexeddb)
 npx vitest run tests/unit/core/rules.test.ts   # un singolo file
@@ -23,12 +24,13 @@ Flusso Immobiliare: `bridge (MAIN world) → content script (ISOLATED) → adapt
 Flusso Idealista: `content script (ISOLATED) → adapter.readDocument (DOM già mostrato) → background → …`, nessun bridge.
 Flusso Subito: `bridge (MAIN world) → content script (ISOLATED) → adapter.parsePayload → background → …`, come Immobiliare (content script comune in `src/content/payload-script.ts`).
 
-- `src/bridge/bridge.ts`: unico codice nel contesto della pagina. Inoltra `__NEXT_DATA__` e le risposte XHR di `/api-next/search-list/listings/` via `window.postMessage`. Non fa mai richieste proprie.
+- `src/bridge/bridge.ts`: unico codice nel contesto della pagina, installato da `*-bridge.content.ts`. Inoltra `__NEXT_DATA__` e le risposte XHR/fetch del sito (Immobiliare `/api-next/search-list/listings/`, Subito `hades.subito.it/v1/search/items`) via `window.postMessage`. Non fa mai richieste proprie e non deve mai rompere quelle del sito.
 - `src/adapters/immobiliare/`: funzioni pure. Gli schemi zod sono la **lista dei campi ammessi**: ciò che non è dichiarato (telefoni, nomi, descrizioni) viene scartato. `urls.ts` non importa zod perché è usato anche dal bridge.
 - `src/adapters/idealista/`: funzioni pure sul DOM delle card (`article.item[data-element-id]`, `data-is-professional-ad`; esclusi gli annunci suggeriti `.geo-reach-card`). Nessuna data di pubblicazione: l'età si stima dall'ID (`DEFAULT_CALIBRATION.idealista` in `core/age.ts`, più i punti appresi dalla pagina "più recenti"). Non leggere mai `.professional-name` (nome del privato).
 - `src/adapters/subito/`: funzioni pure su `__NEXT_DATA__` della ricerca (`initialState.items`, compresi `galleryList`/`boostedItems`, che hanno card in pagina) e sulle risposte di `hades.subito.it/v1/search/items` intercettate dal bridge (paginazione SPA; il cambio di categoria ricarica la pagina). Schemi zod come whitelist: di `advertiser` solo `company`/`type` (il sito espone nome e telefono). Solo `type.key === 's'` e macrocategoria Immobili `'6'` (`category.parentId` in `__NEXT_DATA__`, `category.macrocategory_id` nell'API). La data di Subito è quella di rinnovo: l'età si stima dall'ID (`DEFAULT_CALIBRATION.subito`, più i punti appresi dagli annunci rinnovati oggi). La scheda annuncio non viene letta.
 - `src/adapters/types.ts`: `PortalAdapter` con modalità `parsePayload` (bridge) o `readDocument` (DOM), più `cardFor`/`badgeHost`/`cardIds` per i badge.
-- `src/core/`: logica pura e testabile. `rules.ts` (priorità e badge), `age.ts` (stima età da ID), `service.ts` (`LeadService`, unico scrittore su Dexie), `router.ts` (dispatch dei messaggi), `export.ts`.
+- `src/core/`: logica pura e testabile. `rules.ts` (priorità e badge), `age.ts` (stima età da ID), `service.ts` (`LeadService`, unico scrittore su Dexie), `router.ts` (dispatch dei messaggi), `export.ts`. Lo schema Dexie è in `db.ts` con versioni incrementali: per cambiarlo aggiungi una `version(n+1)` con migrazione, non modificare quelle esistenti.
+- `src/entrypoints/`: solo cablaggio WXT (background, content script per portale, side panel); la logica sta nei moduli sopra.
 - `src/content/`: badge sulle card (`li` con link `/annunci/{id}/`), `RouteWatcher` che mostra il banner "ricarica" se dopo un cambio rotta non arrivano dati.
 - `src/ui/sidepanel/`: React; parla col background solo tramite `api.ts`.
 - Tipi condivisi in `src/shared/types.ts`; messaggi in `src/shared/messages.ts`.
