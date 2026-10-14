@@ -106,6 +106,13 @@ describe('handleRequest', () => {
     expect(h.leadsChanged).toHaveBeenCalledTimes(1);
   });
 
+  it('importBackup con un file non valido fallisce senza avvisare il pannello', async () => {
+    const { svc } = setup();
+    const h = hooks();
+    await expect(handleRequest(svc, { type: 'importBackup', backup: { foo: 1 } }, 'v', h)).rejects.toThrow();
+    expect(h.leadsChanged).not.toHaveBeenCalled();
+  });
+
   it('rifiuta richieste sconosciute', async () => {
     const { svc } = setup();
     await expect(handleRequest(svc, { type: 'boh' } as never, 'v', hooks())).rejects.toThrow('Richiesta sconosciuta: boh');

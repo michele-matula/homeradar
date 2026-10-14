@@ -73,7 +73,8 @@ const SettingsSchema = z.object({
   enabledPortals: z.object({ immobiliare: z.boolean().optional(), idealista: z.boolean().optional(), subito: z.boolean().optional() }).optional(),
 });
 
-const HeaderSchema = z.object({ format: z.literal(BACKUP_FORMAT), formatVersion: int.min(1), createdAt: num, extensionVersion: z.string() });
+const VersionSchema = z.object({ format: z.literal(BACKUP_FORMAT), formatVersion: int.min(1) });
+const HeaderSchema = VersionSchema.extend({ createdAt: num, extensionVersion: z.string() });
 
 function table<T>(raw: Record<string, unknown>, field: string, schema: z.ZodType<T, unknown>, label: string): T[] {
   const r = z.array(schema).safeParse(raw[field]);
@@ -82,9 +83,12 @@ function table<T>(raw: Record<string, unknown>, field: string, schema: z.ZodType
 }
 
 export function parseBackup(json: unknown): BackupFile {
+  // Prima formato e versione: un file di una versione futura può avere un'intestazione diversa.
+  const version = VersionSchema.safeParse(json);
+  if (!version.success) throw new Error(NOT_A_BACKUP);
+  if (version.data.formatVersion > BACKUP_FORMAT_VERSION) throw new Error(TOO_NEW);
   const header = HeaderSchema.safeParse(json);
   if (!header.success) throw new Error(NOT_A_BACKUP);
-  if (header.data.formatVersion > BACKUP_FORMAT_VERSION) throw new Error(TOO_NEW);
   const raw = json as Record<string, unknown>;
   const file: BackupFile = {
     ...header.data,
@@ -121,7 +125,9 @@ export function buildBackup(data: BackupData, now: number, extensionVersion: str
 }
 
 export function backupFileName(now: number): string {
-  return `homeradar-backup-${new Date(now).toISOString().slice(0, 10)}.json`;
+  const d = new Date(now);
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `homeradar-backup-${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}.json`;
 }
 
 export function autoBackupFileName(slot: number): string {
@@ -182,7 +188,7 @@ export function mergeBackup(current: CurrentData, incoming: BackupData, now: num
 
   for (const [key, s] of incStates) {
     const cur = curStates.get(key);
-    if (cur && (s.updatedAt <= cur.updatedAt || stable(s) === stable(cur))) continue;
+    if (cur && (s.updatedAt <= cur.updatedAt)) continue;
     out.leadStates.push(s);
     touched.add(key);
   }

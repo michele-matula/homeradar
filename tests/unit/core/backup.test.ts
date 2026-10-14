@@ -54,6 +54,8 @@ describe('buildBackup / parseBackup', () => {
 
   it('rifiuta un formato più recente', () => {
     expect(() => parseBackup({ ...roundTrip(data()), formatVersion: 2 })).toThrow(TOO_NEW);
+    // Anche se l'intestazione di una versione futura è diversa.
+    expect(() => parseBackup({ format: 'homeradar-backup', formatVersion: 2 })).toThrow(TOO_NEW);
   });
 
   // `any` serve solo a corrompere i dati del file di prova.
@@ -88,7 +90,7 @@ describe('buildBackup / parseBackup', () => {
 
 describe('nomi dei file e riepilogo', () => {
   it('nomi', () => {
-    expect(backupFileName(NOW)).toBe('homeradar-backup-2026-10-14.json');
+    expect(backupFileName(new Date(2026, 9, 14, 1, 0).getTime())).toBe('homeradar-backup-2026-10-14.json');
     expect(autoBackupFileName(3)).toBe('HomeRadar/homeradar-backup-3.json');
   });
   it('riepilogo al plurale e al singolare', () => {
