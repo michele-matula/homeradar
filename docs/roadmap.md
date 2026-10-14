@@ -11,7 +11,7 @@ L'ordine conta: il punto 7 riusa il confronto per caratteristiche del punto 6.
 
 | # | Funzionalità | Stato | PR |
 |---|---|---|---|
-| 1 | Backup e ripristino | da fare | |
+| 1 | Backup e ripristino | in revisione | |
 | 2 | Onboarding e informativa privacy | da fare | |
 | 3 | Ricerca e filtri nel pannello | da fare | |
 | 4 | Promemoria di ricontatto | da fare | |

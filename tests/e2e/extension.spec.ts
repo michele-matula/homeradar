@@ -76,3 +76,30 @@ test('il pannello elenca i lead ed esporta il CSV', async ({ context, extensionI
   expect(csv).toContain('Priorità;Stato;Portale;Titolo;Indirizzo');
   expect(csv).not.toMatch(/\b3\d{2}[ .]?\d{3}[ .]?\d{3,4}\b/);
 });
+
+test("esporta un backup e lo reimporta dopo aver azzerato l'archivio", async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  await page.goto(SEARCH);
+  await page.locator('[data-homeradar-badge]').first().waitFor();
+
+  const panel = await context.newPage();
+  await panel.goto(`chrome-extension://${extensionId}/sidepanel.html`);
+  const nuovi = panel.getByRole('tab', { name: /^Nuovi \(\d+\)$/ });
+  await expect(panel.getByRole('tab', { name: /^Nuovi \([1-9]\d*\)$/ })).toBeVisible();
+  const before = await nuovi.textContent();
+
+  await panel.getByRole('button', { name: 'Impostazioni', exact: true }).click();
+  await expect(panel.getByText('Ultimo backup: mai')).toBeVisible();
+  const [download] = await Promise.all([panel.waitForEvent('download'), panel.getByRole('button', { name: 'Esporta backup ora', exact: true }).click()]);
+  const file = (await download.path())!;
+  expect(JSON.parse(readFileSync(file, 'utf8')).format).toBe('homeradar-backup');
+  await expect(panel.getByText(/^Ultimo backup: \d{2}\/\d{2} alle \d{2}:\d{2}$/)).toBeVisible();
+
+  await panel.getByRole('button', { name: 'Azzera archivio annunci', exact: true }).click();
+  await panel.getByRole('button', { name: 'Conferma: azzera tutto', exact: true }).click();
+  await panel.getByLabel('Importa backup', { exact: true }).setInputFiles(file);
+  await expect(panel.getByText(/^Backup importato: \d+ annunci nuovi, 0 aggiornati, 0 già presenti$/)).toBeVisible();
+
+  await panel.getByRole('button', { name: 'Torna ai lead', exact: true }).click();
+  await expect(nuovi).toHaveText(before!);
+});
