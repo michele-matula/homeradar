@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { warnedPortals } from '@/core/diagnostics';
+import { applyQuery, describeQuery, isEmptyQuery, parseThousands, type LeadQuery } from '@/core/lead-filters';
 import { groupByStatus, PRIORITY_LABELS, SORT_KEYS, SORT_LABELS, sortLeadsBy, type SortKey } from '@/core/leads';
 import { needsOnboarding } from '@/core/onboarding';
 import { Onboarding } from '@/ui/onboarding/Onboarding';
@@ -7,7 +8,7 @@ import { joinList } from '@/shared/format';
 import { LEAD_STATUSES, PORTAL_SITES, PORTAL_TAGS, PORTALS, type LeadStatus, type LeadView, type Portal, type Priority } from '@/shared/types';
 import { defaultApi, type Api } from './api';
 import { ExportBar } from './ExportBar';
-import { AlertIcon, BackIcon, Logo, SearchIcon, SettingsIcon } from './Icons';
+import { AlertIcon, BackIcon, CloseIcon, Logo, SearchIcon, SettingsIcon } from './Icons';
 import { LeadItem } from './LeadItem';
 import { SettingsView } from './SettingsView';
 import { loadSortByTab, saveSortByTab, type SortByTab } from './sortPrefs';
@@ -41,6 +42,10 @@ export function App({ api = defaultApi }: { api?: Api }) {
   const [warned, setWarned] = useState<Portal[]>([]);
   const [confirmingAll, setConfirmingAll] = useState(false);
   const [sortByTab, setSortByTab] = useState<SortByTab>(loadSortByTab);
+  // Ricerca e prezzo valgono per tutte le schede e si azzerano alla chiusura del pannello, come badge e sito.
+  const [text, setText] = useState('');
+  const [minInput, setMinInput] = useState('');
+  const [maxInput, setMaxInput] = useState('');
 
   const refresh = useCallback(async () => {
     try {
@@ -77,14 +82,28 @@ export function App({ api = defaultApi }: { api?: Api }) {
     action().then(refresh, (e: unknown) => setError(errorText(e)));
   };
 
-  const groups = groupByStatus(leads);
+  const minPrice = parseThousands(minInput);
+  const maxPrice = parseThousands(maxInput);
+  // Un prezzo non valido non filtra: il campo è segnato in rosso.
+  const query: LeadQuery = { text, minPrice: minPrice === 'invalid' ? null : minPrice, maxPrice: maxPrice === 'invalid' ? null : maxPrice };
+  // Ricerca e prezzo agiscono prima delle schede, così anche i loro conteggi li seguono.
+  const groups = groupByStatus(applyQuery(leads, query));
   const inPortals = byPortals(groups[tab], portals);
   const visible = sortLeadsBy(byFilter(inPortals, filter), sortByTab[tab]);
   const tagParts = [
     ...(filter === 'all' ? [] : [FILTER_LABELS[filter]]),
     ...(portals.length ? [joinList(portals.map((p) => PORTAL_TAGS[p]), 'e')] : []),
+    ...describeQuery(query),
   ];
   const filterTag = tagParts.length ? ` «${tagParts.join(', ')}»` : '';
+  const anyFilter = filter !== 'all' || portals.length > 0 || !isEmptyQuery(query) || minPrice === 'invalid' || maxPrice === 'invalid';
+  const resetFilters = () => {
+    setText('');
+    setMinInput('');
+    setMaxInput('');
+    setFilter('all');
+    setPortals([]);
+  };
 
   // Selezionare tutti i siti equivale a nessun filtro: si torna a "Tutti i siti".
   const togglePortal = (p: Portal) =>
@@ -101,7 +120,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
       return next;
     });
 
-  useEffect(() => setConfirmingAll(false), [tab, filter, portals, visible.length]);
+  useEffect(() => setConfirmingAll(false), [tab, filter, portals, visible.length, text, query.minPrice, query.maxPrice]);
 
   return (
     <main className="panel">
@@ -175,6 +194,46 @@ export function App({ api = defaultApi }: { api?: Api }) {
                   </button>
                 ))}
               </nav>
+              <div className="search">
+                <SearchIcon size={16} />
+                <input
+                  type="search"
+                  className="field search__input"
+                  aria-label="Cerca nei lead"
+                  placeholder="Cerca titolo, indirizzo, zona…"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                />
+                {text && (
+                  <button type="button" className="icon-btn search__clear" aria-label="Svuota ricerca" title="Svuota ricerca" onClick={() => setText('')}>
+                    <CloseIcon />
+                  </button>
+                )}
+              </div>
+              <div className="price">
+                <span className="price__label">Prezzo da</span>
+                <input
+                  className="field price__input"
+                  inputMode="decimal"
+                  aria-label="Prezzo minimo in migliaia di euro"
+                  aria-invalid={minPrice === 'invalid'}
+                  value={minInput}
+                  onChange={(e) => setMinInput(e.target.value)}
+                />
+                <span className="price__label">a</span>
+                <input
+                  className="field price__input"
+                  inputMode="decimal"
+                  aria-label="Prezzo massimo in migliaia di euro"
+                  aria-invalid={maxPrice === 'invalid'}
+                  value={maxInput}
+                  onChange={(e) => setMaxInput(e.target.value)}
+                />
+                <span className="price__label">k€</span>
+                {anyFilter && (
+                  <button type="button" className="btn btn--sm price__reset" onClick={resetFilters}>Azzera filtri</button>
+                )}
+              </div>
               <div className="filters" role="radiogroup" aria-label="Filtra per badge">
                 {PRIORITY_FILTERS.map((f) => {
                   const count = byFilter(inPortals, f).length;
