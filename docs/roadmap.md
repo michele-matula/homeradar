@@ -12,7 +12,7 @@ L'ordine conta: il punto 7 riusa il confronto per caratteristiche del punto 6.
 | # | Funzionalità | Stato | PR |
 |---|---|---|---|
 | 1 | Backup e ripristino | fatto | [#7](https://github.com/michele-matula/homeradar/pull/7) |
-| 2 | Onboarding e informativa privacy | da fare | |
+| 2 | Onboarding e informativa privacy | in revisione | |
 | 3 | Ricerca e filtri nel pannello | da fare | |
 | 4 | Promemoria di ricontatto | da fare | |
 | 5 | Prezzo al m² rispetto alla zona | da fare | |
