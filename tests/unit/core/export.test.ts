@@ -20,9 +20,15 @@ const lead: LeadView = {
 };
 
 describe('toExportRows', () => {
+  it('la colonna Richiamo mostra il giorno locale scelto', () => {
+    const recallAt = new Date(2026, 9, 17).getTime();
+    expect(toExportRows([{ ...lead, state: { ...lead.state, recallAt } }])[0]!['Richiamo']).toBe('17/10/2026');
+    expect(EXPORT_COLUMNS.indexOf('Richiamo')).toBe(EXPORT_COLUMNS.indexOf('Stato') + 1);
+  });
+
   it('mappa tutte le colonne', () => {
     expect(toExportRows([lead])).toEqual([{
-      'Priorità': 'Alta', 'Stato': 'Da contattare', 'Portale': 'Immobiliare.it', 'Titolo': 'Bilocale via Esempio 1, Precotto, Milano',
+      'Priorità': 'Alta', 'Stato': 'Da contattare', 'Richiamo': '', 'Portale': 'Immobiliare.it', 'Titolo': 'Bilocale via Esempio 1, Precotto, Milano',
       'Indirizzo': 'Via Esempio', 'Città/Zona': 'Milano / Precotto', 'Tipologia': 'Appartamento', 'm²': 62, 'Locali': 2,
       'Prezzo attuale': 235000, 'Prezzo massimo noto': 249000, 'Calo %': 5.6, 'Data ultimo ribasso': '21/09/2026',
       'Online da (giorni)': 173, 'Età stimata': 'sì', 'Prima visita': '01/10/2026', 'Ultima visita': '10/10/2026',
@@ -46,7 +52,7 @@ describe('toExportRows per Idealista', () => {
 describe('toCsv', () => {
   it('usa ; come separatore, BOM UTF-8 e virgola decimale', () => {
     const csv = toCsv(toExportRows([lead]));
-    expect(csv.startsWith('﻿Priorità;Stato;Portale;Titolo;')).toBe(true);
+    expect(csv.startsWith('﻿Priorità;Stato;Richiamo;Portale;Titolo;')).toBe(true);
     expect(csv).toContain(';5,6;');
     expect(csv.split('\r\n')).toHaveLength(2);
   });

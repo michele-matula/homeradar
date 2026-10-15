@@ -63,8 +63,16 @@ const ListingSchema = z
 const SnapshotSchema = z.object({ listingKey: z.string(), price: num, at: num, source: z.enum(['observed', 'declared']) });
 
 const LeadStateSchema = z
-  .object({ listingKey: z.string(), status: z.enum(LEAD_STATUSES), notes: z.string(), statusChangedAt: num, updatedAt: num.optional() })
-  .transform((s): LeadState => ({ ...s, updatedAt: s.updatedAt ?? s.statusChangedAt, recallAt: null }));
+  .object({
+    listingKey: z.string(), status: z.enum(LEAD_STATUSES), notes: z.string(), statusChangedAt: num, updatedAt: num.optional(),
+    recallAt: num.nullable().optional(),
+  })
+  .transform((s): LeadState => ({
+    ...s,
+    updatedAt: s.updatedAt ?? s.statusChangedAt,
+    // Backup precedenti al richiamo, o un lead scartato: nessun richiamo.
+    recallAt: s.status === 'discarded' ? null : (s.recallAt ?? null),
+  }));
 
 const CalibrationSchema = z.object({ portal, portalId: int, createdAt: num });
 
