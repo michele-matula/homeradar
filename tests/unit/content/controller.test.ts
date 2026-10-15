@@ -30,7 +30,7 @@ describe('createController', () => {
   it('su un portale spento non legge nulla e toglie i badge già mostrati', async () => {
     const send = fakeSend();
     let on = true;
-    const c = createController({ adapter: immobiliareAdapter, send, root: document, getUrl: () => SEARCH_URL, isPortalEnabled: async () => on });
+    const c = createController({ adapter: immobiliareAdapter, send, root: document, getUrl: () => SEARCH_URL, portalState: async () => (on ? 'active' : 'off') });
     const payload = searchNextData([searchResult(realEstate())]);
     await c.handle('next-data', SEARCH_URL, payload);
     expect(document.querySelectorAll(`[${BADGE_ATTR}]`)).toHaveLength(1);
@@ -46,9 +46,52 @@ describe('createController', () => {
   it('su Idealista spento non legge le card', async () => {
     document.body.innerHTML = searchBody([idealistaCard({ id: 1 })]);
     const send = fakeSend();
-    const c = createController({ adapter: idealistaAdapter, send, root: document, getUrl: () => NEWEST_URL, isPortalEnabled: async () => false });
+    const c = createController({ adapter: idealistaAdapter, send, root: document, getUrl: () => NEWEST_URL, portalState: async () => 'off' });
     await c.scan();
     expect(send).not.toHaveBeenCalled();
+  });
+
+  it("senza conferma dell'informativa non legge, toglie i badge e chiede l'avviso una volta sola", async () => {
+    const send = fakeSend();
+    let state: 'active' | 'onboarding' = 'active';
+    const onOnboardingNeeded = vi.fn();
+    const c = createController({
+      adapter: immobiliareAdapter, send, root: document, getUrl: () => SEARCH_URL, portalState: async () => state, onOnboardingNeeded,
+    });
+    const payload = searchNextData([searchResult(realEstate())]);
+    await c.handle('next-data', SEARCH_URL, payload);
+    expect(document.querySelectorAll(`[${BADGE_ATTR}]`)).toHaveLength(1);
+    state = 'onboarding';
+    send.mockClear();
+    await c.handle('next-data', SEARCH_URL, payload);
+    await c.handle('next-data', SEARCH_URL, payload);
+    expect(send).not.toHaveBeenCalled();
+    expect(document.querySelectorAll(`[${BADGE_ATTR}]`)).toHaveLength(0);
+    expect(onOnboardingNeeded).toHaveBeenCalledTimes(1);
+    expect(await c.isEnabled()).toBe(false);
+  });
+
+  it('su Idealista, dopo la conferma, legge alla scansione successiva senza ricaricare', async () => {
+    document.body.innerHTML = searchBody([idealistaCard({ id: 1 })]);
+    const send = fakeSend();
+    let state: 'active' | 'onboarding' = 'onboarding';
+    const c = createController({ adapter: idealistaAdapter, send, root: document, getUrl: () => NEWEST_URL, portalState: async () => state });
+    await c.scan();
+    expect(send).not.toHaveBeenCalled();
+    state = 'active';
+    await c.scan();
+    expect(send).toHaveBeenCalledWith(expect.objectContaining({ type: 'ingest' }));
+  });
+
+  it('se lo stato del portale non si legge non legge nulla', async () => {
+    const send = fakeSend();
+    const c = createController({
+      adapter: immobiliareAdapter, send, root: document, getUrl: () => SEARCH_URL,
+      portalState: async () => { throw new Error('Nessuna risposta dal background'); },
+    });
+    await expect(c.handle('next-data', SEARCH_URL, searchNextData([searchResult(realEstate())]))).rejects.toThrow();
+    expect(send).not.toHaveBeenCalled();
+    expect(document.querySelectorAll(`[${BADGE_ATTR}]`)).toHaveLength(0);
   });
 
   it('invia lo stato del parsing, ingerisce e disegna i badge solo per i privati', async () => {

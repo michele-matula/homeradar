@@ -1,7 +1,7 @@
 import type { PayloadKind, PortalAdapter } from '@/adapters/types';
 import { removeBadges, renderBadge } from '@/content/badges';
 import type { ParseSource, Request } from '@/shared/messages';
-import type { Evaluation, ParseResult } from '@/shared/types';
+import type { Evaluation, ParseResult, PortalState } from '@/shared/types';
 
 export interface ControllerDeps {
   adapter: PortalAdapter;
@@ -10,13 +10,15 @@ export interface ControllerDeps {
   /** URL della pagina corrente (iniettato per testabilità). */
   getUrl: () => string;
   /**
-   * true se il portale è acceso nelle impostazioni. Si chiede a ogni lettura, così l'interruttore vale
-   * subito anche sulle schede già aperte. Predefinito: sempre acceso (il background scarta comunque i dati).
+   * Stato del portale, chiesto a ogni lettura: così interruttore e conferma dell'informativa valgono subito
+   * anche sulle schede già aperte. Predefinito: attivo (il background scarta comunque i dati).
    */
-  isPortalEnabled?: () => Promise<boolean>;
+  portalState?: () => Promise<PortalState>;
+  /** Informativa da confermare: chiamata al massimo una volta per pagina (avviso sul portale). */
+  onOnboardingNeeded?: () => void;
 }
 
-export function createController({ adapter, send, root, getUrl, isPortalEnabled = async () => true }: ControllerDeps) {
+export function createController({ adapter, send, root, getUrl, portalState = async () => 'active', onOnboardingNeeded }: ControllerDeps) {
   const evaluations = new Map<number, Evaluation>();
   /** ID di tutti gli annunci ricevuti, agenzie comprese. */
   const seen = new Set<number>();
@@ -24,15 +26,20 @@ export function createController({ adapter, send, root, getUrl, isPortalEnabled 
   const sent = new Set<number>();
   const sentErrors = new Set<string>();
   let scannedUrl: string | null = null;
+  let onboardingNotified = false;
 
-  /** Portale spento: niente lettura, e via i badge già mostrati. */
+  /** Solo un portale attivo si legge; altrimenti via i badge già mostrati. */
   async function isEnabled(): Promise<boolean> {
-    const on = await isPortalEnabled();
-    if (!on && evaluations.size) {
+    const state = await portalState();
+    if (state !== 'active' && evaluations.size) {
       evaluations.clear();
       removeBadges(root);
     }
-    return on;
+    if (state === 'onboarding' && !onboardingNotified) {
+      onboardingNotified = true;
+      onOnboardingNeeded?.();
+    }
+    return state === 'active';
   }
 
   function applyAll(): void {
