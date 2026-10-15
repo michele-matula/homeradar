@@ -162,6 +162,17 @@ button, input, select { font: inherit; color: inherit; }
 .lead--high::before { background: var(--high); }
 .lead--medium::before { background: #e8930c; }
 .lead--verify::before { background: var(--verify); }
+.lead--overdue::before { background: var(--high); }
+.tab__count--due { color: var(--high); }
+.tab--on .tab__count--due { color: #fff; }
+.leads__group { list-style: none; }
+.leads__group h3 { margin: 6px 2px 0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.recall { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
+.recall__tag { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); }
+.recall__tag--overdue { background: var(--high-soft); border-color: var(--high-border); color: var(--high); }
+.recall__tag--today { background: var(--medium-soft); border-color: var(--medium-border); color: var(--medium); }
+.recall__picker { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; width: 100%; }
+.recall__date { height: 28px; font-size: 12px; }
 .lead__top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .lead__top:empty { display: none; }
 .lead__tags { display: flex; align-items: center; gap: 6px; }

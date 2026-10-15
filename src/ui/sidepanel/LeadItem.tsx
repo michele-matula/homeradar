@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { priorityLabel, STATUS_LABELS } from '@/core/leads';
+import { addDays, formatRecallDate, fromDateInput, RECALL_SHORTCUTS, recallLabel, recallStatus, startOfLocalDay, toDateInput } from '@/core/recall';
 import { formatEuro } from '@/shared/format';
 import { LEAD_STATUSES, PORTAL_TAGS, type LeadStatus, type LeadView } from '@/shared/types';
 import { ExternalIcon, TrashIcon } from './Icons';
@@ -7,21 +8,28 @@ import { Sparkline } from './Sparkline';
 
 interface Props {
   lead: LeadView;
-  onChange(patch: { status?: LeadStatus; notes?: string }): void;
+  now: number;
+  onChange(patch: { status?: LeadStatus; notes?: string; recallAt?: number | null }): void;
   onDelete(): void;
 }
 
-export function LeadItem({ lead, onChange, onDelete }: Props) {
+export function LeadItem({ lead, now, onChange, onDelete }: Props) {
   const { listing, evaluation, state, prices } = lead;
   const [notes, setNotes] = useState(state.notes);
   const [confirming, setConfirming] = useState(false);
+  const [picking, setPicking] = useState(false);
+  const recall = recallStatus(state.recallAt, now);
+  const pick = (recallAt: number) => {
+    setPicking(false);
+    onChange({ recallAt });
+  };
   useEffect(() => setNotes(state.notes), [state.notes]);
 
   const price = listing.currentPrice != null ? `€ ${formatEuro(listing.currentPrice)}` : 'Prezzo n.d.';
   const visits = `Visto ${listing.seenCount} ${listing.seenCount === 1 ? 'volta' : 'volte'}`;
 
   return (
-    <li className={`lead lead--${evaluation.priority}`}>
+    <li className={`lead lead--${evaluation.priority}${recall?.kind === 'overdue' ? ' lead--overdue' : ''}`}>
       <div className="lead__top">
         <div className="lead__tags">
           {evaluation.priority !== 'none' && (
@@ -56,6 +64,40 @@ export function LeadItem({ lead, onChange, onDelete }: Props) {
           </button>
         )}
       </div>
+      {state.status !== 'discarded' && (
+        <div className="recall">
+          {state.recallAt != null && recall ? (
+            <>
+              <span className={`recall__tag recall__tag--${recall.kind}`}>
+                {`Richiamo ${formatRecallDate(state.recallAt)} · ${recallLabel(recall)}`}
+              </span>
+              <button type="button" className="btn btn--sm" onClick={() => onChange({ recallAt: null })}>Fatto</button>
+              <button type="button" className="btn btn--sm" aria-expanded={picking} onClick={() => setPicking((p) => !p)}>Sposta…</button>
+            </>
+          ) : (
+            <button type="button" className="btn btn--sm" aria-expanded={picking} onClick={() => setPicking((p) => !p)}>Richiama…</button>
+          )}
+          {picking && (
+            <div className="recall__picker">
+              <input
+                type="date"
+                className="field recall__date"
+                aria-label="Data del richiamo"
+                defaultValue={state.recallAt != null ? toDateInput(state.recallAt) : ''}
+                onChange={(e) => {
+                  const day = fromDateInput(e.target.value);
+                  if (day != null) pick(day);
+                }}
+              />
+              {RECALL_SHORTCUTS.map((s) => (
+                <button key={s.days} type="button" className="chip" onClick={() => pick(addDays(startOfLocalDay(now), s.days))}>
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       <input
         className="field lead__notes"
         aria-label="Note"
