@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { buildBackup } from '@/core/backup';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from '@/ui/sidepanel/App';
@@ -113,6 +113,7 @@ describe('LeadItem', () => {
 describe('App', () => {
   const titles = () => screen.getAllByText(/^Bilocale \d+$/).map((e) => e.textContent);
   const withPrice = (l: LeadView, currentPrice: number): LeadView => ({ ...l, listing: { ...l.listing, currentPrice } });
+  const at = (l: LeadView, listing: Partial<LeadView['listing']>): LeadView => ({ ...l, listing: { ...l.listing, ...listing } });
 
   it('ordina la lista col criterio scelto, ricordandolo per scheda anche alla riapertura', async () => {
     const leads = [withPrice(lead(1, 'high'), 300000), withPrice(lead(2, 'medium'), 100000), withPrice(lead(3, 'high', 'contacted'), 50000), withPrice(lead(4, 'high', 'contacted'), 90000)];
@@ -295,6 +296,105 @@ describe('App', () => {
     render(<App api={api} />);
     expect(await screen.findByText('Errore: QuotaExceededError')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Esporta XLSX' })).toBeTruthy();
+  });
+
+  it('la ricerca filtra lista e conteggi delle schede, su più campi e senza accenti', async () => {
+    const leads = [
+      at(lead(1, 'high'), { zone: 'Navile' }),
+      at(lead(2, 'high'), { city: 'Bologna', zone: 'Navile', typology: 'Trilocale' }),
+      lead(3, 'high'),
+      at(lead(4, 'high', 'contacted'), { address: 'Via Città di Castello 3' }),
+    ];
+    render(<App api={fakeApi(leads)} />);
+    const search = await screen.findByLabelText('Cerca nei lead');
+    fireEvent.change(search, { target: { value: 'navile' } });
+    expect(screen.getByRole('tab', { name: 'Nuovi (2)' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Contattati (0)' })).toBeTruthy();
+    expect(titles()).toEqual(['Bilocale 1', 'Bilocale 2']);
+    fireEvent.change(search, { target: { value: 'Bologna  NAVILE' } });
+    expect(titles()).toEqual(['Bilocale 2']);
+    fireEvent.change(search, { target: { value: 'trilocale' } });
+    expect(titles()).toEqual(['Bilocale 2']);
+    fireEvent.change(search, { target: { value: 'citta' } });
+    expect(screen.getByRole('tab', { name: 'Nuovi (0)' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Contattati (1)' })).toBeTruthy();
+    expect(screen.getByText('Nessun lead «"citta"» in questa scheda.')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Svuota ricerca' }));
+    expect(screen.getByRole('tab', { name: 'Nuovi (3)' })).toBeTruthy();
+    expect((screen.getByLabelText('Cerca nei lead') as HTMLInputElement).value).toBe('');
+  });
+
+  it('la fascia di prezzo in k€ esclude i lead fuori fascia e senza prezzo; un valore non valido non filtra', async () => {
+    const leads = [withPrice(lead(1, 'high'), 150000), withPrice(lead(2, 'high'), 250000), withPrice(lead(3, 'high'), 300000), at(lead(4, 'high'), { currentPrice: null })];
+    render(<App api={fakeApi(leads)} />);
+    const min = await screen.findByLabelText('Prezzo minimo in migliaia di euro');
+    const max = screen.getByLabelText('Prezzo massimo in migliaia di euro');
+    expect(titles()).toHaveLength(4);
+    fireEvent.change(min, { target: { value: '0' } });
+    expect(titles()).toEqual(['Bilocale 1', 'Bilocale 2', 'Bilocale 3']);
+    fireEvent.change(min, { target: { value: '150' } });
+    fireEvent.change(max, { target: { value: '250' } });
+    expect(titles()).toEqual(['Bilocale 1', 'Bilocale 2']);
+    expect(screen.getByText('Elimina tutti «150–250 k€» (2)')).toBeTruthy();
+    fireEvent.change(max, { target: { value: 'abc' } });
+    expect(max.getAttribute('aria-invalid')).toBe('true');
+    expect(min.getAttribute('aria-invalid')).toBe('false');
+    expect(titles()).toEqual(['Bilocale 1', 'Bilocale 2', 'Bilocale 3']);
+  });
+
+  it('"Elimina tutti" riporta ricerca e prezzo, elimina solo i visibili e la conferma si annulla se cambia la ricerca', async () => {
+    const api = fakeApi([
+      at(withPrice(lead(1, 'high'), 200000), { zone: 'Navile' }),
+      at(withPrice(lead(2, 'high'), 400000), { zone: 'Navile' }),
+      withPrice(lead(3, 'high'), 200000),
+    ]);
+    render(<App api={api} />);
+    fireEvent.change(await screen.findByLabelText('Cerca nei lead'), { target: { value: 'navile' } });
+    fireEvent.change(screen.getByLabelText('Prezzo massimo in migliaia di euro'), { target: { value: '250' } });
+    fireEvent.click(screen.getByText('Elimina tutti «"navile", fino a 250 k€» (1)'));
+    expect(screen.getByText(/^Conferma: elimina/)).toBeTruthy();
+    // Stesso numero di visibili, ricerca diversa: la conferma non deve sopravvivere.
+    fireEvent.change(screen.getByLabelText('Cerca nei lead'), { target: { value: 'navil' } });
+    expect(screen.queryByText(/^Conferma: elimina/)).toBeNull();
+    fireEvent.click(screen.getByText('Elimina tutti «"navil", fino a 250 k€» (1)'));
+    fireEvent.click(screen.getByText('Conferma: elimina 1 annuncio «"navil", fino a 250 k€»'));
+    expect(api.deleteListings).toHaveBeenCalledWith(['immobiliare:1']);
+  });
+
+  it('"Azzera filtri" compare solo con un filtro attivo e riporta tutto allo stato iniziale', async () => {
+    render(<App api={fakeApi([lead(1, 'high'), lead(2, 'medium')])} />);
+    const search = await screen.findByLabelText('Cerca nei lead');
+    expect(screen.queryByRole('button', { name: 'Azzera filtri' })).toBeNull();
+    fireEvent.change(search, { target: { value: '   ' } });
+    expect(screen.queryByRole('button', { name: 'Azzera filtri' })).toBeNull();
+    expect(screen.getByText('Elimina tutti (2)')).toBeTruthy();
+    fireEvent.change(search, { target: { value: '' } });
+    fireEvent.change(screen.getByLabelText('Prezzo minimo in migliaia di euro'), { target: { value: 'x' } });
+    expect(screen.getByRole('button', { name: 'Azzera filtri' })).toBeTruthy();
+    fireEvent.change(search, { target: { value: 'bilocale' } });
+    fireEvent.click(screen.getByRole('radio', { name: 'Alta (1)' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Immobiliare (1)' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Azzera filtri' }));
+    expect((screen.getByLabelText('Cerca nei lead') as HTMLInputElement).value).toBe('');
+    expect((screen.getByLabelText('Prezzo minimo in migliaia di euro') as HTMLInputElement).value).toBe('');
+    expect(screen.getByRole('radio', { name: 'Tutti (2)' }).getAttribute('aria-checked')).toBe('true');
+    expect(screen.getByRole('button', { name: 'Tutti i siti' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.queryByRole('button', { name: 'Azzera filtri' })).toBeNull();
+  });
+
+  it('i filtri restano attivi quando la lista si aggiorna e l\'export indica la vista filtrata', async () => {
+    let notify = () => {};
+    const api = fakeApi([at(lead(1, 'high'), { zone: 'Navile' }), lead(2, 'high')]);
+    api.onLeadsChanged = vi.fn((cb: () => void) => {
+      notify = cb;
+      return () => {};
+    });
+    render(<App api={api} />);
+    fireEvent.change(await screen.findByLabelText('Cerca nei lead'), { target: { value: 'navile' } });
+    await act(async () => notify());
+    expect(titles()).toEqual(['Bilocale 1']);
+    expect((screen.getByLabelText('Cerca nei lead') as HTMLInputElement).value).toBe('navile');
+    expect(screen.getByText('Esporta la vista corrente (1)')).toBeTruthy();
   });
 });
 

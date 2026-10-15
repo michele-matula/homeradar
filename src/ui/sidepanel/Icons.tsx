@@ -64,9 +64,15 @@ export const AlertIcon = () => (
   </Icon>
 );
 
-export const SearchIcon = () => (
-  <Icon size={28}>
+export const SearchIcon = ({ size = 28 }: { size?: number }) => (
+  <Icon size={size}>
     <circle cx="11" cy="11" r="7" />
     <path d="M20 20l-4-4" />
+  </Icon>
+);
+
+export const CloseIcon = () => (
+  <Icon>
+    <path d="M18 6 6 18M6 6l12 12" />
   </Icon>
 );

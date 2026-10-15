@@ -19,7 +19,7 @@ export function ExportBar({ leads, download = downloadBlob }: { leads: LeadView[
       <button type="button" className="btn" onClick={() => download(new Blob([toCsv(rows())], { type: 'text/csv;charset=utf-8' }), exportFileName('csv', Date.now()))}>
         <DownloadIcon /> CSV
       </button>
-      <span className="export__hint">Esporta la vista corrente</span>
+      <span className="export__hint">{`Esporta la vista corrente (${leads.length})`}</span>
     </footer>
   );
 }

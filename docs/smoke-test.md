@@ -16,9 +16,12 @@ Durata: ~10 minuti. Usa `npm run build` e carica `.output/chrome-mv3` in Chrome.
    - [ ] Schede con conteggi; cambia lo stato di un lead e scrivi una nota; ricarica il pannello: dati mantenuti.
    - [ ] Filtro per badge: scegli "Da verificare" e restano solo quei lead; i conteggi dei filtri corrispondono alla scheda; cambiando scheda il filtro resta attivo e i filtri senza annunci sono disattivati.
    - [ ] Con un filtro attivo il pulsante dice "Elimina tutti «…» (n)" e n è il numero dei lead filtrati (premi "Annulla", non confermare).
+   - [ ] Ricerca: scrivi il nome di una zona o di una via che vedi nei lead (anche senza accenti); lista e numeri sulle schede si aggiornano mentre scrivi; la ✕ svuota la ricerca e torna tutto come prima.
+   - [ ] Prezzo da/a in k€ (es. 150 e 250): restano solo i lead nella fascia, senza quelli privi di prezzo; un valore come "abc" si colora di rosso e non filtra; "Azzera filtri" riporta ricerca, prezzo, badge e siti a "Tutti".
+   - [ ] Con ricerca o prezzo attivi, "Elimina tutti «…»" li riporta nel testo (premi "Annulla").
 6. Export.
    - [ ] XLSX si apre in Excel; CSV si apre in Excel con colonne separate e accenti corretti.
-   - [ ] Con un filtro attivo il file contiene solo i lead filtrati.
+   - [ ] Con un filtro attivo (badge, sito, ricerca o prezzo) il file contiene solo i lead filtrati e il numero accanto a "Esporta la vista corrente" corrisponde.
 7. Impostazioni → "Copia report diagnostico".
    - [ ] Il testo copiato non contiene indirizzi, titoli o telefoni.
 8. Icona dell'estensione.
