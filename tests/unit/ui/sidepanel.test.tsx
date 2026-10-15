@@ -297,3 +297,63 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: 'Esporta XLSX' })).toBeTruthy();
   });
 });
+
+describe('App: informativa', () => {
+  const never = { acceptedVersion: null, acceptedAt: null, current: 1 };
+
+  it("senza conferma mostra l'informativa al posto della lista e nasconde le impostazioni", async () => {
+    const api = fakeApi([lead(1, 'high')]);
+    vi.mocked(api.getOnboardingStatus).mockResolvedValue(never);
+    render(<App api={api} />);
+    expect(await screen.findByRole('button', { name: 'Ho capito, inizia' })).toBeTruthy();
+    expect(screen.queryByText('Bilocale 1')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Impostazioni' })).toBeNull();
+  });
+
+  it('confermando nel pannello passa alla lista', async () => {
+    const api = fakeApi([lead(1, 'high')]);
+    // Due letture "mai confermata": quella del pannello e quella della schermata; poi confermata.
+    vi.mocked(api.getOnboardingStatus).mockResolvedValueOnce(never).mockResolvedValueOnce(never);
+    render(<App api={api} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Ho capito, inizia' }));
+    expect(await screen.findByText('Bilocale 1')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Impostazioni' })).toBeTruthy();
+  });
+
+  it('passa alla lista quando la conferma arriva dalla scheda di benvenuto', async () => {
+    const api = fakeApi([lead(1, 'high')]);
+    let notify = () => {};
+    vi.mocked(api.onOnboardingChanged).mockImplementation((cb) => {
+      notify = cb;
+      return () => {};
+    });
+    vi.mocked(api.getOnboardingStatus).mockResolvedValueOnce(never).mockResolvedValueOnce(never);
+    render(<App api={api} />);
+    await screen.findByRole('button', { name: 'Ho capito, inizia' });
+    notify();
+    expect(await screen.findByText('Bilocale 1')).toBeTruthy();
+  });
+
+  it('se lo stato non si legge mostra l\'errore e "Riprova", mai la lista', async () => {
+    const api = fakeApi([lead(1, 'high')]);
+    vi.mocked(api.getOnboardingStatus).mockRejectedValueOnce(new Error('Nessuna risposta dal background'));
+    render(<App api={api} />);
+    expect(await screen.findByText('Errore: Nessuna risposta dal background')).toBeTruthy();
+    expect(screen.queryByText('Bilocale 1')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Riprova' }));
+    expect(await screen.findByText('Bilocale 1')).toBeTruthy();
+  });
+
+  it("dalle impostazioni si rivede l'informativa in sola lettura e si torna indietro", async () => {
+    const api = fakeApi([lead(1, 'high')]);
+    vi.mocked(api.getOnboardingStatus).mockResolvedValue({ acceptedVersion: 1, acceptedAt: Date.UTC(2026, 9, 15), current: 1 });
+    render(<App api={api} />);
+    await screen.findByText('Bilocale 1');
+    fireEvent.click(screen.getByRole('button', { name: 'Impostazioni' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Rivedi informativa' }));
+    expect(await screen.findByText('Confermata il 15/10/2026')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Ho capito, inizia' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Chiudi' }));
+    expect(await screen.findByRole('button', { name: 'Rivedi informativa' })).toBeTruthy();
+  });
+});
