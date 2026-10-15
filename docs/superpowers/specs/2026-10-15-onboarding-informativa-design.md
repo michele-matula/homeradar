@@ -78,7 +78,7 @@ Su Immobiliare.it, Idealista.it e Subito.it HomeRadar riconosce gli annunci pubb
 
 **Dove restano i dati**
 - Solo nel tuo browser, su questo computer. Non vengono inviati a nessun server, nemmeno a chi ha creato HomeRadar.
-- Gli annunci che non hai mai lavorato (stato "Nuovo") e che non rivedi da {retentionDays} giorni vengono cancellati da soli; puoi cambiare il periodo nelle impostazioni.
+- Gli annunci rimasti in stato "Nuovo" che non rivedi da {retentionDays} giorni vengono cancellati da soli, anche se hanno note: per tenerli cambia lo stato. Puoi cambiare il periodo nelle impostazioni.
 - Una volta a settimana HomeRadar salva un backup nella cartella Download/HomeRadar. Se Chrome è impostato per chiedere dove salvare i file, in quel momento vedrai la finestra di salvataggio: confermala. Il backup si può spegnere nelle impostazioni.
 - Puoi cancellare tutto in qualsiasi momento: Impostazioni → Azzera archivio annunci.
 

@@ -30,6 +30,15 @@ describe('Onboarding', () => {
     expect(screen.queryByText('Cosa è cambiato')).toBeNull();
   });
 
+  it('la conservazione avverte che anche le note dei lead rimasti "Nuovo" vengono cancellate', async () => {
+    render(<Onboarding api={api(never, { ...DEFAULT_SETTINGS, retentionDays: 60 })} mode="confirm" />);
+    expect(
+      await screen.findByText(
+        'Gli annunci rimasti in stato "Nuovo" che non rivedi da 60 giorni vengono cancellati da soli, anche se hanno note: per tenerli cambia lo stato. Puoi cambiare il periodo nelle impostazioni.',
+      ),
+    ).toBeTruthy();
+  });
+
   it('senza soglia di ribasso dice solo "ribassato"', async () => {
     render(<Onboarding api={api()} mode="confirm" />);
     expect(await screen.findByText('online da almeno 120 giorni e ribassato.')).toBeTruthy();

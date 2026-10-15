@@ -127,7 +127,7 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
         <ul>
           <li>Solo nel tuo browser, su questo computer. Non vengono inviati a nessun server, nemmeno a chi ha creato HomeRadar.</li>
           <li>
-            {`Gli annunci che non hai mai lavorato (stato "Nuovo") e che non rivedi da ${settings.retentionDays} giorni vengono cancellati da soli; puoi cambiare il periodo nelle impostazioni.`}
+            {`Gli annunci rimasti in stato "Nuovo" che non rivedi da ${settings.retentionDays} giorni vengono cancellati da soli, anche se hanno note: per tenerli cambia lo stato. Puoi cambiare il periodo nelle impostazioni.`}
           </li>
           <li>
             Una volta a settimana HomeRadar salva un backup nella cartella Download/HomeRadar. Se Chrome è impostato per chiedere
