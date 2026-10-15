@@ -6,6 +6,8 @@ import { PORTALS, type PortalState } from '@/shared/types';
 export interface RouterHooks {
   setWarning(on: boolean): void;
   leadsChanged(): void;
+  /** Un lead ha cambiato stato o richiamo: va ricalcolato il numero sull'icona. */
+  recallsChanged(): void;
   /** Conferma dell'informativa cambiata: le pagine dell'estensione si aggiornano. */
   onboardingChanged(): void;
   /** Apre la scheda di benvenuto. */
@@ -36,8 +38,11 @@ export async function handleRequest(service: LeadService, req: Request, version:
     }
     case 'listLeads':
       return service.listLeads();
-    case 'setLeadState':
-      return service.setLeadState(req.listingKey, { status: req.status, notes: req.notes });
+    case 'setLeadState': {
+      const state = await service.setLeadState(req.listingKey, { status: req.status, notes: req.notes, recallAt: req.recallAt });
+      hooks.recallsChanged();
+      return state;
+    }
     case 'deleteListing':
       await service.deleteListing(req.listingKey);
       hooks.leadsChanged();

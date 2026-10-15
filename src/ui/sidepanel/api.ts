@@ -5,7 +5,7 @@ import type { BackupStatus, Diagnostics, ImportSummary, LeadState, LeadStatus, L
 
 export interface Api {
   listLeads(): Promise<LeadView[]>;
-  setLeadState(listingKey: string, patch: { status?: LeadStatus; notes?: string }): Promise<LeadState>;
+  setLeadState(listingKey: string, patch: { status?: LeadStatus; notes?: string; recallAt?: number | null }): Promise<LeadState>;
   deleteListing(listingKey: string): Promise<void>;
   deleteListings(listingKeys: string[]): Promise<void>;
   deleteAllListings(): Promise<number>;
