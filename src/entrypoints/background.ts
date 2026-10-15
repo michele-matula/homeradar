@@ -1,5 +1,5 @@
 import { createFileSaver, isOffscreenRequest } from '@/background/file-saver';
-import { runAutoBackup } from '@/core/auto-backup';
+import { runAutoBackup, settleAutoBackup, type AutoBackupDeps } from '@/core/auto-backup';
 import { HomeRadarDB } from '@/core/db';
 import { handleRequest, type RouterHooks } from '@/core/router';
 import { LeadService } from '@/core/service';
@@ -19,7 +19,7 @@ export default defineBackground(() => {
     },
   };
 
-  const saveFile = createFileSaver({
+  const saver = createFileSaver({
     async ensureOffscreen() {
       const open = await browser.runtime.getContexts({ contextTypes: [browser.runtime.ContextType.OFFSCREEN_DOCUMENT] });
       if (open.length) return;
@@ -32,23 +32,28 @@ export default defineBackground(() => {
     closeOffscreen: () => browser.offscreen.closeDocument(),
     sendToOffscreen: (msg) => browser.runtime.sendMessage(msg),
     download: ({ url, filename }) => browser.downloads.download({ url, filename, conflictAction: 'overwrite', saveAs: false }),
-    onDownloadChanged(listener) {
-      browser.downloads.onChanged.addListener(listener);
-      return () => browser.downloads.onChanged.removeListener(listener);
-    },
+    findDownload: async (url) => (await browser.downloads.search({ url }))[0],
   });
 
-  const autoBackup = () =>
-    runAutoBackup({
-      now: Date.now,
-      status: () => service.backupStatus(),
-      settings: () => service.getSettings(),
-      listingCount: () => service.listingCount(),
-      exportJson: async () => JSON.stringify(await service.exportBackup(version)),
-      saveFile,
-      recordSuccess: (slot) => service.recordBackup(slot),
-      recordFailure: (message) => service.recordBackupFailure(message),
-    });
+  const backupDeps: AutoBackupDeps = {
+    now: Date.now,
+    status: () => service.backupStatus(),
+    settings: () => service.getSettings(),
+    listingCount: () => service.listingCount(),
+    exportJson: async () => JSON.stringify(await service.exportBackup(version)),
+    ...saver,
+    recordStarted: (slot, url) => service.recordBackupStarted(slot, url),
+    recordSuccess: (slot) => service.recordBackup(slot),
+    recordFailure: (message) => service.recordBackupFailure(message),
+  };
+  const backupError = (err: unknown) =>
+    service.recordError(`Backup automatico: ${err instanceof Error ? err.message : String(err)}`).catch(() => {});
+
+  // Registrato subito: l'evento riaccende il service worker spento mentre la finestra "Salva con nome" era aperta.
+  browser.downloads.onChanged.addListener((delta) => {
+    const state = delta.state?.current;
+    if (state === 'complete' || state === 'interrupted') void settleAutoBackup(backupDeps).catch(backupError);
+  });
 
   browser.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
 
@@ -68,6 +73,6 @@ export default defineBackground(() => {
   })();
   browser.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === 'purge') void service.purge();
-    if (alarm.name === 'backup') void autoBackup().catch((err: unknown) => service.recordError(`Backup automatico: ${err instanceof Error ? err.message : String(err)}`)).catch(() => {});
+    if (alarm.name === 'backup') void runAutoBackup(backupDeps).catch(backupError);
   });
 });

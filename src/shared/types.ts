@@ -165,6 +165,15 @@ export interface BackupStatus {
   lastAutoFailedAt: number | null;
   /** Slot (1–4) del prossimo backup automatico. */
   nextSlot: number;
+  /** Backup automatico avviato e non ancora concluso (es. finestra "Salva con nome" aperta). */
+  pending: PendingBackup | null;
+}
+
+export interface PendingBackup {
+  slot: number;
+  /** URL blob del file: identifica il download anche dopo un riavvio del service worker. */
+  url: string;
+  startedAt: number;
 }
 
 export interface ImportSummary {

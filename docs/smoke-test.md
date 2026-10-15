@@ -74,7 +74,9 @@ Naviga a mano, senza automazione: Idealista usa DataDome.
 27. Naviga una ricerca su un portale finché compaiono lead, poi attendi almeno 5 minuti con il browser aperto.
     - [ ] Compare `Download/HomeRadar/homeradar-backup-1.json`; in Impostazioni "Ultimo backup" ha data e ora di oggi.
 28. Attiva in Chrome "Chiedi dove salvare ogni file prima di scaricarlo", azzera lo stato del backup (rimuovi l'estensione e reinstallala), ripeti il punto 27.
-    - [ ] Annota se si apre la finestra di salvataggio: se sì, va segnalato nell'onboarding (roadmap, punto 2).
+    - [ ] Si apre la finestra di salvataggio (va segnalato nell'onboarding, roadmap punto 2). Prima di confermarla, in Impostazioni c'è "Backup automatico in corso".
+    - [ ] Aspetta almeno 1 minuto con la finestra aperta, poi conferma: riaprendo Impostazioni "Ultimo backup" ha data e ora di oggi, senza "non riuscito".
+    - [ ] Variante: annulla la finestra. In Impostazioni compare "Ultimo backup automatico non riuscito".
 29. Impostazioni → "Esporta backup ora".
     - [ ] Scarica `homeradar-backup-AAAA-MM-GG.json`; il file non contiene nomi né telefoni dei venditori.
 30. Su un altro profilo Chrome pulito: Impostazioni → "Importa backup" con quel file.

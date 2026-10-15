@@ -237,7 +237,7 @@ export class LeadService {
 
   async backupStatus(): Promise<BackupStatus> {
     const rec = await this.db.meta.get('backup');
-    return { lastAt: null, lastAutoFailedAt: null, nextSlot: 1, ...(rec?.value as Partial<BackupStatus> | undefined) };
+    return { lastAt: null, lastAutoFailedAt: null, nextSlot: 1, pending: null, ...(rec?.value as Partial<BackupStatus> | undefined) };
   }
 
   private async updateBackupStatus(fn: (s: BackupStatus) => void): Promise<void> {
@@ -248,12 +248,23 @@ export class LeadService {
     });
   }
 
-  /** Backup riuscito; `slotUsed` solo per quelli automatici, che ruotano sugli slot. */
+  /** Backup automatico avviato: segnato prima del download, che può concludersi in un altro service worker. */
+  recordBackupStarted(slot: number, url: string): Promise<void> {
+    const at = this.clock();
+    return this.updateBackupStatus((s) => {
+      s.pending = { slot, url, startedAt: at };
+    });
+  }
+
+  /** Backup riuscito; `slotUsed` solo per quelli automatici, che ruotano sugli slot e chiudono quello in corso. */
   recordBackup(slotUsed?: number): Promise<void> {
     const at = this.clock();
     return this.updateBackupStatus((s) => {
       s.lastAt = at;
-      if (slotUsed !== undefined) s.nextSlot = (slotUsed % AUTO_BACKUP_SLOTS) + 1;
+      if (slotUsed !== undefined) {
+        s.nextSlot = (slotUsed % AUTO_BACKUP_SLOTS) + 1;
+        s.pending = null;
+      }
     });
   }
 
@@ -261,6 +272,7 @@ export class LeadService {
     const at = this.clock();
     await this.updateBackupStatus((s) => {
       s.lastAutoFailedAt = at;
+      s.pending = null;
     });
     await this.recordError(`Backup automatico non riuscito: ${message}`);
   }

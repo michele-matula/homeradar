@@ -237,6 +237,7 @@ export function SettingsView({ api, onSaved, download = downloadBlob }: { api: A
           </p>
         )}
         {backupFailed && <p className="card__text backup__warn">Ultimo backup automatico non riuscito</p>}
+        {backup?.pending && <p className="card__text">Backup automatico in corso: se Chrome chiede dove salvare il file, conferma</p>}
         <div className="settings__row switch">
           <label id={`${ids}-autoBackup-label`} htmlFor={`${ids}-autoBackup`} className="switch__label">Backup automatico settimanale</label>
           <InfoTip label="Backup automatico settimanale">

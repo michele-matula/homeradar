@@ -50,7 +50,7 @@ function fakeApi(leads: LeadView[], adapterWarning: Diagnostics['adapterWarning'
     onLeadsChanged: vi.fn(() => () => {}),
     exportBackup: vi.fn(async () => buildBackup({ listings: [], priceSnapshots: [], leadStates: [], calibration: [] }, 0, '0.1.0')),
     importBackup: vi.fn(async () => ({ added: 0, updated: 0, unchanged: 0 })),
-    getBackupStatus: vi.fn(async () => ({ lastAt: null, lastAutoFailedAt: null, nextSlot: 1 })),
+    getBackupStatus: vi.fn(async () => ({ lastAt: null, lastAutoFailedAt: null, nextSlot: 1, pending: null })),
   };
 }
 

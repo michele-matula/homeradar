@@ -7,7 +7,7 @@ import { DEFAULT_SETTINGS, type BackupStatus } from '@/shared/types';
 
 afterEach(cleanup);
 
-function api(status: BackupStatus = { lastAt: null, lastAutoFailedAt: null, nextSlot: 1 }): Api {
+function api(status: BackupStatus = { lastAt: null, lastAutoFailedAt: null, nextSlot: 1, pending: null }): Api {
   return {
     listLeads: vi.fn(async () => []),
     setLeadState: vi.fn(),
@@ -37,15 +37,20 @@ describe('impostazioni: backup', () => {
   });
 
   it("segnala l'ultimo backup automatico fallito", async () => {
-    render(<SettingsView api={api({ lastAt: 1000, lastAutoFailedAt: 2000, nextSlot: 2 })} onSaved={vi.fn()} />);
+    render(<SettingsView api={api({ lastAt: 1000, lastAutoFailedAt: 2000, nextSlot: 2, pending: null })} onSaved={vi.fn()} />);
     expect(await screen.findByText('Ultimo backup automatico non riuscito')).toBeTruthy();
+  });
+
+  it('con un backup automatico in corso invita a confermare la finestra di Chrome', async () => {
+    render(<SettingsView api={api({ lastAt: null, lastAutoFailedAt: null, nextSlot: 1, pending: { slot: 1, url: 'blob:x/1', startedAt: 1 } })} onSaved={vi.fn()} />);
+    expect(await screen.findByText('Backup automatico in corso: se Chrome chiede dove salvare il file, conferma')).toBeTruthy();
   });
 
   it('esporta il backup come file JSON e aggiorna la data', async () => {
     const a = api();
     const download = vi.fn();
     render(<SettingsView api={a} onSaved={vi.fn()} download={download} />);
-    vi.mocked(a.getBackupStatus).mockResolvedValue({ lastAt: new Date(2026, 9, 12, 9, 30).getTime(), lastAutoFailedAt: null, nextSlot: 1 });
+    vi.mocked(a.getBackupStatus).mockResolvedValue({ lastAt: new Date(2026, 9, 12, 9, 30).getTime(), lastAutoFailedAt: null, nextSlot: 1, pending: null });
     fireEvent.click(await screen.findByRole('button', { name: 'Esporta backup ora' }));
     await waitFor(() => expect(download).toHaveBeenCalled());
     const [blob, name] = download.mock.calls[0]!;

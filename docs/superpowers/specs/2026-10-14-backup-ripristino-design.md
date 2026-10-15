@@ -94,14 +94,17 @@ Il manifest aggiunge `downloads` e `offscreen`. `downloads` mostra all'installaz
 ### `src/core/auto-backup.ts`
 
 - `isBackupDue(status, settings, listingCount, now): boolean`.
-- `runAutoBackup(deps)`: dipendenze iniettate (`exportBackup`, `createBlobUrl`, `download`, `waitForDownload`, `recordBackup`, `recordFailure`). Sceglie lo slot, scarica, attende il completamento e registra l'esito. Testabile senza Chrome.
+- `runAutoBackup(deps)`: dipendenze iniettate (`exportJson`, `createUrl`, `startDownload`, `downloadOutcome`, `release`, `recordStarted`, `recordSuccess`, `recordFailure`). Sceglie lo slot, segna il backup come "in corso" (`pending`: slot, URL blob, ora di inizio) e avvia il download, senza attenderne la fine. Testabile senza Chrome.
+- `settleAutoBackup(deps)`: chiamata a ogni download concluso. Se c'è un backup in corso, cerca il download per URL: completato → successo e avanzamento dello slot; interrotto → fallimento; in ogni caso libera l'URL e chiude l'offscreen.
+- Perché l'esito non si attende nel worker: con l'opzione di Chrome "Chiedi dove salvare ogni file" si apre la finestra di salvataggio e, mentre resta aperta, Chrome spegne il service worker inattivo (circa 30 s). L'evento `downloads.onChanged`, registrato all'avvio del worker, lo riaccende a download concluso. Trovato con lo smoke test del 2026-10-15: il file veniva salvato ma lo stato restava "mai".
+- All'allarme successivo un backup in corso viene prima risolto: se il download è ancora aperto si aspetta (nessun secondo download); oltre 12 ore conta come fallito e si riprova.
 
 ### `LeadService`
 
 - `exportBackup(extensionVersion): Promise<BackupFile>`: legge tutte le tabelle in un'unica transazione di sola lettura.
 - `importBackup(json: unknown): Promise<ImportSummary>`: `parseBackup`, poi `mergeBackup` e scrittura in **un'unica transazione** `rw` su `listings`, `priceSnapshots`, `leadStates`, `calibration`, `meta`. O tutto o niente.
-- `backupStatus(): Promise<BackupStatus>`: `{ lastAt: number | null; lastAutoFailedAt: number | null; nextSlot: number }`, dal record `meta.backup`.
-- `recordBackup(at, slotUsed?)`, `recordBackupFailure(at, message)`: aggiornano `meta.backup`; il fallimento va anche negli errori del diagnostico, senza dati degli annunci.
+- `backupStatus(): Promise<BackupStatus>`: `{ lastAt: number | null; lastAutoFailedAt: number | null; nextSlot: number; pending: { slot; url; startedAt } | null }`, dal record `meta.backup`.
+- `recordBackupStarted(slot, url)`, `recordBackup(slotUsed?)`, `recordBackupFailure(message)`: aggiornano `meta.backup`; successo automatico e fallimento chiudono il backup in corso, quello manuale no; il fallimento va anche negli errori del diagnostico, senza dati degli annunci.
 - `setLeadState` aggiorna `updatedAt` a ogni cambio di stato o di note; `ingest` crea i nuovi stati con `updatedAt = now`.
 
 ### Schema Dexie
@@ -114,11 +117,13 @@ Il manifest aggiunge `downloads` e `offscreen`. `downloads` mostra all'installaz
 
 ### Documento offscreen
 
-`src/entrypoints/offscreen/` (pagina non elencata di WXT), creato con motivo `BLOBS`. Riceve il JSON del backup, crea un `Blob` e risponde con l'URL `blob:`. Il service worker non può creare URL `blob:`, e gli URL `data:` hanno un limite di circa 2 MB che un database grande supera. Il background chiude il documento offscreen al termine del download.
+`src/entrypoints/offscreen/` (pagina non elencata di WXT), creato con motivo `BLOBS`. Riceve il JSON del backup, crea un `Blob` e risponde con l'URL `blob:`. Il service worker non può creare URL `blob:`, e gli URL `data:` hanno un limite di circa 2 MB che un database grande supera. Il documento resta aperto anche se il service worker viene spento; il background lo chiude quando risolve il download (`settleAutoBackup`).
 
 ### Background
 
-- Nuovo allarme `backup`, creato come `purge` (`periodInMinutes: 24 * 60`, primo controllo dopo pochi minuti dall'avvio). Al suono: `runAutoBackup` con le dipendenze reali (`chrome.offscreen`, `chrome.downloads.download` con `saveAs: false`, `chrome.downloads.onChanged`).
+- Nuovo allarme `backup`, creato come `purge` (`periodInMinutes: 24 * 60`, primo controllo dopo pochi minuti dall'avvio). Al suono: `runAutoBackup` con le dipendenze reali (`chrome.offscreen`, `chrome.downloads.download` con `saveAs: false`, `chrome.downloads.search({ url })`).
+- Listener `chrome.downloads.onChanged` registrato al livello principale del worker: a ogni download completato o interrotto chiama `settleAutoBackup`.
+- Con un backup in corso le impostazioni mostrano "Backup automatico in corso: se Chrome chiede dove salvare il file, conferma".
 - Se `autoBackup` è spento l'allarme scatta ma `isBackupDue` restituisce `false`.
 
 ### Messaggi e router
