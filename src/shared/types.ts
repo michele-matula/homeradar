@@ -181,3 +181,14 @@ export interface ImportSummary {
   updated: number;
   unchanged: number;
 }
+
+/** Conferma dell'informativa (record `meta.onboarding`, fuori dal backup). */
+export interface OnboardingStatus {
+  acceptedVersion: number | null;
+  acceptedAt: number | null;
+  /** Versione dell'informativa di questa build. */
+  current: number;
+}
+
+/** Cosa deve fare un content script sul suo portale. */
+export type PortalState = 'active' | 'off' | 'onboarding';
