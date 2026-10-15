@@ -2,6 +2,7 @@ import { browser } from 'wxt/browser';
 import type { CalibrationHint, LeadStatus, ListingObservation, Portal, Settings } from '@/shared/types';
 
 export const LEADS_CHANGED = 'leadsChanged';
+export const ONBOARDING_CHANGED = 'onboardingChanged';
 
 export type ParseSource = 'next-data' | 'api' | 'dom';
 
@@ -19,7 +20,11 @@ export type Request =
   | { type: 'getDiagnostics' }
   | { type: 'exportBackup' }
   | { type: 'importBackup'; backup: unknown }
-  | { type: 'getBackupStatus' };
+  | { type: 'getBackupStatus' }
+  | { type: 'getOnboardingStatus' }
+  | { type: 'acceptOnboarding' }
+  | { type: 'getPortalState'; portal: Portal }
+  | { type: 'openOnboarding' };
 
 /** Per i content script: il portale è acceso nelle impostazioni? */
 export async function isPortalEnabled(portal: Portal): Promise<boolean> {

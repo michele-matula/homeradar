@@ -21,6 +21,9 @@ function api(status: BackupStatus = { lastAt: null, lastAutoFailedAt: null, next
     exportBackup: vi.fn(async () => buildBackup({ listings: [], priceSnapshots: [], leadStates: [], calibration: [] }, 0, '0.1.0')),
     importBackup: vi.fn(async () => ({ added: 2, updated: 1, unchanged: 0 })),
     getBackupStatus: vi.fn(async () => status),
+    getOnboardingStatus: vi.fn(async () => ({ acceptedVersion: 1, acceptedAt: 0, current: 1 })),
+    acceptOnboarding: vi.fn(async () => ({ acceptedVersion: 1, acceptedAt: 0, current: 1 })),
+    onOnboardingChanged: vi.fn(() => () => {}),
   } as unknown as Api;
 }
 

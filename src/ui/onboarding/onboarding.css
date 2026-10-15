@@ -1,0 +1,13 @@
+/* Benvenuto e informativa: pagina all'installazione e vista del pannello. Usa le variabili di sidepanel/styles.css. */
+.onboarding-page { max-width: 720px; margin: 0 auto; min-height: 100vh; background: var(--bg); }
+.onboarding { display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+.onboarding p { margin: 0; }
+.onboarding ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.onboarding__title { margin: 0; font-size: 17px; color: var(--brand); }
+.onboarding__h { margin: 0; font-size: 13px; font-weight: 700; color: var(--text); }
+.onboarding__changes { border-color: var(--verify-border); background: var(--verify-soft); }
+.onboarding__contact { color: var(--muted); font-size: 12px; }
+.onboarding__cta { width: 100%; }
+.onboarding__review { display: flex; gap: 10px; align-items: center; justify-content: space-between; color: var(--muted); }
+.onboarding .legend { list-style: none; padding-left: 0; gap: 8px; }
+.legend li { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
