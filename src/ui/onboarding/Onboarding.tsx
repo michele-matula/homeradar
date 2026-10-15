@@ -114,7 +114,10 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
             nell'annuncio), città e zona, tipologia, m², locali, prezzo e link.
           </li>
           <li>Lo storico dei prezzi, per riconoscere i ribassi.</li>
-          <li>Lo stato che dai a ogni lead e le tue note. Le note le scrivi tu: non inserire dati personali che non ti servono.</li>
+          <li>
+            Lo stato che dai a ogni lead, le date di ricontatto e le tue note. Le note le scrivi tu: non inserire dati personali
+            che non ti servono.
+          </li>
         </ul>
         <h2 className="onboarding__h">Cosa non salva mai</h2>
         <ul>
@@ -153,6 +156,10 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
             <span>età stimata: Idealista e Subito non pubblicano la data dell'annuncio, quindi HomeRadar la stima; su Immobiliare l'età è esatta.</span>
           </li>
           <li><Badge priority="medium">−8%</Badge><span>ribasso rispetto al prezzo più alto visto.</span></li>
+          <li>
+            <Badge priority="high">3</Badge>
+            <span>sull'icona di HomeRadar: i richiami da fare oggi o in ritardo. Li trovi nella scheda «Richiami» del pannello.</span>
+          </li>
         </ul>
       </section>
       <p className="onboarding__contact">Per domande, rivolgiti a chi ti ha fornito HomeRadar.</p>

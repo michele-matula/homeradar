@@ -26,6 +26,8 @@ describe('Onboarding', () => {
     expect(screen.getByText(/finestra di salvataggio/)).toBeTruthy();
     expect(screen.getByText('online da almeno 90 giorni e ribassato di almeno 5%.')).toBeTruthy();
     expect(screen.getByText('● Alta')).toBeTruthy();
+    expect(screen.getByText(/le date di ricontatto/)).toBeTruthy();
+    expect(screen.getByText(/richiami da fare oggi o in ritardo/)).toBeTruthy();
     expect(screen.getByText('Per domande, rivolgiti a chi ti ha fornito HomeRadar.')).toBeTruthy();
     expect(screen.queryByText('Cosa è cambiato')).toBeNull();
   });

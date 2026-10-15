@@ -68,11 +68,11 @@ Lo stato di default di un lead senza record (`LeadService.listLeads`) e quello c
 
 `LeadService.dueRecallCount(now)`: conta via indice i record con `recallAt < addDays(startOfLocalDay(now), 1)`, escludendo per sicurezza quelli "Scartato".
 
-`purge` non cambia.
+`purge` salta anche i lead con un richiamo: un lead rimesso a mano su "Nuovo" conserva il richiamo e non viene cancellato.
 
 ## 6. Messaggi
 
-`setLeadState` in `src/shared/messages.ts`, il router e `api.ts` accettano anche `recallAt?: number | null`. Il router chiama già `hooks.leadsChanged()` dopo `setLeadState`, l'eliminazione e l'importazione: lo stesso hook ora aggiorna anche il segnale sull'icona.
+`setLeadState` in `src/shared/messages.ts`, il router e `api.ts` accettano anche `recallAt?: number | null`. Dopo `setLeadState` il router chiama il nuovo hook `recallsChanged()`, che nel background aggiorna il segnale sull'icona (il pannello si aggiorna già da sé). Anche `leadsChanged()`, chiamato dopo eliminazioni e importazione, aggiorna il segnale.
 
 ## 7. Icona dell'estensione
 
@@ -119,6 +119,7 @@ Il pannello manda il giorno scelto come mezzanotte locale (`startOfLocalDay` / `
 ## 9. Backup ed export
 
 - `LeadStateSchema` in `src/core/backup.ts`: `recallAt: num.nullable().optional()`, trasformato in `null` se manca. I backup già fatti restano importabili. `BACKUP_FORMAT_VERSION` non cambia: l'aggiunta è compatibile; una build precedente che importasse un backup nuovo scarterebbe solo il richiamo (nessuna build precedente è in uso).
+- Un lead "Scartato" letto dal file non porta un richiamo (`recallAt` diventa `null`).
 - L'unione non cambia: vince l'`updatedAt` più recente, che il richiamo aggiorna (regola 4).
 - Export XLSX/CSV: colonna "Richiamo" dopo "Stato", data `gg/mm/aaaa`, vuota se non c'è richiamo.
 

@@ -101,4 +101,24 @@ Naviga a mano, senza automazione: Idealista usa DataDome.
 35. Impostazioni → "Rivedi informativa".
     - [ ] Stessa schermata in sola lettura, con "Confermata il" e la data di oggi; "Chiudi" torna alle impostazioni.
 
+## Promemoria di ricontatto
+
+36. Aggiorna l'estensione su un profilo che aveva già confermato l'informativa (build precedente, poi questa).
+    - [ ] Il pannello chiede di riconfermare, con il riquadro "Cosa è cambiato" sulle date di ricontatto; la legenda spiega il numero rosso sull'icona.
+37. Su un lead "Nuovo": "Richiama…" → "Domani".
+    - [ ] Il lead passa a "Da contattare" e mostra "Richiamo <giorno> · domani"; nella scheda "Richiami" è sotto "Prossimi".
+38. Su un altro lead: "Richiama…" → nel campo data scegli oggi.
+    - [ ] Sull'icona compare "1" in rosso; passandoci sopra: "HomeRadar: 1 richiamo da fare".
+    - [ ] Chiudendo e riaprendo il pannello si apre la scheda "Richiami", con il contatore rosso e il lead sotto "Oggi".
+39. Sul lead di oggi: "Sposta…" → "Tra 1 settimana".
+    - [ ] Il lead va sotto "Prossimi" e il numero sull'icona sparisce.
+40. Rimetti il richiamo a oggi, poi premi "Fatto".
+    - [ ] L'etichetta del richiamo sparisce, torna "Richiama…" e il numero sull'icona sparisce.
+41. Su un lead con richiamo, cambia lo stato in "Scartato".
+    - [ ] Il richiamo sparisce e il lead non ha più "Richiama…".
+42. Nella scheda "Richiami", esporta CSV.
+    - [ ] La colonna "Richiamo" ha la data giusta (gg/mm/aaaa), non il giorno prima.
+43. Con un richiamo di oggi: "Esporta backup ora", "Azzera archivio annunci", poi "Importa backup".
+    - [ ] Il richiamo torna con la stessa data e il numero sull'icona ricompare.
+
 Se il sito è cambiato: ricattura le fixture (Immobiliare: piano MVP, Task 4; Idealista: piano 2026-10-13, Task 8; Subito: piano 2026-10-13-subito-adapter, Task 5), aggiorna schemi o selettori, riesegui `npm test`.
