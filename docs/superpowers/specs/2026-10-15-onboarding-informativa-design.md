@@ -45,7 +45,7 @@ Se l'agente chiude la scheda senza confermare:
 - l'icona dell'estensione mostra un pallino nel colore del marchio con il suggerimento "HomeRadar: conferma l'informativa per iniziare";
 - aprendo il pannello laterale compare la stessa schermata al posto della lista; il pulsante Impostazioni è nascosto.
 
-Dopo la conferma, una scheda del portale già aperta riprende a lavorare alla lettura successiva (payload nuovo o scansione del DOM) senza ricaricare. Se il pannello è aperto mentre l'agente conferma nella scheda, passa da solo alla lista dei lead.
+Dopo la conferma, una scheda del portale già aperta riprende a lavorare alla lettura successiva senza ricaricare: su Idealista alla prossima scansione delle card, su Immobiliare e Subito al prossimo payload (es. pagina successiva dei risultati), perché i dati della pagina già caricata arrivano una volta sola. Per questo, dopo il clic su "Apri", l'avviso diventa "Dopo aver confermato, ricarica la pagina" con il pulsante "Ricarica". Se il pannello è aperto mentre l'agente conferma nella scheda, passa da solo alla lista dei lead.
 
 ### Aggiornamento con informativa cambiata
 
@@ -132,7 +132,7 @@ Controllo: finché `needsOnboarding` è vero, `ingest` (restituisce `[]`) e `par
 
 - `src/shared/messages.ts`: `isPortalEnabled(portal)` diventa `portalState(portal): Promise<PortalState>`.
 - `src/content/controller.ts`: `isPortalEnabled` diventa `portalState: () => Promise<PortalState>`. A ogni lettura: `'active'` legge; `'off'` come oggi (niente lettura, via i badge); `'onboarding'` niente lettura, via i badge e `onOnboardingNeeded()` (iniettata) che mostra l'avviso. L'avviso si mostra al massimo una volta per controller, cioè per caricamento di pagina.
-- `src/content/banner.ts`: `showBanner(doc, text, action?)` con `action = { label, onClick }`; senza `action` resta "Ricarica" come oggi. Avviso di onboarding: testo come in §3, pulsante "Apri" che invia `openOnboarding`.
+- `src/content/banner.ts`: `showBanner(doc, text, action?)` con `action = { label, onClick }`; senza `action` resta "Ricarica" come oggi. Avviso di onboarding: testo come in §3, pulsante "Apri" che invia `openOnboarding` e sostituisce l'avviso con "HomeRadar: dopo aver confermato, ricarica la pagina" e il pulsante "Ricarica" (§3).
 
 ### Background
 
