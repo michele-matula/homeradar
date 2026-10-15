@@ -21,4 +21,20 @@ describe('HomeRadarDB migrazioni', () => {
     expect(await db.leadStates.get('immobiliare:128416572')).toMatchObject({ status: 'contacted' });
     expect(db.tables.map((t) => t.name)).not.toContain('idCalibration');
   });
+
+  it('v4: inizializza updatedAt dei lead con la data di cambio stato', async () => {
+    const name = `mig4-${Math.random()}`;
+    const old = new Dexie(name);
+    old.version(3).stores({
+      listings: 'key, lastSeenAt', priceSnapshots: '++id, listingKey, [listingKey+at]',
+      leadStates: 'listingKey, status', calibration: '[portal+portalId], portal', meta: 'key',
+    });
+    await old.table('leadStates').put({ listingKey: 'immobiliare:1', status: 'contacted', notes: 'x', statusChangedAt: 123 });
+    await old.table('leadStates').put({ listingKey: 'immobiliare:2', status: 'new', notes: '' });
+    old.close();
+
+    const db = new HomeRadarDB(name);
+    expect(await db.leadStates.get('immobiliare:1')).toMatchObject({ status: 'contacted', statusChangedAt: 123, updatedAt: 123 });
+    expect(await db.leadStates.get('immobiliare:2')).toMatchObject({ updatedAt: 0 });
+  });
 });

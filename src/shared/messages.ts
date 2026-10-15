@@ -16,7 +16,10 @@ export type Request =
   | { type: 'saveSettings'; settings: Settings }
   | { type: 'parseStatus'; portal: Portal; ok: boolean; errors: string[]; source: ParseSource }
   | { type: 'fallbackShown' }
-  | { type: 'getDiagnostics' };
+  | { type: 'getDiagnostics' }
+  | { type: 'exportBackup' }
+  | { type: 'importBackup'; backup: unknown }
+  | { type: 'getBackupStatus' };
 
 /** Per i content script: il portale è acceso nelle impostazioni? */
 export async function isPortalEnabled(portal: Portal): Promise<boolean> {

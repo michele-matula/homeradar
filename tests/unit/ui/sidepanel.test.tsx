@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { buildBackup } from '@/core/backup';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from '@/ui/sidepanel/App';
 import type { Api } from '@/ui/sidepanel/api';
@@ -23,7 +24,7 @@ function lead(id: number, priority: Priority, status: LeadStatus = 'new'): LeadV
       listingKey: key, portalId: id, priority, ageDays: 173, ageEstimated: false, ageUncertain: false, dropPercent: 5.6,
       dropCount: 1, maxKnownPrice: 249000, reasons: ['Online da 173 gg', 'Ribassato del 5,6%'], badgeText: '',
     },
-    state: { listingKey: key, status, notes: '', statusChangedAt: 0 },
+    state: { listingKey: key, status, notes: '', statusChangedAt: 0, updatedAt: 0 },
     prices: [
       { listingKey: key, price: 249000, at: 1, source: 'declared' },
       { listingKey: key, price: 235000, at: 2, source: 'declared' },
@@ -39,7 +40,7 @@ function from(portal: Portal, l: LeadView): LeadView {
 function fakeApi(leads: LeadView[], adapterWarning: Diagnostics['adapterWarning'] = {}): Api {
   return {
     listLeads: vi.fn(async () => leads),
-    setLeadState: vi.fn(async (k, p) => ({ listingKey: k, status: p.status ?? 'new', notes: p.notes ?? '', statusChangedAt: 0 })),
+    setLeadState: vi.fn(async (k, p) => ({ listingKey: k, status: p.status ?? 'new', notes: p.notes ?? '', statusChangedAt: 0, updatedAt: 0 })),
     deleteListing: vi.fn(async () => {}),
     deleteListings: vi.fn(async () => {}),
     deleteAllListings: vi.fn(async () => leads.length),
@@ -47,6 +48,9 @@ function fakeApi(leads: LeadView[], adapterWarning: Diagnostics['adapterWarning'
     saveSettings: vi.fn(async (s) => s),
     getDiagnostics: vi.fn(async () => ({ version: '0.1.0', counters: {}, errors: [], adapterWarning })),
     onLeadsChanged: vi.fn(() => () => {}),
+    exportBackup: vi.fn(async () => buildBackup({ listings: [], priceSnapshots: [], leadStates: [], calibration: [] }, 0, '0.1.0')),
+    importBackup: vi.fn(async () => ({ added: 0, updated: 0, unchanged: 0 })),
+    getBackupStatus: vi.fn(async () => ({ lastAt: null, lastAutoFailedAt: null, nextSlot: 1, pending: null })),
   };
 }
 

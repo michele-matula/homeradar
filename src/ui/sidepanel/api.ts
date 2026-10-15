@@ -1,6 +1,7 @@
 import { browser } from 'wxt/browser';
 import { LEADS_CHANGED, send } from '@/shared/messages';
-import type { Diagnostics, LeadState, LeadStatus, LeadView, Settings } from '@/shared/types';
+import type { BackupFile } from '@/core/backup';
+import type { BackupStatus, Diagnostics, ImportSummary, LeadState, LeadStatus, LeadView, Settings } from '@/shared/types';
 
 export interface Api {
   listLeads(): Promise<LeadView[]>;
@@ -11,6 +12,9 @@ export interface Api {
   getSettings(): Promise<Settings>;
   saveSettings(settings: Settings): Promise<Settings>;
   getDiagnostics(): Promise<Diagnostics>;
+  exportBackup(): Promise<BackupFile>;
+  importBackup(backup: unknown): Promise<ImportSummary>;
+  getBackupStatus(): Promise<BackupStatus>;
   onLeadsChanged(cb: () => void): () => void;
 }
 
@@ -23,6 +27,9 @@ export const defaultApi: Api = {
   getSettings: () => send({ type: 'getSettings' }),
   saveSettings: (settings) => send({ type: 'saveSettings', settings }),
   getDiagnostics: () => send({ type: 'getDiagnostics' }),
+  exportBackup: () => send({ type: 'exportBackup' }),
+  importBackup: (backup) => send({ type: 'importBackup', backup }),
+  getBackupStatus: () => send({ type: 'getBackupStatus' }),
   onLeadsChanged(cb) {
     const listener = (msg: unknown) => {
       if ((msg as { type?: string } | undefined)?.type === LEADS_CHANGED) cb();

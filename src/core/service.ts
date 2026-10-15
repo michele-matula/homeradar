@@ -1,12 +1,13 @@
 import Dexie from 'dexie';
 import { acceptLearnedPoint, DEFAULT_CALIBRATION, estimateCreatedAt, LEARN_RATE_PER_DAY, mergeCalibration, utcDay } from '@/core/age';
+import { AUTO_BACKUP_SLOTS, buildBackup, mergeBackup, parseBackup, type BackupFile } from '@/core/backup';
 import type { HomeRadarDB } from '@/core/db';
 import { warnedPortals } from '@/core/diagnostics';
 import { sortLeads } from '@/core/leads';
 import { evaluate } from '@/core/rules';
 import { validateSettings } from '@/core/settings';
 import {
-  DAY_MS, listingKey, type CalibrationHint, type Diagnostics, type Evaluation, type LeadState, type LeadStatus, type LeadView,
+  DAY_MS, listingKey, type BackupStatus, type CalibrationHint, type Diagnostics, type Evaluation, type ImportSummary, type LeadState, type LeadStatus, type LeadView,
   type ListingObservation, type ListingRecord, type ObservedPriceDrop, type Portal, type PriceDrop, type PriceSnapshot, type Settings,
 } from '@/shared/types';
 
@@ -83,7 +84,7 @@ export class LeadService {
         await listings.put(record);
         await this.recordSnapshots(key, drop, o.price, now);
         if (!(await leadStates.get(key))) {
-          await leadStates.add({ listingKey: key, status: 'new', notes: '', statusChangedAt: now });
+          await leadStates.add({ listingKey: key, status: 'new', notes: '', statusChangedAt: now, updatedAt: now });
         }
         const snaps = await priceSnapshots.where('listingKey').equals(key).toArray();
         evaluations.push(evaluate(record, snaps, settings, now));
@@ -116,7 +117,7 @@ export class LeadService {
       return {
         listing,
         evaluation: evaluate(listing, prices, settings, now),
-        state: stateByKey.get(listing.key) ?? { listingKey: listing.key, status: 'new', notes: '', statusChangedAt: listing.firstSeenAt },
+        state: stateByKey.get(listing.key) ?? { listingKey: listing.key, status: 'new', notes: '', statusChangedAt: listing.firstSeenAt, updatedAt: listing.firstSeenAt },
         prices,
       };
     });
@@ -127,12 +128,16 @@ export class LeadService {
     const now = this.clock();
     return this.db.transaction('rw', [this.db.listings, this.db.leadStates], async () => {
       if (!(await this.db.listings.get(key))) throw new Error('Annuncio non trovato');
-      const prev = (await this.db.leadStates.get(key)) ?? { listingKey: key, status: 'new' as LeadStatus, notes: '', statusChangedAt: now };
+      const prev = (await this.db.leadStates.get(key)) ?? { listingKey: key, status: 'new' as LeadStatus, notes: '', statusChangedAt: now, updatedAt: now };
       const next: LeadState = { ...prev };
-      if (patch.notes !== undefined) next.notes = patch.notes;
+      if (patch.notes !== undefined && patch.notes !== prev.notes) {
+        next.notes = patch.notes;
+        next.updatedAt = now;
+      }
       if (patch.status !== undefined && patch.status !== prev.status) {
         next.status = patch.status;
         next.statusChangedAt = now;
+        next.updatedAt = now;
       }
       await this.db.leadStates.put(next);
       return next;
@@ -172,6 +177,104 @@ export class LeadService {
       removed++;
     }
     return removed;
+  }
+
+  listingCount(): Promise<number> {
+    return this.db.listings.count();
+  }
+
+  async exportBackup(extensionVersion: string): Promise<BackupFile> {
+    const now = this.clock();
+    const { listings, priceSnapshots, leadStates, calibration, meta } = this.db;
+    const file = await this.db.transaction('r', [listings, priceSnapshots, leadStates, calibration, meta], async () => {
+      const saved = await meta.get('settings');
+      return buildBackup(
+        {
+          settings: saved ? validateSettings(saved.value as Partial<Settings>) : undefined,
+          listings: await listings.toArray(),
+          priceSnapshots: await priceSnapshots.toArray(),
+          leadStates: await leadStates.toArray(),
+          calibration: await calibration.toArray(),
+        },
+        now,
+        extensionVersion,
+      );
+    });
+    // Un backup che poi non si può ripristinare non deve risultare riuscito: lo si rilegge come farebbe l'importazione.
+    try {
+      parseBackup(JSON.parse(JSON.stringify(file)));
+    } catch (err) {
+      throw new Error(`Backup non ripristinabile: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    return file;
+  }
+
+  /** Unisce un backup ai dati presenti, in un'unica transazione: o tutto o niente. */
+  async importBackup(json: unknown): Promise<ImportSummary> {
+    const file = parseBackup(json);
+    const now = this.clock();
+    const { listings, priceSnapshots, leadStates, calibration, meta } = this.db;
+    return this.db.transaction('rw', [listings, priceSnapshots, leadStates, calibration, meta], async () => {
+      const m = mergeBackup(
+        {
+          listings: await listings.toArray(),
+          priceSnapshots: await priceSnapshots.toArray(),
+          leadStates: await leadStates.toArray(),
+          calibration: await calibration.toArray(),
+          settingsSaved: Boolean(await meta.get('settings')),
+        },
+        file,
+        now,
+      );
+      await listings.bulkPut(m.listings);
+      await priceSnapshots.bulkAdd(m.priceSnapshots);
+      await leadStates.bulkPut(m.leadStates);
+      await calibration.bulkPut(m.calibration);
+      if (m.settings) await meta.put({ key: 'settings', value: m.settings });
+      return m.summary;
+    });
+  }
+
+  async backupStatus(): Promise<BackupStatus> {
+    const rec = await this.db.meta.get('backup');
+    return { lastAt: null, lastAutoFailedAt: null, nextSlot: 1, pending: null, ...(rec?.value as Partial<BackupStatus> | undefined) };
+  }
+
+  private async updateBackupStatus(fn: (s: BackupStatus) => void): Promise<void> {
+    await this.db.transaction('rw', this.db.meta, async () => {
+      const s = await this.backupStatus();
+      fn(s);
+      await this.db.meta.put({ key: 'backup', value: s });
+    });
+  }
+
+  /** Backup automatico avviato: segnato prima del download, che può concludersi in un altro service worker. */
+  recordBackupStarted(slot: number, url: string): Promise<void> {
+    const at = this.clock();
+    return this.updateBackupStatus((s) => {
+      s.pending = { slot, url, startedAt: at };
+    });
+  }
+
+  /** Backup riuscito; `slotUsed` solo per quelli automatici, che ruotano sugli slot e chiudono quello in corso. */
+  recordBackup(slotUsed?: number): Promise<void> {
+    const at = this.clock();
+    return this.updateBackupStatus((s) => {
+      s.lastAt = at;
+      if (slotUsed !== undefined) {
+        s.nextSlot = (slotUsed % AUTO_BACKUP_SLOTS) + 1;
+        s.pending = null;
+      }
+    });
+  }
+
+  async recordBackupFailure(message: string): Promise<void> {
+    const at = this.clock();
+    await this.updateBackupStatus((s) => {
+      s.lastAutoFailedAt = at;
+      s.pending = null;
+    });
+    await this.recordError(`Backup automatico non riuscito: ${message}`);
   }
 
   private async diag(): Promise<Omit<Diagnostics, 'version'>> {

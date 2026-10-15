@@ -73,7 +73,7 @@ describe('LeadService.ingest', () => {
   it('non sovrascrive stato e note dell\'agente', async () => {
     const { db, svc } = setup();
     await svc.ingest([obs()]);
-    await db.leadStates.put({ listingKey: KEY, status: 'contacted', notes: 'richiamare', statusChangedAt: 1 });
+    await db.leadStates.put({ listingKey: KEY, status: 'contacted', notes: 'richiamare', statusChangedAt: 1, updatedAt: 1 });
     await svc.ingest([obs()]);
     expect(await db.leadStates.get(KEY)).toMatchObject({ status: 'contacted', notes: 'richiamare' });
   });

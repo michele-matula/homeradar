@@ -90,6 +90,29 @@ describe('handleRequest', () => {
     expect(h.leadsChanged).toHaveBeenCalledTimes(1);
   });
 
+  it('exportBackup registra il backup manuale; importBackup aggiorna il pannello', async () => {
+    const { svc } = setup();
+    const h = hooks();
+    await svc.ingest([obs()]);
+    const file = await handleRequest(svc, { type: 'exportBackup' }, '0.1.0', h);
+    expect(file).toMatchObject({ format: 'homeradar-backup', extensionVersion: '0.1.0' });
+    const status = (await handleRequest(svc, { type: 'getBackupStatus' }, 'v', h)) as { lastAt: number | null; nextSlot: number };
+    expect(status.lastAt).not.toBeNull();
+    expect(status.nextSlot).toBe(1);
+
+    const other = setup();
+    h.leadsChanged.mockClear();
+    expect(await handleRequest(other.svc, { type: 'importBackup', backup: JSON.parse(JSON.stringify(file)) }, 'v', h)).toEqual({ added: 1, updated: 0, unchanged: 0 });
+    expect(h.leadsChanged).toHaveBeenCalledTimes(1);
+  });
+
+  it('importBackup con un file non valido fallisce senza avvisare il pannello', async () => {
+    const { svc } = setup();
+    const h = hooks();
+    await expect(handleRequest(svc, { type: 'importBackup', backup: { foo: 1 } }, 'v', h)).rejects.toThrow();
+    expect(h.leadsChanged).not.toHaveBeenCalled();
+  });
+
   it('rifiuta richieste sconosciute', async () => {
     const { svc } = setup();
     await expect(handleRequest(svc, { type: 'boh' } as never, 'v', hooks())).rejects.toThrow('Richiesta sconosciuta: boh');

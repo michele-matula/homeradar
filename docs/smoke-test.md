@@ -67,4 +67,19 @@ Naviga a mano, senza automazione: Idealista usa DataDome.
 25. Impostazioni → "Copia report diagnostico".
     - [ ] Nessun avviso adattatore per Subito.it.
 
+## Backup
+
+26. Installa la build su un profilo Chrome nuovo e accetta i permessi.
+    - [ ] Chrome chiede il permesso "Gestire i download".
+27. Naviga una ricerca su un portale finché compaiono lead, poi attendi almeno 5 minuti con il browser aperto.
+    - [ ] Compare `Download/HomeRadar/homeradar-backup-1.json`; in Impostazioni "Ultimo backup" ha data e ora di oggi.
+28. Attiva in Chrome "Chiedi dove salvare ogni file prima di scaricarlo", azzera lo stato del backup (rimuovi l'estensione e reinstallala), ripeti il punto 27.
+    - [ ] Si apre la finestra di salvataggio (va segnalato nell'onboarding, roadmap punto 2). Prima di confermarla, in Impostazioni c'è "Backup automatico in corso".
+    - [ ] Aspetta almeno 1 minuto con la finestra aperta, poi conferma: riaprendo Impostazioni "Ultimo backup" ha data e ora di oggi, senza "non riuscito".
+    - [ ] Variante: annulla la finestra. In Impostazioni compare "Ultimo backup automatico non riuscito".
+29. Impostazioni → "Esporta backup ora".
+    - [ ] Scarica `homeradar-backup-AAAA-MM-GG.json`; il file non contiene nomi né telefoni dei venditori.
+30. Su un altro profilo Chrome pulito: Impostazioni → "Importa backup" con quel file.
+    - [ ] Riepilogo "Backup importato: N annunci nuovi…"; lead, stati, note, grafici prezzi e impostazioni come nel profilo di origine.
+
 Se il sito è cambiato: ricattura le fixture (Immobiliare: piano MVP, Task 4; Idealista: piano 2026-10-13, Task 8; Subito: piano 2026-10-13-subito-adapter, Task 5), aggiorna schemi o selettori, riesegui `npm test`.

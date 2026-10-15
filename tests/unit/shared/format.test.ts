@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatDayMonth, formatEuro, formatPercent, joinList } from '@/shared/format';
+import { formatDate, formatDateTime, formatDayMonth, formatEuro, formatPercent, joinList } from '@/shared/format';
 
 describe('format', () => {
   it('formatta gli euro con il punto delle migliaia', () => {
@@ -16,6 +16,12 @@ describe('format', () => {
   it('formatta le date in UTC', () => {
     expect(formatDate(Date.UTC(2026, 8, 21))).toBe('21/09/2026');
     expect(formatDayMonth(Date.UTC(2026, 8, 1))).toBe('01/09');
+  });
+});
+
+describe('formatDateTime', () => {
+  it('giorno, mese e ora locali', () => {
+    expect(formatDateTime(new Date(2026, 9, 12, 9, 5).getTime())).toBe('12/10 alle 09:05');
   });
 });
 

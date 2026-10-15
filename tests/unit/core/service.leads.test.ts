@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DAY_MS } from '@/shared/types';
-import { obs, setup } from './helpers';
+import { START, obs, setup } from './helpers';
 
 const KEY = 'immobiliare:128416572';
 
@@ -39,6 +39,18 @@ describe('LeadService.setLeadState', () => {
   it('rifiuta un annuncio sconosciuto', async () => {
     const { svc } = setup();
     await expect(svc.setLeadState('immobiliare:1', { status: 'contacted' })).rejects.toThrow('Annuncio non trovato');
+  });
+
+  it('aggiorna updatedAt a ogni cambio di stato o di note, non se nulla cambia', async () => {
+    const { db, svc, advance, now } = setup();
+    await svc.ingest([obs()]);
+    expect((await db.leadStates.get(KEY))!.updatedAt).toBe(START);
+    advance(1000);
+    expect((await svc.setLeadState(KEY, { status: 'to_contact' })).updatedAt).toBe(now());
+    advance(1000);
+    expect((await svc.setLeadState(KEY, { notes: 'chiamare sera' })).updatedAt).toBe(now());
+    advance(1000);
+    expect((await svc.setLeadState(KEY, { notes: 'chiamare sera', status: 'to_contact' })).updatedAt).toBe(now() - 1000);
   });
 });
 
