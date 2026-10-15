@@ -107,7 +107,8 @@ Naviga a mano, senza automazione: Idealista usa DataDome.
     - [ ] Il pannello chiede di riconfermare, con il riquadro "Cosa è cambiato" sulle date di ricontatto; la legenda spiega il numero rosso sull'icona.
 37. Su un lead "Nuovo": "Richiama…" → "Domani".
     - [ ] Il lead passa a "Da contattare" e mostra "Richiamo <giorno> · domani"; nella scheda "Richiami" è sotto "Prossimi".
-38. Su un altro lead: "Richiama…" → nel campo data scegli oggi.
+38. Su un altro lead: "Richiama…" → nel campo data scrivi la data di oggi da tastiera e premi Invio.
+    - [ ] Mentre scrivi l'anno la riga resta aperta e non si salva nulla; con Invio si salva il giorno scritto.
     - [ ] Sull'icona compare "1" in rosso; passandoci sopra: "HomeRadar: 1 richiamo da fare".
     - [ ] Chiudendo e riaprendo il pannello si apre la scheda "Richiami", con il contatore rosso e il lead sotto "Oggi".
 39. Sul lead di oggi: "Sposta…" → "Tra 1 settimana".

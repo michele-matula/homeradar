@@ -122,7 +122,8 @@ export default defineBackground(() => {
     if (alarm.name === 'purge') void service.purge();
     if (alarm.name === 'backup') void runAutoBackup(backupDeps).catch(backupError);
     if (alarm.name === 'recall') {
-      updateBadge();
+      // Anche il pannello aperto ricalcola gruppi ed etichette: "domani" diventa "oggi".
+      hooks.leadsChanged();
       scheduleRecallCheck();
     }
   });

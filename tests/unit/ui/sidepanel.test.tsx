@@ -127,14 +127,34 @@ describe('LeadItem', () => {
     expect(screen.queryByLabelText('Data del richiamo')).toBeNull();
   });
 
-  it('il campo data salva il giorno scelto; un campo svuotato non salva nulla', () => {
+  it('il campo data salva solo uscendo dal campo o con Invio, non a ogni cifra; un campo svuotato non salva nulla', () => {
     const onChange = vi.fn();
     render(<ul><LeadItem lead={withRecall(lead(1, 'high'), dayOffset(4))} now={Date.now()} onChange={onChange} onDelete={() => {}} /></ul>);
     fireEvent.click(screen.getByRole('button', { name: 'Sposta…' }));
-    fireEvent.change(screen.getByLabelText('Data del richiamo'), { target: { value: '' } });
+    const field = () => screen.getByLabelText('Data del richiamo');
+    // Scrivendo l'anno da tastiera Chrome passa da date intermedie valide (0202-03-09).
+    fireEvent.change(field(), { target: { value: '0202-03-09' } });
+    fireEvent.change(field(), { target: { value: '2031-03-09' } });
     expect(onChange).not.toHaveBeenCalled();
-    fireEvent.change(screen.getByLabelText('Data del richiamo'), { target: { value: '2031-03-09' } });
+    fireEvent.keyDown(field(), { key: 'Enter' });
     expect(onChange).toHaveBeenCalledWith({ recallAt: new Date(2031, 2, 9).getTime() });
+
+    onChange.mockClear();
+    fireEvent.click(screen.getByRole('button', { name: 'Sposta…' }));
+    fireEvent.change(field(), { target: { value: '' } });
+    fireEvent.blur(field());
+    expect(onChange).not.toHaveBeenCalled();
+    fireEvent.change(field(), { target: { value: '2031-04-01' } });
+    fireEvent.blur(field());
+    expect(onChange).toHaveBeenCalledWith({ recallAt: new Date(2031, 3, 1).getTime() });
+  });
+
+  it('le scorciatoie contano dal giorno in cui si clicca, anche se il pannello è aperto da ieri', () => {
+    const onChange = vi.fn();
+    render(<ul><LeadItem lead={lead(1, 'high')} now={dayOffset(-1) + 12 * 3600_000} onChange={onChange} onDelete={() => {}} /></ul>);
+    fireEvent.click(screen.getByRole('button', { name: 'Richiama…' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Domani' }));
+    expect(onChange).toHaveBeenCalledWith({ recallAt: dayOffset(1) });
   });
 
   it('con un richiamo scaduto: etichetta rossa, "Fatto" lo toglie, "Sposta…" riapre le scorciatoie', () => {

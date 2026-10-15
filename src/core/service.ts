@@ -124,7 +124,8 @@ export class LeadService {
         prices,
       };
     });
-    return sortLeads(views.filter((v) => v.evaluation.priority !== 'none' || v.state.status !== 'new'));
+    // Un lead con un richiamo resta visibile anche se è "Nuovo" senza segnali: l'icona lo conta.
+    return sortLeads(views.filter((v) => v.evaluation.priority !== 'none' || v.state.status !== 'new' || v.state.recallAt != null));
   }
 
   async setLeadState(key: string, patch: { status?: LeadStatus; notes?: string; recallAt?: number | null }): Promise<LeadState> {

@@ -110,7 +110,7 @@ Nuovo criterio d'ordinamento `recall` "Richiamo più vicino" in `SORT_KEYS` (`sr
 
 Non compare sui lead "Scartato".
 
-- **Senza richiamo:** pulsante piccolo "Richiama…" che apre una riga con un `<input type="date">` e le quattro scorciatoie. Scegliere una data o una scorciatoia salva subito e chiude la riga.
+- **Senza richiamo:** pulsante piccolo "Richiama…" che apre una riga con un `<input type="date">` e le quattro scorciatoie. Una scorciatoia salva subito e chiude la riga; il campo data salva uscendo dal campo o con Invio (scrivendo da tastiera ogni cifra produce una data intermedia), e le date prima del 2000 non sono valide.
 - **Con richiamo:** etichetta "Richiamo gio 17 ott · scaduto da 2 giorni" (rossa), "· oggi" (ambra), "· tra 3 giorni" (neutra); accanto i pulsanti **"Fatto"** e **"Sposta…"**, che apre la stessa riga di data e scorciatoie.
 - La card di un lead con richiamo scaduto ha il bordo sinistro rosso, con precedenza sul colore della priorità.
 

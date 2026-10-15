@@ -23,6 +23,10 @@ export function LeadItem({ lead, now, onChange, onDelete }: Props) {
     setPicking(false);
     onChange({ recallAt });
   };
+  const commitDate = (value: string) => {
+    const day = fromDateInput(value);
+    if (day != null) pick(day);
+  };
   useEffect(() => setNotes(state.notes), [state.notes]);
 
   const price = listing.currentPrice != null ? `€ ${formatEuro(listing.currentPrice)}` : 'Prezzo n.d.';
@@ -84,13 +88,15 @@ export function LeadItem({ lead, now, onChange, onDelete }: Props) {
                 className="field recall__date"
                 aria-label="Data del richiamo"
                 defaultValue={state.recallAt != null ? toDateInput(state.recallAt) : ''}
-                onChange={(e) => {
-                  const day = fromDateInput(e.target.value);
-                  if (day != null) pick(day);
+                // Si salva uscendo dal campo o con Invio: scrivendo da tastiera ogni cifra produce una data intermedia.
+                onBlur={(e) => commitDate(e.currentTarget.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') commitDate(e.currentTarget.value);
                 }}
               />
               {RECALL_SHORTCUTS.map((s) => (
-                <button key={s.days} type="button" className="chip" onClick={() => pick(addDays(startOfLocalDay(now), s.days))}>
+                // Date.now() e non `now`: il pannello può essere aperto da prima di mezzanotte.
+                <button key={s.days} type="button" className="chip" onClick={() => pick(addDays(startOfLocalDay(Date.now()), s.days))}>
                   {s.label}
                 </button>
               ))}

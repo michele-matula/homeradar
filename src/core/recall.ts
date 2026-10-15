@@ -73,11 +73,15 @@ export function toDateInput(dayMs: number): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
-/** Valore di `<input type="date">` → mezzanotte locale; null se vuoto o non è un giorno esistente. */
+/**
+ * Valore di `<input type="date">` → mezzanotte locale; null se vuoto, se non è un giorno esistente o se l'anno
+ * è prima del 2000 (date intermedie mentre si scrive l'anno da tastiera).
+ */
 export function fromDateInput(value: string): number | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!m) return null;
   const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  if (y < 2000) return null;
   const date = new Date(y, mo - 1, d);
   return date.getFullYear() === y && date.getMonth() === mo - 1 && date.getDate() === d ? date.getTime() : null;
 }

@@ -84,6 +84,9 @@ describe('formati e campo data', () => {
     expect(fromDateInput('')).toBeNull();
     expect(fromDateInput('2026-02-30')).toBeNull();
     expect(fromDateInput('17/10/2026')).toBeNull();
+    // Anni intermedi mentre si scrive l'anno da tastiera.
+    expect(fromDateInput('0202-10-17')).toBeNull();
+    expect(fromDateInput('1999-10-17')).toBeNull();
   });
 
   it('scorciatoie', () => {

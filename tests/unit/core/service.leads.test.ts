@@ -214,3 +214,16 @@ describe('LeadService: richiami', () => {
     expect(await db.listings.toCollection().primaryKeys()).toEqual([KEY]);
   });
 });
+
+describe('LeadService.listLeads: richiami', () => {
+  it('mostra un lead "Nuovo" senza segnali se ha un richiamo, così il pannello lo vede come l\'icona', async () => {
+    const { svc } = setup();
+    await svc.ingest([obs({ portalId: 131597836, lastDrop: null, price: 410000 })]); // nessun segnale
+    const key = 'immobiliare:131597836';
+    await svc.setLeadState(key, { recallAt: startOfLocalDay(START) });
+    await svc.setLeadState(key, { status: 'new' });
+    const leads = await svc.listLeads();
+    expect(leads.map((l) => [l.listing.key, l.evaluation.priority, l.state.status])).toEqual([[key, 'none', 'new']]);
+    expect(await svc.dueRecallCount(START)).toBe(1);
+  });
+});
