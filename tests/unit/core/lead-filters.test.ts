@@ -55,6 +55,12 @@ describe('parseThousands', () => {
     expect(parseThousands('150.5')).toBe(150500);
     expect(parseThousands('0')).toBe(0);
   });
+  it('accetta il separatore senza cifre dopo (mentre si scrive "150,5") o prima', () => {
+    expect(parseThousands('150,')).toBe(150000);
+    expect(parseThousands('150.')).toBe(150000);
+    expect(parseThousands(',5')).toBe(500);
+    expect(parseThousands(',')).toBe('invalid');
+  });
   it('vuoto è null, il resto è invalid', () => {
     expect(parseThousands('')).toBeNull();
     expect(parseThousands('  ')).toBeNull();

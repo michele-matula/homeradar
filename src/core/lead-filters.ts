@@ -28,11 +28,14 @@ export function matchesText(lead: LeadView, text: string): boolean {
   return ws.every((w) => fields.some((f) => f.includes(w)));
 }
 
-/** Migliaia di euro scritte dall'agente ("150", "150,5") in euro. Vuoto = nessun limite. */
+/**
+ * Migliaia di euro scritte dall'agente ("150", "150,5") in euro. Vuoto = nessun limite.
+ * "150," vale 150: è il passaggio intermedio mentre si scrive un decimale e non deve segnare errore.
+ */
 export function parseThousands(input: string): number | null | 'invalid' {
   const s = input.trim();
   if (!s) return null;
-  if (!/^\d+(?:[.,]\d+)?$/.test(s)) return 'invalid';
+  if (!/^(?:\d+(?:[.,]\d*)?|[.,]\d+)$/.test(s)) return 'invalid';
   return Math.round(Number(s.replace(',', '.')) * 1000);
 }
 

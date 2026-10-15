@@ -382,7 +382,7 @@ describe('App', () => {
     expect(screen.queryByRole('button', { name: 'Azzera filtri' })).toBeNull();
   });
 
-  it('i filtri restano attivi quando la lista si aggiorna e l\'export indica la vista filtrata', async () => {
+  it('i filtri restano attivi e si applicano ai lead nuovi quando la lista si aggiorna; l\'export indica la vista filtrata', async () => {
     let notify = () => {};
     const api = fakeApi([at(lead(1, 'high'), { zone: 'Navile' }), lead(2, 'high')]);
     api.onLeadsChanged = vi.fn((cb: () => void) => {
@@ -391,10 +391,14 @@ describe('App', () => {
     });
     render(<App api={api} />);
     fireEvent.change(await screen.findByLabelText('Cerca nei lead'), { target: { value: 'navile' } });
-    await act(async () => notify());
-    expect(titles()).toEqual(['Bilocale 1']);
-    expect((screen.getByLabelText('Cerca nei lead') as HTMLInputElement).value).toBe('navile');
     expect(screen.getByText('Esporta la vista corrente (1)')).toBeTruthy();
+    // Dal portale arrivano un lead della zona cercata e uno di un'altra zona.
+    api.listLeads = vi.fn(async () => [at(lead(1, 'high'), { zone: 'Navile' }), lead(2, 'high'), at(lead(5, 'high'), { zone: 'Navile' }), lead(6, 'high')]);
+    await act(async () => notify());
+    expect(titles()).toEqual(['Bilocale 1', 'Bilocale 5']);
+    expect(screen.getByRole('tab', { name: 'Nuovi (2)' })).toBeTruthy();
+    expect((screen.getByLabelText('Cerca nei lead') as HTMLInputElement).value).toBe('navile');
+    expect(screen.getByText('Esporta la vista corrente (2)')).toBeTruthy();
   });
 });
 
