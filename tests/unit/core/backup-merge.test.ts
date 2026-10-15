@@ -4,7 +4,7 @@ import { DEFAULT_SETTINGS, type LeadState } from '@/shared/types';
 import { listing, NOW } from './backup-builders';
 
 const K = 'immobiliare:128416572';
-const state = (o: Partial<LeadState> = {}): LeadState => ({ listingKey: K, status: 'new', notes: '', statusChangedAt: 1, updatedAt: 1, ...o });
+const state = (o: Partial<LeadState> = {}): LeadState => ({ listingKey: K, status: 'new', notes: '', statusChangedAt: 1, updatedAt: 1, recallAt: null, ...o });
 const empty = (): CurrentData => ({ listings: [], priceSnapshots: [], leadStates: [], calibration: [], settingsSaved: false });
 const file = (o: Partial<BackupData> = {}): BackupData => ({ listings: [listing()], priceSnapshots: [], leadStates: [state()], calibration: [], ...o });
 
@@ -18,7 +18,7 @@ describe('mergeBackup', () => {
 
   it('a un annuncio aggiunto senza stato dà lo stato "new"', () => {
     const m = mergeBackup(empty(), file({ leadStates: [] }), NOW);
-    expect(m.leadStates).toEqual([{ listingKey: K, status: 'new', notes: '', statusChangedAt: NOW, updatedAt: NOW }]);
+    expect(m.leadStates).toEqual([{ listingKey: K, status: 'new', notes: '', statusChangedAt: NOW, updatedAt: NOW, recallAt: null }]);
   });
 
   it('lo stesso contenuto non produce scritture, anche con le chiavi in ordine diverso', () => {

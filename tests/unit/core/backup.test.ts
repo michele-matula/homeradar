@@ -8,7 +8,7 @@ function data(): BackupData {
     settings: { ...DEFAULT_SETTINGS, minAgeDays: 90 },
     listings: [listing()],
     priceSnapshots: [{ listingKey: 'immobiliare:128416572', price: 235000, at: NOW, source: 'observed' }],
-    leadStates: [{ listingKey: 'immobiliare:128416572', status: 'to_contact', notes: 'sera', statusChangedAt: 5, updatedAt: 6 }],
+    leadStates: [{ listingKey: 'immobiliare:128416572', status: 'to_contact', notes: 'sera', statusChangedAt: 5, updatedAt: 6, recallAt: null }],
     calibration: [{ portal: 'idealista', portalId: 34000000, createdAt: Date.UTC(2026, 9, 1) }],
   };
 }

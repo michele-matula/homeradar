@@ -64,7 +64,7 @@ const SnapshotSchema = z.object({ listingKey: z.string(), price: num, at: num, s
 
 const LeadStateSchema = z
   .object({ listingKey: z.string(), status: z.enum(LEAD_STATUSES), notes: z.string(), statusChangedAt: num, updatedAt: num.optional() })
-  .transform((s): LeadState => ({ ...s, updatedAt: s.updatedAt ?? s.statusChangedAt }));
+  .transform((s): LeadState => ({ ...s, updatedAt: s.updatedAt ?? s.statusChangedAt, recallAt: null }));
 
 const CalibrationSchema = z.object({ portal, portalId: int, createdAt: num });
 
@@ -199,7 +199,7 @@ export function mergeBackup(current: CurrentData, incoming: BackupData, now: num
       out.listings.push(inc);
       out.summary.added++;
       if (!incStates.has(inc.key) && !curStates.has(inc.key)) {
-        out.leadStates.push({ listingKey: inc.key, status: 'new', notes: '', statusChangedAt: now, updatedAt: now });
+        out.leadStates.push({ listingKey: inc.key, status: 'new', notes: '', statusChangedAt: now, updatedAt: now, recallAt: null });
       }
       continue;
     }

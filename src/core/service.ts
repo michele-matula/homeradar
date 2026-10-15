@@ -5,6 +5,7 @@ import type { HomeRadarDB } from '@/core/db';
 import { warnedPortals } from '@/core/diagnostics';
 import { sortLeads } from '@/core/leads';
 import { ONBOARDING_VERSION } from '@/core/onboarding';
+import { addDays, startOfLocalDay } from '@/core/recall';
 import { evaluate } from '@/core/rules';
 import { validateSettings } from '@/core/settings';
 import {
@@ -13,6 +14,7 @@ import {
 } from '@/shared/types';
 
 export const VISIT_GAP_MS = 30 * 60_000;
+export const RECALL_ON_DISCARDED = 'Impossibile impostare un richiamo su un lead scartato';
 
 /** Dà una data al ribasso: quella del portale, quella già registrata per lo stesso ribasso o oggi. */
 function resolveDrop(drop: ObservedPriceDrop | null, prev: PriceDrop | null, now: number): PriceDrop | null {
@@ -85,7 +87,7 @@ export class LeadService {
         await listings.put(record);
         await this.recordSnapshots(key, drop, o.price, now);
         if (!(await leadStates.get(key))) {
-          await leadStates.add({ listingKey: key, status: 'new', notes: '', statusChangedAt: now, updatedAt: now });
+          await leadStates.add({ listingKey: key, status: 'new', notes: '', statusChangedAt: now, updatedAt: now, recallAt: null });
         }
         const snaps = await priceSnapshots.where('listingKey').equals(key).toArray();
         evaluations.push(evaluate(record, snaps, settings, now));
@@ -118,31 +120,50 @@ export class LeadService {
       return {
         listing,
         evaluation: evaluate(listing, prices, settings, now),
-        state: stateByKey.get(listing.key) ?? { listingKey: listing.key, status: 'new', notes: '', statusChangedAt: listing.firstSeenAt, updatedAt: listing.firstSeenAt },
+        state: stateByKey.get(listing.key) ?? { listingKey: listing.key, status: 'new', notes: '', statusChangedAt: listing.firstSeenAt, updatedAt: listing.firstSeenAt, recallAt: null },
         prices,
       };
     });
     return sortLeads(views.filter((v) => v.evaluation.priority !== 'none' || v.state.status !== 'new'));
   }
 
-  async setLeadState(key: string, patch: { status?: LeadStatus; notes?: string }): Promise<LeadState> {
+  async setLeadState(key: string, patch: { status?: LeadStatus; notes?: string; recallAt?: number | null }): Promise<LeadState> {
     const now = this.clock();
     return this.db.transaction('rw', [this.db.listings, this.db.leadStates], async () => {
       if (!(await this.db.listings.get(key))) throw new Error('Annuncio non trovato');
-      const prev = (await this.db.leadStates.get(key)) ?? { listingKey: key, status: 'new' as LeadStatus, notes: '', statusChangedAt: now, updatedAt: now };
-      const next: LeadState = { ...prev };
+      const prev = (await this.db.leadStates.get(key)) ?? { listingKey: key, status: 'new' as LeadStatus, notes: '', statusChangedAt: now, updatedAt: now, recallAt: null };
+      const next: LeadState = { ...prev, recallAt: prev.recallAt ?? null };
+      const recallAt = patch.recallAt == null ? patch.recallAt : startOfLocalDay(patch.recallAt);
+      let status = patch.status ?? prev.status;
+      if (status === 'discarded' && recallAt != null) throw new Error(RECALL_ON_DISCARDED);
+      // Un lead con un richiamo è già in lavorazione: da "Nuovo" passa a "Da contattare".
+      if (recallAt != null && status === 'new') status = 'to_contact';
       if (patch.notes !== undefined && patch.notes !== prev.notes) {
         next.notes = patch.notes;
         next.updatedAt = now;
       }
-      if (patch.status !== undefined && patch.status !== prev.status) {
-        next.status = patch.status;
+      if (status !== prev.status) {
+        next.status = status;
         next.statusChangedAt = now;
+        next.updatedAt = now;
+      }
+      const nextRecall = status === 'discarded' ? null : recallAt === undefined ? next.recallAt : recallAt;
+      if (nextRecall !== next.recallAt) {
+        next.recallAt = nextRecall;
         next.updatedAt = now;
       }
       await this.db.leadStates.put(next);
       return next;
     });
+  }
+
+  /** Richiami da fare oggi o in ritardo, per il numero sull'icona. */
+  dueRecallCount(now: number): Promise<number> {
+    return this.db.leadStates
+      .where('recallAt')
+      .below(addDays(startOfLocalDay(now), 1))
+      .filter((s) => s.status !== 'discarded')
+      .count();
   }
 
   async deleteListing(key: string): Promise<void> {
@@ -173,7 +194,8 @@ export class LeadService {
     let removed = 0;
     for (const key of stale) {
       const state = await this.db.leadStates.get(key);
-      if (state && state.status !== 'new') continue;
+      // Un lead lavorato o con un richiamo resta, anche se rimesso a mano su "Nuovo".
+      if (state && (state.status !== 'new' || state.recallAt != null)) continue;
       await this.deleteListing(key);
       removed++;
     }
