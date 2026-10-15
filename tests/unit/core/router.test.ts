@@ -4,12 +4,19 @@ import { DEFAULT_SETTINGS } from '@/shared/types';
 import { obs, setup } from './helpers';
 
 function hooks() {
-  return { setWarning: vi.fn(), leadsChanged: vi.fn() };
+  return { setWarning: vi.fn(), leadsChanged: vi.fn(), onboardingChanged: vi.fn(), openOnboarding: vi.fn(async () => {}) };
+}
+
+/** Servizio con l'informativa già confermata: i test esistenti lavorano su un'estensione attiva. */
+async function ready() {
+  const s = setup();
+  await s.svc.acceptOnboarding();
+  return s;
 }
 
 describe('handleRequest', () => {
   it('ingest restituisce le valutazioni e notifica il pannello', async () => {
-    const { svc } = setup();
+    const { svc } = await ready();
     const h = hooks();
     const evs = (await handleRequest(svc, { type: 'ingest', observations: [obs()] }, '0.1.0', h)) as { priority: string }[];
     expect(evs[0]!.priority).toBe('high');
@@ -21,7 +28,7 @@ describe('handleRequest', () => {
   });
 
   it("parseStatus gestisce l'avviso per portale e registra gli errori", async () => {
-    const { svc } = setup();
+    const { svc } = await ready();
     const h = hooks();
     await handleRequest(svc, { type: 'parseStatus', portal: 'immobiliare', ok: false, errors: ['search data not found'], source: 'api' }, '0.1.0', h);
     expect(h.setWarning).toHaveBeenLastCalledWith(true);
@@ -39,7 +46,7 @@ describe('handleRequest', () => {
   });
 
   it("parseStatus aggiorna il pannello solo quando l'avviso del portale cambia", async () => {
-    const { svc } = setup();
+    const { svc } = await ready();
     const h = hooks();
     const status = (ok: boolean) => handleRequest(svc, { type: 'parseStatus', portal: 'subito', ok, errors: [], source: 'next-data' }, 'v', h);
     await status(true);
@@ -54,7 +61,7 @@ describe('handleRequest', () => {
   });
 
   it('un portale spento non salva annunci né avvisi', async () => {
-    const { svc } = setup();
+    const { svc } = await ready();
     const h = hooks();
     await handleRequest(svc, { type: 'parseStatus', portal: 'subito', ok: false, errors: [], source: 'api' }, 'v', h);
     await handleRequest(svc, { type: 'saveSettings', settings: { ...DEFAULT_SETTINGS, enabledPortals: { ...DEFAULT_SETTINGS.enabledPortals, subito: false } } }, 'v', h);
@@ -72,7 +79,7 @@ describe('handleRequest', () => {
   });
 
   it('inoltra le richieste del pannello', async () => {
-    const { svc } = setup();
+    const { svc } = await ready();
     const h = hooks();
     await svc.ingest([obs()]);
     expect(((await handleRequest(svc, { type: 'listLeads' }, 'v', h)) as unknown[]).length).toBe(1);
@@ -91,7 +98,7 @@ describe('handleRequest', () => {
   });
 
   it('exportBackup registra il backup manuale; importBackup aggiorna il pannello', async () => {
-    const { svc } = setup();
+    const { svc } = await ready();
     const h = hooks();
     await svc.ingest([obs()]);
     const file = await handleRequest(svc, { type: 'exportBackup' }, '0.1.0', h);
@@ -100,21 +107,68 @@ describe('handleRequest', () => {
     expect(status.lastAt).not.toBeNull();
     expect(status.nextSlot).toBe(1);
 
-    const other = setup();
+    const other = await ready();
     h.leadsChanged.mockClear();
     expect(await handleRequest(other.svc, { type: 'importBackup', backup: JSON.parse(JSON.stringify(file)) }, 'v', h)).toEqual({ added: 1, updated: 0, unchanged: 0 });
     expect(h.leadsChanged).toHaveBeenCalledTimes(1);
   });
 
   it('importBackup con un file non valido fallisce senza avvisare il pannello', async () => {
-    const { svc } = setup();
+    const { svc } = await ready();
     const h = hooks();
     await expect(handleRequest(svc, { type: 'importBackup', backup: { foo: 1 } }, 'v', h)).rejects.toThrow();
     expect(h.leadsChanged).not.toHaveBeenCalled();
   });
 
-  it('rifiuta richieste sconosciute', async () => {
+  it("senza conferma dell'informativa non salva annunci né avvisi", async () => {
     const { svc } = setup();
+    const h = hooks();
+    expect(await handleRequest(svc, { type: 'ingest', observations: [obs()] }, 'v', h)).toEqual([]);
+    expect(await handleRequest(svc, { type: 'parseStatus', portal: 'immobiliare', ok: false, errors: ['x'], source: 'api' }, 'v', h)).toBeNull();
+    expect(await svc.listLeads()).toEqual([]);
+    const d = await svc.getDiagnostics('v');
+    expect(d.errors).toEqual([]);
+    expect(d.adapterWarning).toEqual({});
+    expect(h.leadsChanged).not.toHaveBeenCalled();
+    expect(h.setWarning).not.toHaveBeenCalled();
+    // Le richieste del pannello passano comunque.
+    expect(await handleRequest(svc, { type: 'getSettings' }, 'v', h)).toEqual(DEFAULT_SETTINGS);
+  });
+
+  it('getPortalState: in attesa della conferma, poi acceso o spento', async () => {
+    const { svc } = setup();
+    const h = hooks();
+    expect(await handleRequest(svc, { type: 'getPortalState', portal: 'subito' }, 'v', h)).toBe('onboarding');
+    await svc.saveSettings({ ...DEFAULT_SETTINGS, enabledPortals: { ...DEFAULT_SETTINGS.enabledPortals, subito: false } });
+    // Finché manca la conferma vince l'informativa, anche su un portale spento.
+    expect(await handleRequest(svc, { type: 'getPortalState', portal: 'subito' }, 'v', h)).toBe('onboarding');
+    await handleRequest(svc, { type: 'acceptOnboarding' }, 'v', h);
+    expect(await handleRequest(svc, { type: 'getPortalState', portal: 'subito' }, 'v', h)).toBe('off');
+    expect(await handleRequest(svc, { type: 'getPortalState', portal: 'immobiliare' }, 'v', h)).toBe('active');
+  });
+
+  it("acceptOnboarding salva, avvisa le pagine e sblocca la lettura", async () => {
+    const { svc, now } = setup();
+    const h = hooks();
+    expect(await handleRequest(svc, { type: 'getOnboardingStatus' }, 'v', h)).toMatchObject({ acceptedVersion: null });
+    expect(await handleRequest(svc, { type: 'acceptOnboarding' }, 'v', h)).toMatchObject({ acceptedVersion: 1, acceptedAt: now() });
+    expect(h.onboardingChanged).toHaveBeenCalledTimes(1);
+    const evs = (await handleRequest(svc, { type: 'ingest', observations: [obs()] }, 'v', h)) as unknown[];
+    expect(evs).toHaveLength(1);
+  });
+
+  it("openOnboarding apre la scheda; un errore finisce nel diagnostico", async () => {
+    const { svc } = setup();
+    const h = hooks();
+    expect(await handleRequest(svc, { type: 'openOnboarding' }, 'v', h)).toBeNull();
+    expect(h.openOnboarding).toHaveBeenCalledTimes(1);
+    h.openOnboarding.mockRejectedValueOnce(new Error('No current window'));
+    expect(await handleRequest(svc, { type: 'openOnboarding' }, 'v', h)).toBeNull();
+    expect((await svc.getDiagnostics('v')).errors.at(-1)!.message).toBe("Apertura dell'informativa: No current window");
+  });
+
+  it('rifiuta richieste sconosciute', async () => {
+    const { svc } = await ready();
     await expect(handleRequest(svc, { type: 'boh' } as never, 'v', hooks())).rejects.toThrow('Richiesta sconosciuta: boh');
   });
 });

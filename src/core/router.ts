@@ -1,10 +1,21 @@
+import { needsOnboarding } from '@/core/onboarding';
 import type { LeadService } from '@/core/service';
 import type { Request } from '@/shared/messages';
-import { PORTALS } from '@/shared/types';
+import { PORTALS, type PortalState } from '@/shared/types';
 
 export interface RouterHooks {
   setWarning(on: boolean): void;
   leadsChanged(): void;
+  /** Conferma dell'informativa cambiata: le pagine dell'estensione si aggiornano. */
+  onboardingChanged(): void;
+  /** Apre la scheda di benvenuto. */
+  openOnboarding(): Promise<void>;
+}
+
+/** Finché l'informativa non è confermata non si legge né si salva nulla dai portali. */
+async function awaitingOnboarding(service: LeadService): Promise<boolean> {
+  const s = await service.onboardingStatus();
+  return needsOnboarding(s.acceptedVersion, s.current);
 }
 
 const PAYLOAD_COUNTERS = { api: 'apiPayloads', 'next-data': 'nextDataPayloads', dom: 'domScans' } as const;
@@ -12,6 +23,7 @@ const PAYLOAD_COUNTERS = { api: 'apiPayloads', 'next-data': 'nextDataPayloads', 
 export async function handleRequest(service: LeadService, req: Request, version: string, hooks: RouterHooks): Promise<unknown> {
   switch (req.type) {
     case 'ingest': {
+      if (await awaitingOnboarding(service)) return [];
       // Difesa in profondità: anche se un content script invia dati, un portale spento non salva nulla.
       const enabled = (await service.getSettings()).enabledPortals;
       const observations = req.observations.filter((o) => enabled[o.portal]);
@@ -51,6 +63,7 @@ export async function handleRequest(service: LeadService, req: Request, version:
       return saved;
     }
     case 'parseStatus': {
+      if (await awaitingOnboarding(service)) return null;
       if (!(await service.getSettings()).enabledPortals[req.portal]) return null;
       await service.bumpCounter(PAYLOAD_COUNTERS[req.source]);
       for (const e of req.errors.slice(0, 5)) await service.recordError(e);
@@ -78,6 +91,25 @@ export async function handleRequest(service: LeadService, req: Request, version:
     }
     case 'getBackupStatus':
       return service.backupStatus();
+    case 'getOnboardingStatus':
+      return service.onboardingStatus();
+    case 'acceptOnboarding': {
+      const status = await service.acceptOnboarding();
+      hooks.onboardingChanged();
+      return status;
+    }
+    case 'getPortalState': {
+      let state: PortalState = 'onboarding';
+      if (!(await awaitingOnboarding(service))) state = (await service.getSettings()).enabledPortals[req.portal] ? 'active' : 'off';
+      return state;
+    }
+    case 'openOnboarding':
+      try {
+        await hooks.openOnboarding();
+      } catch (err) {
+        await service.recordError(`Apertura dell'informativa: ${err instanceof Error ? err.message : String(err)}`);
+      }
+      return null;
     default:
       throw new Error(`Richiesta sconosciuta: ${(req as { type?: string }).type}`);
   }
