@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { groupByStatus, SORT_KEYS, sortLeads, sortLeadsBy } from '@/core/leads';
+import { groupByRecall, groupByStatus, SORT_KEYS, sortLeads, sortLeadsBy } from '@/core/leads';
 import type { LeadStatus, LeadView, Priority } from '@/shared/types';
 
 function lead(key: string, priority: Priority, ageDays: number | null, status: LeadStatus = 'new'): LeadView {
@@ -18,7 +18,7 @@ describe('sortLeads', () => {
   });
 });
 
-interface Fields { priority?: Priority; age?: number | null; drop?: number; price?: number | null; m2?: number | null; first?: number; last?: number; changed?: number }
+interface Fields { priority?: Priority; age?: number | null; drop?: number; price?: number | null; m2?: number | null; first?: number; last?: number; changed?: number; recall?: number | null }
 
 function item(key: string, f: Fields): LeadView {
   const base = lead(key, f.priority ?? 'high', f.age === undefined ? 100 : f.age);
@@ -26,7 +26,7 @@ function item(key: string, f: Fields): LeadView {
     ...base,
     listing: { key, currentPrice: f.price ?? null, surfaceM2: f.m2 ?? null, firstSeenAt: f.first ?? 0, lastSeenAt: f.last ?? 0 } as LeadView['listing'],
     evaluation: { ...base.evaluation, dropPercent: f.drop ?? 0 },
-    state: { ...base.state, statusChangedAt: f.changed ?? 0 },
+    state: { ...base.state, statusChangedAt: f.changed ?? 0, recallAt: f.recall ?? null },
   };
 }
 const keys = (ls: LeadView[]) => ls.map((l) => l.listing.key);
@@ -91,5 +91,34 @@ describe('groupByStatus', () => {
     expect(g.contacted.map((l) => l.listing.key)).toEqual(['b']);
     expect(g.to_contact).toEqual([]);
     expect(g.discarded).toEqual([]);
+  });
+});
+
+describe('richiami', () => {
+  const day = (d: number) => new Date(2026, 9, d).getTime();
+  const now = new Date(2026, 9, 15, 14).getTime();
+
+  it('"Richiamo più vicino": data crescente, senza richiamo in fondo, a parità la priorità', () => {
+    const sorted = sortLeadsBy([
+      item('a', { recall: null, priority: 'high' }),
+      item('b', { recall: day(20) }),
+      item('c', { recall: day(13), priority: 'medium' }),
+      item('d', { recall: day(13), priority: 'high' }),
+    ], 'recall');
+    expect(sorted.map((l) => l.listing.key)).toEqual(['d', 'c', 'b', 'a']);
+  });
+
+  it('raggruppa in Scaduti, Oggi, Prossimi, saltando i gruppi vuoti e i lead senza richiamo', () => {
+    const groups = groupByRecall([
+      item('futuro', { recall: day(18) }),
+      item('nessuno', { recall: null }),
+      item('ieri', { recall: day(14) }),
+      item('vecchio', { recall: day(2) }),
+      item('presto', { recall: day(16) }),
+    ], now);
+    expect(groups.map((g) => [g.kind, g.leads.map((l) => l.listing.key)])).toEqual([
+      ['overdue', ['vecchio', 'ieri']],
+      ['upcoming', ['presto', 'futuro']],
+    ]);
   });
 });
