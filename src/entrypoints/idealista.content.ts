@@ -1,6 +1,7 @@
 import { idealistaAdapter } from '@/adapters/idealista';
+import { showOnboardingBanner } from '@/content/banner';
 import { createController } from '@/content/controller';
-import { isPortalEnabled, send } from '@/shared/messages';
+import { portalState, send } from '@/shared/messages';
 
 // Idealista è renderizzato lato server: si legge il DOM già mostrato, senza bridge.
 // La pagina non viene modificata, se non per aggiungere i badge.
@@ -9,7 +10,9 @@ export default defineContentScript({
   runAt: 'document_idle',
   main(ctx) {
     const controller = createController({
-      adapter: idealistaAdapter, send, root: document, getUrl: () => location.href, isPortalEnabled: () => isPortalEnabled('idealista'),
+      adapter: idealistaAdapter, send, root: document, getUrl: () => location.href,
+      portalState: () => portalState('idealista'),
+      onOnboardingNeeded: () => showOnboardingBanner(document, () => send({ type: 'openOnboarding' })),
     });
     const scan = () => controller.scan().catch((err) => console.warn('[HomeRadar]', err));
     scan();

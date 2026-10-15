@@ -55,7 +55,13 @@ function readText(file: File): Promise<string> {
   });
 }
 
-export function SettingsView({ api, onSaved, download = downloadBlob }: { api: Api; onSaved(): void; download?: (b: Blob, name: string) => void }) {
+export function SettingsView({ api, onSaved, download = downloadBlob, onOpenGuide }: {
+  api: Api;
+  onSaved(): void;
+  download?: (b: Blob, name: string) => void;
+  /** Apre l'informativa in sola lettura. */
+  onOpenGuide?: () => void;
+}) {
   const [form, setForm] = useState<Settings | null>(null);
   /** Ultime impostazioni salvate: gli interruttori salvano subito, senza le modifiche ancora in sospeso nei campi. */
   const [saved, setSaved] = useState<Settings | null>(null);
@@ -275,6 +281,13 @@ export function SettingsView({ api, onSaved, download = downloadBlob }: { api: A
             lo stesso annuncio, tiene lo stato e le note modificati più di recente. Le impostazioni del backup si
             usano solo se qui non le hai mai cambiate.
           </InfoTip>
+        </div>
+      </div>
+      <div className="card">
+        <h2 className="card__title">Informativa e guida</h2>
+        <p className="card__text">Cosa fa HomeRadar, cosa salva e come leggere i badge.</p>
+        <div className="settings__row">
+          <button type="button" className="btn" onClick={onOpenGuide}>Rivedi informativa</button>
         </div>
       </div>
       <div className="card">

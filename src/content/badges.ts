@@ -1,5 +1,6 @@
 import type { PortalAdapter } from '@/adapters/types';
-import type { Evaluation, Priority } from '@/shared/types';
+import { BADGE_COLORS, BADGE_LOOK } from '@/shared/badge-style';
+import type { Evaluation } from '@/shared/types';
 
 export const BADGE_ATTR = 'data-homeradar-badge';
 
@@ -8,17 +9,8 @@ export const BADGE_ATTR = 'data-homeradar-badge';
 const BASE: Record<string, string> = {
   position: 'absolute', top: '8px', left: '8px', right: 'auto', bottom: 'auto',
   width: 'auto', height: 'auto', 'max-width': 'calc(100% - 16px)', margin: '0', transform: 'none',
-  display: 'inline-block', 'box-sizing': 'border-box', overflow: 'hidden', 'text-overflow': 'ellipsis',
-  'z-index': '5', 'pointer-events': 'none', padding: '4px 10px', 'border-radius': '999px',
-  'border-width': '1px', 'border-style': 'solid', font: "600 12px/1.3 Inter, 'Segoe UI', system-ui, sans-serif", 'white-space': 'nowrap',
-  'letter-spacing': '0.01em', 'box-shadow': '0 1px 2px rgba(16,24,40,.12), 0 2px 8px rgba(16,24,40,.18)',
-};
-
-const COLORS: Record<Priority, Record<string, string>> = {
-  high: { background: '#c0262d', color: '#ffffff', 'border-color': '#a01e24' },
-  medium: { background: '#fff4e0', color: '#8a3f04', 'border-color': '#f2cf8c' },
-  verify: { background: '#eaf1fd', color: '#1d5fd1', 'border-color': '#b6ccf5' },
-  none: { background: '#ffffff', color: '#0f4c5c', 'border-color': '#cdd5db' },
+  overflow: 'hidden', 'text-overflow': 'ellipsis', 'z-index': '5', 'pointer-events': 'none',
+  ...BADGE_LOOK,
 };
 
 export function renderBadge(
@@ -44,7 +36,7 @@ export function renderBadge(
   }
   badge.textContent = ev.badgeText;
   badge.dataset.priority = ev.priority;
-  for (const [prop, value] of Object.entries({ ...BASE, ...COLORS[ev.priority] })) {
+  for (const [prop, value] of Object.entries({ ...BASE, ...BADGE_COLORS[ev.priority] })) {
     badge.style.setProperty(prop, value, 'important');
   }
   return result;

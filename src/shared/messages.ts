@@ -1,7 +1,8 @@
 import { browser } from 'wxt/browser';
-import type { CalibrationHint, LeadStatus, ListingObservation, Portal, Settings } from '@/shared/types';
+import type { CalibrationHint, LeadStatus, ListingObservation, Portal, PortalState, Settings } from '@/shared/types';
 
 export const LEADS_CHANGED = 'leadsChanged';
+export const ONBOARDING_CHANGED = 'onboardingChanged';
 
 export type ParseSource = 'next-data' | 'api' | 'dom';
 
@@ -19,11 +20,15 @@ export type Request =
   | { type: 'getDiagnostics' }
   | { type: 'exportBackup' }
   | { type: 'importBackup'; backup: unknown }
-  | { type: 'getBackupStatus' };
+  | { type: 'getBackupStatus' }
+  | { type: 'getOnboardingStatus' }
+  | { type: 'acceptOnboarding' }
+  | { type: 'getPortalState'; portal: Portal }
+  | { type: 'openOnboarding' };
 
-/** Per i content script: il portale è acceso nelle impostazioni? */
-export async function isPortalEnabled(portal: Portal): Promise<boolean> {
-  return (await send<Settings>({ type: 'getSettings' })).enabledPortals[portal];
+/** Per i content script: leggere (attivo), no (spento) o no e avvisare (informativa da confermare). */
+export function portalState(portal: Portal): Promise<PortalState> {
+  return send<PortalState>({ type: 'getPortalState', portal });
 }
 
 export type Response<T> = { ok: true; data: T } | { ok: false; error: string };

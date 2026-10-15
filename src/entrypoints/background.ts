@@ -1,22 +1,45 @@
 import { createFileSaver, isOffscreenRequest } from '@/background/file-saver';
+import { actionBadge } from '@/core/action-badge';
 import { runAutoBackup, settleAutoBackup, type AutoBackupDeps } from '@/core/auto-backup';
 import { HomeRadarDB } from '@/core/db';
+import { warnedPortals } from '@/core/diagnostics';
+import { needsOnboarding } from '@/core/onboarding';
 import { handleRequest, type RouterHooks } from '@/core/router';
 import { LeadService } from '@/core/service';
-import { LEADS_CHANGED, type Request } from '@/shared/messages';
+import { LEADS_CHANGED, ONBOARDING_CHANGED, type Request } from '@/shared/messages';
 
 export default defineBackground(() => {
   const service = new LeadService(new HomeRadarDB());
   const version = browser.runtime.getManifest().version;
 
+  /** Un solo punto decide il segnale sull'icona: conferma mancante prima dell'avviso dei portali. */
+  async function refreshActionBadge(): Promise<void> {
+    const [status, diag] = await Promise.all([service.onboardingStatus(), service.getDiagnostics(version)]);
+    const badge = actionBadge({
+      onboarding: needsOnboarding(status.acceptedVersion, status.current),
+      warning: warnedPortals(diag.adapterWarning).length > 0,
+    });
+    await browser.action.setBadgeText({ text: badge.text });
+    if (badge.color) await browser.action.setBadgeBackgroundColor({ color: badge.color });
+    await browser.action.setTitle({ title: badge.title });
+  }
+  const updateBadge = () => void refreshActionBadge().catch(() => {});
+
+  async function openOnboarding(): Promise<void> {
+    await browser.tabs.create({ url: browser.runtime.getURL('/onboarding.html') });
+  }
+
   const hooks: RouterHooks = {
-    setWarning(on) {
-      void browser.action.setBadgeText({ text: on ? '!' : '' });
-      if (on) void browser.action.setBadgeBackgroundColor({ color: '#d97706' });
-    },
+    // L'avviso è già salvato nel diagnostico: il segnale si ricalcola da lì.
+    setWarning: () => updateBadge(),
     leadsChanged() {
       browser.runtime.sendMessage({ type: LEADS_CHANGED }).catch(() => {});
     },
+    onboardingChanged() {
+      browser.runtime.sendMessage({ type: ONBOARDING_CHANGED }).catch(() => {});
+      updateBadge();
+    },
+    openOnboarding,
   };
 
   const saver = createFileSaver({
@@ -55,11 +78,22 @@ export default defineBackground(() => {
     if (state === 'complete' || state === 'interrupted') void settleAutoBackup(backupDeps).catch(backupError);
   });
 
+  // Prima installazione: scheda di benvenuto. Aggiornamento: solo se l'informativa va riconfermata.
+  browser.runtime.onInstalled.addListener(({ reason }) => {
+    void (async () => {
+      const status = await service.onboardingStatus();
+      if (reason === 'install' || (reason === 'update' && needsOnboarding(status.acceptedVersion, status.current))) await openOnboarding();
+    })().catch((err: unknown) =>
+      service.recordError(`Apertura dell'informativa: ${err instanceof Error ? err.message : String(err)}`).catch(() => {}),
+    );
+  });
+  updateBadge();
+
   browser.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
 
   browser.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     const type = (msg as { type?: unknown } | undefined)?.type;
-    if (typeof type !== 'string' || type === LEADS_CHANGED || isOffscreenRequest(msg)) return false;
+    if (typeof type !== 'string' || type === LEADS_CHANGED || type === ONBOARDING_CHANGED || isOffscreenRequest(msg)) return false;
     handleRequest(service, msg as Request, version, hooks).then(
       (data) => sendResponse({ ok: true, data }),
       (err: unknown) => sendResponse({ ok: false, error: err instanceof Error ? err.message : String(err) }),

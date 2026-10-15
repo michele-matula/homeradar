@@ -1,7 +1,7 @@
 import { browser } from 'wxt/browser';
-import { LEADS_CHANGED, send } from '@/shared/messages';
+import { LEADS_CHANGED, ONBOARDING_CHANGED, send } from '@/shared/messages';
 import type { BackupFile } from '@/core/backup';
-import type { BackupStatus, Diagnostics, ImportSummary, LeadState, LeadStatus, LeadView, Settings } from '@/shared/types';
+import type { BackupStatus, Diagnostics, ImportSummary, LeadState, LeadStatus, LeadView, OnboardingStatus, Settings } from '@/shared/types';
 
 export interface Api {
   listLeads(): Promise<LeadView[]>;
@@ -15,7 +15,19 @@ export interface Api {
   exportBackup(): Promise<BackupFile>;
   importBackup(backup: unknown): Promise<ImportSummary>;
   getBackupStatus(): Promise<BackupStatus>;
+  getOnboardingStatus(): Promise<OnboardingStatus>;
+  acceptOnboarding(): Promise<OnboardingStatus>;
   onLeadsChanged(cb: () => void): () => void;
+  onOnboardingChanged(cb: () => void): () => void;
+}
+
+/** Ascolta un messaggio diffuso dal background a tutte le pagine dell'estensione. */
+function onBroadcast(type: string, cb: () => void): () => void {
+  const listener = (msg: unknown) => {
+    if ((msg as { type?: string } | undefined)?.type === type) cb();
+  };
+  browser.runtime.onMessage.addListener(listener);
+  return () => browser.runtime.onMessage.removeListener(listener);
 }
 
 export const defaultApi: Api = {
@@ -30,11 +42,8 @@ export const defaultApi: Api = {
   exportBackup: () => send({ type: 'exportBackup' }),
   importBackup: (backup) => send({ type: 'importBackup', backup }),
   getBackupStatus: () => send({ type: 'getBackupStatus' }),
-  onLeadsChanged(cb) {
-    const listener = (msg: unknown) => {
-      if ((msg as { type?: string } | undefined)?.type === LEADS_CHANGED) cb();
-    };
-    browser.runtime.onMessage.addListener(listener);
-    return () => browser.runtime.onMessage.removeListener(listener);
-  },
+  getOnboardingStatus: () => send({ type: 'getOnboardingStatus' }),
+  acceptOnboarding: () => send({ type: 'acceptOnboarding' }),
+  onLeadsChanged: (cb) => onBroadcast(LEADS_CHANGED, cb),
+  onOnboardingChanged: (cb) => onBroadcast(ONBOARDING_CHANGED, cb),
 };

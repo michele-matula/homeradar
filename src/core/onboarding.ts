@@ -1,0 +1,21 @@
+/**
+ * Versione dell'informativa. Si alza solo se cambia cosa viene salvato o come viene usato
+ * (es. nuovi dati del lead): l'agente deve riconfermare. Refusi e legenda non la alzano.
+ */
+export const ONBOARDING_VERSION = 1;
+
+/** Voci del riquadro "Cosa è cambiato", per versione dell'informativa. */
+export const ONBOARDING_CHANGES: Record<number, string[]> = {};
+
+/** Vero se l'informativa non è mai stata confermata o è stata confermata in una versione precedente. */
+export function needsOnboarding(acceptedVersion: number | null, current = ONBOARDING_VERSION): boolean {
+  return acceptedVersion === null || acceptedVersion < current;
+}
+
+/** Novità delle versioni successive a quella confermata; vuoto alla prima conferma. */
+export function changesSince(acceptedVersion: number | null, changes = ONBOARDING_CHANGES, current = ONBOARDING_VERSION): string[] {
+  if (acceptedVersion === null) return [];
+  const out: string[] = [];
+  for (let v = acceptedVersion + 1; v <= current; v++) out.push(...(changes[v] ?? []));
+  return out;
+}

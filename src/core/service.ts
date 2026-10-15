@@ -4,11 +4,12 @@ import { AUTO_BACKUP_SLOTS, buildBackup, mergeBackup, parseBackup, type BackupFi
 import type { HomeRadarDB } from '@/core/db';
 import { warnedPortals } from '@/core/diagnostics';
 import { sortLeads } from '@/core/leads';
+import { ONBOARDING_VERSION } from '@/core/onboarding';
 import { evaluate } from '@/core/rules';
 import { validateSettings } from '@/core/settings';
 import {
   DAY_MS, listingKey, type BackupStatus, type CalibrationHint, type Diagnostics, type Evaluation, type ImportSummary, type LeadState, type LeadStatus, type LeadView,
-  type ListingObservation, type ListingRecord, type ObservedPriceDrop, type Portal, type PriceDrop, type PriceSnapshot, type Settings,
+  type ListingObservation, type ListingRecord, type ObservedPriceDrop, type OnboardingStatus, type Portal, type PriceDrop, type PriceSnapshot, type Settings,
 } from '@/shared/types';
 
 export const VISIT_GAP_MS = 30 * 60_000;
@@ -238,6 +239,22 @@ export class LeadService {
   async backupStatus(): Promise<BackupStatus> {
     const rec = await this.db.meta.get('backup');
     return { lastAt: null, lastAutoFailedAt: null, nextSlot: 1, pending: null, ...(rec?.value as Partial<BackupStatus> | undefined) };
+  }
+
+  async onboardingStatus(): Promise<OnboardingStatus> {
+    const rec = (await this.db.meta.get('onboarding'))?.value as { version?: unknown; acceptedAt?: unknown } | undefined;
+    const version = rec?.version;
+    const acceptedAt = rec?.acceptedAt;
+    // Un record di forma inattesa non vale come conferma.
+    if (typeof version !== 'number' || typeof acceptedAt !== 'number') {
+      return { acceptedVersion: null, acceptedAt: null, current: ONBOARDING_VERSION };
+    }
+    return { acceptedVersion: version, acceptedAt, current: ONBOARDING_VERSION };
+  }
+
+  async acceptOnboarding(): Promise<OnboardingStatus> {
+    await this.db.meta.put({ key: 'onboarding', value: { version: ONBOARDING_VERSION, acceptedAt: this.clock() } });
+    return this.onboardingStatus();
   }
 
   private async updateBackupStatus(fn: (s: BackupStatus) => void): Promise<void> {

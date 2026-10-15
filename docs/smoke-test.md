@@ -82,4 +82,20 @@ Naviga a mano, senza automazione: Idealista usa DataDome.
 30. Su un altro profilo Chrome pulito: Impostazioni → "Importa backup" con quel file.
     - [ ] Riepilogo "Backup importato: N annunci nuovi…"; lead, stati, note, grafici prezzi e impostazioni come nel profilo di origine.
 
+## Onboarding e informativa
+
+31. Installa la build su un profilo Chrome nuovo.
+    - [ ] Si apre da sola la scheda "Benvenuto in HomeRadar"; la legenda mostra le soglie delle impostazioni (120 giorni di default).
+    - [ ] L'icona dell'estensione ha un pallino; passandoci sopra: "HomeRadar: conferma l'informativa per iniziare".
+32. Chiudi la scheda senza confermare e apri una ricerca su Immobiliare.it.
+    - [ ] Nessun badge; compare l'avviso "HomeRadar non è ancora attivo…" con "Apri".
+    - [ ] Il pannello laterale mostra l'informativa, senza lista e senza pulsante Impostazioni.
+33. Premi "Apri" nell'avviso.
+    - [ ] Si apre la scheda di benvenuto; l'avviso diventa "dopo aver confermato, ricarica la pagina".
+34. Premi "Ho capito, inizia" nella scheda.
+    - [ ] La scheda dice "HomeRadar è attivo"; il pannello, se aperto, passa da solo alla lista; il pallino sull'icona sparisce.
+    - [ ] Ricaricando la ricerca compaiono i badge. Su Idealista compaiono anche senza ricaricare, scorrendo i risultati.
+35. Impostazioni → "Rivedi informativa".
+    - [ ] Stessa schermata in sola lettura, con "Confermata il" e la data di oggi; "Chiudi" torna alle impostazioni.
+
 Se il sito è cambiato: ricattura le fixture (Immobiliare: piano MVP, Task 4; Idealista: piano 2026-10-13, Task 8; Subito: piano 2026-10-13-subito-adapter, Task 5), aggiorna schemi o selettori, riesegui `npm test`.
