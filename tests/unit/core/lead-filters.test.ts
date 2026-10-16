@@ -11,6 +11,7 @@ function lead(key: string, f: ListingFields = {}): LeadView {
     state: { listingKey: key, status: 'new', notes: '', statusChangedAt: 0, updatedAt: 0, recallAt: null },
     prices: [],
     market: null,
+    others: [],
   };
 }
 const keys = (ls: LeadView[]) => ls.map((l) => l.listing.key);
@@ -124,5 +125,15 @@ describe('applyQuery, isEmptyQuery, describeQuery', () => {
     expect(describeQuery({ text: '', minPrice: 0, maxPrice: null })).toEqual(['da 0 k€']);
     expect(describeQuery({ text: '', minPrice: null, maxPrice: 250000 })).toEqual(['fino a 250 k€']);
     expect(describeQuery({ text: '', minPrice: 250000, maxPrice: 150000 })).toEqual(['150–250 k€']);
+  });
+});
+
+describe('matchesText su un lead unito', () => {
+  it("trova il lead anche dal testo di un'altra fonte", () => {
+    const main = lead('immobiliare:1', { title: 'Bilocale', address: null });
+    const other = lead('idealista:2', { title: 'Bilocale in via Padova' });
+    const merged: LeadView = { ...main, others: [{ listing: other.listing, evaluation: other.evaluation, prices: [] }] };
+    expect(matchesText(merged, 'padova')).toBe(true);
+    expect(matchesText(main, 'padova')).toBe(false);
   });
 });

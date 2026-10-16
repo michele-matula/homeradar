@@ -105,3 +105,15 @@ describe('LeadService backup', () => {
     expect(await a.svc.listingCount()).toBe(2);
   });
 });
+
+describe('LeadService backup separazioni', () => {
+  it('le separazioni passano dal backup a un altro browser', async () => {
+    const a = setup();
+    await a.svc.ingest([obs(), obs({ portal: 'idealista', portalId: 2, url: 'https://www.idealista.it/immobile/2/', lastDrop: null })]);
+    await a.db.splits.put({ a: 'idealista:2', b: 'immobiliare:128416572', at: 5 });
+    const file = JSON.parse(JSON.stringify(await a.svc.exportBackup('v')));
+    const b = setup();
+    await b.svc.importBackup(file);
+    expect(await b.db.splits.toArray()).toEqual([{ a: 'idealista:2', b: 'immobiliare:128416572', at: 5 }]);
+  });
+});

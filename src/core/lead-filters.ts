@@ -19,12 +19,14 @@ const words = (text: string): string[] => {
   return n ? n.split(' ') : [];
 };
 
-/** Ogni parola della ricerca deve comparire in almeno uno dei campi testuali dell'annuncio. */
+/** Ogni parola della ricerca deve comparire in almeno uno dei campi testuali di una fonte del lead. */
 export function matchesText(lead: LeadView, text: string): boolean {
   const ws = words(text);
   if (!ws.length) return true;
-  const { title, address, city, zone, typology } = lead.listing;
-  const fields = [title, address, city, zone, typology].filter((f): f is string => f != null).map(normalize);
+  const fields = [lead.listing, ...lead.others.map((o) => o.listing)]
+    .flatMap(({ title, address, city, zone, typology }) => [title, address, city, zone, typology])
+    .filter((f): f is string => f != null)
+    .map(normalize);
   return ws.every((w) => fields.some((f) => f.includes(w)));
 }
 

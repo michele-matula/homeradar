@@ -9,7 +9,8 @@ export type ParseSource = 'next-data' | 'api' | 'dom';
 export type Request =
   | { type: 'ingest'; observations: ListingObservation[]; calibrationHint?: CalibrationHint }
   | { type: 'listLeads' }
-  | { type: 'setLeadState'; listingKey: string; status?: LeadStatus; notes?: string; recallAt?: number | null }
+  | { type: 'setLeadState'; listingKeys: string[]; status?: LeadStatus; notes?: string; recallAt?: number | null }
+  | { type: 'splitListing'; listingKey: string; fromKeys: string[] }
   | { type: 'deleteListing'; listingKey: string }
   | { type: 'deleteListings'; listingKeys: string[] }
   | { type: 'deleteAllListings' }

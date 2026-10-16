@@ -39,10 +39,15 @@ export async function handleRequest(service: LeadService, req: Request, version:
     case 'listLeads':
       return service.listLeads();
     case 'setLeadState': {
-      const state = await service.setLeadState(req.listingKey, { status: req.status, notes: req.notes, recallAt: req.recallAt });
+      const state = await service.setLeadState(req.listingKeys, { status: req.status, notes: req.notes, recallAt: req.recallAt });
       hooks.recallsChanged();
       return state;
     }
+    case 'splitListing':
+      await service.splitListing(req.listingKey, req.fromKeys);
+      // Separare può cambiare il numero dei richiami: un gruppo diventa due lead.
+      hooks.recallsChanged();
+      return null;
     case 'deleteListing':
       await service.deleteListing(req.listingKey);
       hooks.leadsChanged();

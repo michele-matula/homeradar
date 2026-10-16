@@ -3,11 +3,12 @@ import { acceptLearnedPoint, DEFAULT_CALIBRATION, estimateCreatedAt, LEARN_RATE_
 import { AUTO_BACKUP_SLOTS, buildBackup, mergeBackup, parseBackup, type BackupFile } from '@/core/backup';
 import type { HomeRadarDB } from '@/core/db';
 import { warnedPortals } from '@/core/diagnostics';
-import { sortLeads } from '@/core/leads';
-import { compareToMarket } from '@/core/market';
+import { buildLeadViews, defaultState, isListed, mergeGroupState, type Archive } from '@/core/lead-groups';
+import { leadKeys, sortLeads } from '@/core/leads';
 import { ONBOARDING_VERSION } from '@/core/onboarding';
 import { addDays, startOfLocalDay } from '@/core/recall';
 import { evaluate } from '@/core/rules';
+import { groupListings, splitPair } from '@/core/same-property';
 import { validateSettings } from '@/core/settings';
 import {
   DAY_MS, listingKey, type BackupStatus, type CalibrationHint, type Diagnostics, type Evaluation, type ImportSummary, type LeadState, type LeadStatus, type LeadView,
@@ -16,6 +17,36 @@ import {
 
 export const VISIT_GAP_MS = 30 * 60_000;
 export const RECALL_ON_DISCARDED = 'Impossibile impostare un richiamo su un lead scartato';
+
+type LeadPatch = { status?: LeadStatus; notes?: string; recallAt?: number | null };
+
+/** Applica la modifica dell'agente a uno stato: `updatedAt` avanza solo se qualcosa cambia. */
+function nextLeadState(prev: LeadState, patch: LeadPatch, now: number): LeadState {
+  const next: LeadState = { ...prev, recallAt: prev.recallAt ?? null };
+  const recallAt = patch.recallAt == null ? patch.recallAt : startOfLocalDay(patch.recallAt);
+  let status = patch.status ?? prev.status;
+  if (status === 'discarded' && recallAt != null) throw new Error(RECALL_ON_DISCARDED);
+  // Un lead con un richiamo è già in lavorazione: da "Nuovo" passa a "Da contattare".
+  if (recallAt != null && status === 'new') status = 'to_contact';
+  if (patch.notes !== undefined && patch.notes !== prev.notes) {
+    next.notes = patch.notes;
+    next.updatedAt = now;
+  }
+  if (status !== prev.status) {
+    next.status = status;
+    next.statusChangedAt = now;
+    next.updatedAt = now;
+  }
+  const nextRecall = status === 'discarded' ? null : recallAt === undefined ? next.recallAt : recallAt;
+  if (nextRecall !== next.recallAt) {
+    next.recallAt = nextRecall;
+    next.updatedAt = now;
+  }
+  return next;
+}
+
+const sameState = (a: LeadState, b: LeadState) =>
+  a.status === b.status && a.notes === b.notes && (a.recallAt ?? null) === b.recallAt && a.statusChangedAt === b.statusChangedAt;
 
 /** Dà una data al ribasso: quella del portale, quella già registrata per lo stesso ribasso o oggi. */
 function resolveDrop(drop: ObservedPriceDrop | null, prev: PriceDrop | null, now: number): PriceDrop | null {
@@ -41,7 +72,7 @@ export class LeadService {
     const settings = await this.getSettings();
     const { listings, priceSnapshots, leadStates, calibration } = this.db;
 
-    return this.db.transaction('rw', [listings, priceSnapshots, leadStates, calibration], async () => {
+    const evaluations = await this.db.transaction('rw', [listings, priceSnapshots, leadStates, calibration], async () => {
       for (const o of observations) {
         if (o.portalCreatedAt != null) await calibration.put({ portal: o.portal, portalId: o.portalId, createdAt: o.portalCreatedAt });
       }
@@ -56,7 +87,7 @@ export class LeadService {
         }
       }
 
-      const evaluations: Evaluation[] = [];
+      const out: Evaluation[] = [];
       for (const o of observations) {
         if (o.sellerType !== 'private') continue;
         const key = listingKey(o.portal, o.portalId);
@@ -91,10 +122,34 @@ export class LeadService {
           await leadStates.add({ listingKey: key, status: 'new', notes: '', statusChangedAt: now, updatedAt: now, recallAt: null });
         }
         const snaps = await priceSnapshots.where('listingKey').equals(key).toArray();
-        evaluations.push(evaluate(record, snaps, settings, now));
+        out.push(evaluate(record, snaps, settings, now));
       }
-      return evaluations;
+      return out;
     });
+    return this.withGroups(evaluations, settings, now);
+  }
+
+  /** Per gli annunci che fanno parte di un gruppo, la card mostra la valutazione del gruppo. */
+  private async withGroups(evaluations: Evaluation[], settings: Settings, now: number): Promise<Evaluation[]> {
+    if (!evaluations.length) return evaluations;
+    const byKey = new Map<string, Evaluation>();
+    for (const v of buildLeadViews(await this.archive(), settings, now)) {
+      if (v.others.length) for (const k of leadKeys(v)) byKey.set(k, v.evaluation);
+    }
+    return evaluations.map((e) => {
+      const g = byKey.get(e.listingKey);
+      return g ? { ...g, listingKey: e.listingKey, portalId: e.portalId } : e;
+    });
+  }
+
+  private async archive(): Promise<Archive> {
+    const [listings, states, snapshots, splits] = await Promise.all([
+      this.db.listings.toArray(),
+      this.db.leadStates.toArray(),
+      this.db.priceSnapshots.toArray(),
+      this.db.splits.toArray(),
+    ]);
+    return { listings, states, snapshots, splits };
   }
 
   async saveSettings(input: Partial<Settings>): Promise<Settings> {
@@ -105,70 +160,69 @@ export class LeadService {
   }
 
   async listLeads(): Promise<LeadView[]> {
-    const now = this.clock();
     const settings = await this.getSettings();
-    const [listings, states, snaps] = await Promise.all([
-      this.db.listings.toArray(),
-      this.db.leadStates.toArray(),
-      this.db.priceSnapshots.toArray(),
-    ]);
-    const stateByKey = new Map(states.map((s) => [s.listingKey, s]));
-    const snapsByKey = new Map<string, PriceSnapshot[]>();
-    for (const s of snaps) snapsByKey.set(s.listingKey, [...(snapsByKey.get(s.listingKey) ?? []), s]);
-
-    // Mediana sull'archivio intero, prima di nascondere i lead senza segnali: anche loro sono prezzi della zona.
-    const market = compareToMarket(listings);
-    const views = listings.map((listing): LeadView => {
-      const prices = (snapsByKey.get(listing.key) ?? []).sort((a, b) => a.at - b.at);
-      return {
-        listing,
-        evaluation: evaluate(listing, prices, settings, now),
-        state: stateByKey.get(listing.key) ?? { listingKey: listing.key, status: 'new', notes: '', statusChangedAt: listing.firstSeenAt, updatedAt: listing.firstSeenAt, recallAt: null },
-        prices,
-        market: market.get(listing.key) ?? null,
-      };
-    });
+    const views = buildLeadViews(await this.archive(), settings, this.clock());
     // Un lead con un richiamo resta visibile anche se è "Nuovo" senza segnali: l'icona lo conta.
-    return sortLeads(views.filter((v) => v.evaluation.priority !== 'none' || v.state.status !== 'new' || v.state.recallAt != null));
+    return sortLeads(views.filter(isListed));
   }
 
-  async setLeadState(key: string, patch: { status?: LeadStatus; notes?: string; recallAt?: number | null }): Promise<LeadState> {
+  /**
+   * Stato, note e richiamo di uno o più annunci, in una transazione. Per lo stesso immobile su più portali la modifica
+   * parte dallo stato del gruppo e lo stesso stato completo va su tutti i membri, così non restano stati diversi.
+   */
+  async setLeadState(keys: string | string[], patch: LeadPatch): Promise<LeadState> {
     const now = this.clock();
-    return this.db.transaction('rw', [this.db.listings, this.db.leadStates], async () => {
-      if (!(await this.db.listings.get(key))) throw new Error('Annuncio non trovato');
-      const prev = (await this.db.leadStates.get(key)) ?? { listingKey: key, status: 'new' as LeadStatus, notes: '', statusChangedAt: now, updatedAt: now, recallAt: null };
-      const next: LeadState = { ...prev, recallAt: prev.recallAt ?? null };
-      const recallAt = patch.recallAt == null ? patch.recallAt : startOfLocalDay(patch.recallAt);
-      let status = patch.status ?? prev.status;
-      if (status === 'discarded' && recallAt != null) throw new Error(RECALL_ON_DISCARDED);
-      // Un lead con un richiamo è già in lavorazione: da "Nuovo" passa a "Da contattare".
-      if (recallAt != null && status === 'new') status = 'to_contact';
-      if (patch.notes !== undefined && patch.notes !== prev.notes) {
-        next.notes = patch.notes;
-        next.updatedAt = now;
+    const list = Array.isArray(keys) ? keys : [keys];
+    if (!list.length) throw new Error('Annuncio non trovato');
+    const { listings, leadStates } = this.db;
+    return this.db.transaction('rw', [listings, leadStates], async () => {
+      const members = [];
+      for (const [i, listing] of (await listings.bulkGet(list)).entries()) {
+        if (!listing) throw new Error('Annuncio non trovato');
+        const own = await leadStates.get(listing.key);
+        members.push({ listing, state: own ?? { listingKey: list[i]!, status: 'new' as LeadStatus, notes: '', statusChangedAt: now, updatedAt: now, recallAt: null } });
       }
-      if (status !== prev.status) {
-        next.status = status;
-        next.statusChangedAt = now;
-        next.updatedAt = now;
-      }
-      const nextRecall = status === 'discarded' ? null : recallAt === undefined ? next.recallAt : recallAt;
-      if (nextRecall !== next.recallAt) {
-        next.recallAt = nextRecall;
-        next.updatedAt = now;
-      }
-      await this.db.leadStates.put(next);
-      return next;
+      const prev = members.length === 1 ? members[0]!.state : mergeGroupState(members);
+      const next = nextLeadState(prev, patch, now);
+      // Un membro che cambia rispetto al suo stato salvato è una modifica: vale per i conflitti di un backup.
+      if (members.some((m) => !sameState(m.state, next))) next.updatedAt = Math.max(next.updatedAt, now);
+      await leadStates.bulkPut(list.map((k) => ({ ...next, listingKey: k })));
+      return { ...next, listingKey: list[0]! };
     });
   }
 
-  /** Richiami da fare oggi o in ritardo, per il numero sull'icona. */
-  dueRecallCount(now: number): Promise<number> {
-    return this.db.leadStates
+  /**
+   * Stacca `key` dalle altre fonti del suo gruppo. Prima scrive su tutti lo stato del gruppo, così un annuncio entrato
+   * nel gruppo dopo l'ultima modifica non torna "Nuovo"; poi salva le coppie, che non si uniranno più.
+   */
+  async splitListing(key: string, fromKeys: string[]): Promise<void> {
+    const now = this.clock();
+    const { listings, leadStates, splits } = this.db;
+    const keys = [key, ...fromKeys];
+    await this.db.transaction('rw', [listings, leadStates, splits], async () => {
+      const members = [];
+      for (const listing of await listings.bulkGet(keys)) {
+        if (!listing) throw new Error('Annuncio non trovato');
+        members.push({ listing, state: (await leadStates.get(listing.key)) ?? defaultState(listing) });
+      }
+      const merged = mergeGroupState(members);
+      await leadStates.bulkPut(keys.map((k) => ({ ...merged, listingKey: k, updatedAt: now })));
+      await splits.bulkPut(fromKeys.map((k) => splitPair(key, k, now)));
+    });
+  }
+
+  /** Richiami da fare oggi o in ritardo, per il numero sull'icona: lo stesso immobile su più portali conta una volta. */
+  async dueRecallCount(now: number): Promise<number> {
+    const due = await this.db.leadStates
       .where('recallAt')
       .below(addDays(startOfLocalDay(now), 1))
       .filter((s) => s.status !== 'discarded')
-      .count();
+      .toArray();
+    if (due.length < 2) return due.length;
+    const [listings, splits] = await Promise.all([this.db.listings.toArray(), this.db.splits.toArray()]);
+    const groupOf = new Map<string, string>();
+    for (const g of groupListings(listings, splits)) for (const k of g) groupOf.set(k, g[0]!);
+    return new Set(due.map((s) => groupOf.get(s.listingKey) ?? s.listingKey)).size;
   }
 
   async deleteListing(key: string): Promise<void> {
@@ -177,17 +231,21 @@ export class LeadService {
 
   async deleteListings(keys: string[]): Promise<void> {
     if (!keys.length) return;
-    await this.db.transaction('rw', [this.db.listings, this.db.priceSnapshots, this.db.leadStates], async () => {
-      await this.db.listings.bulkDelete(keys);
-      await this.db.priceSnapshots.where('listingKey').anyOf(keys).delete();
-      await this.db.leadStates.bulkDelete(keys);
+    const { listings, priceSnapshots, leadStates, splits } = this.db;
+    await this.db.transaction('rw', [listings, priceSnapshots, leadStates, splits], async () => {
+      await listings.bulkDelete(keys);
+      await priceSnapshots.where('listingKey').anyOf(keys).delete();
+      await leadStates.bulkDelete(keys);
+      await splits.where('a').anyOf(keys).delete();
+      await splits.where('b').anyOf(keys).delete();
     });
   }
 
   async deleteAllListings(): Promise<number> {
-    return this.db.transaction('rw', [this.db.listings, this.db.priceSnapshots, this.db.leadStates], async () => {
-      const count = await this.db.listings.count();
-      await Promise.all([this.db.listings.clear(), this.db.priceSnapshots.clear(), this.db.leadStates.clear()]);
+    const { listings, priceSnapshots, leadStates, splits } = this.db;
+    return this.db.transaction('rw', [listings, priceSnapshots, leadStates, splits], async () => {
+      const count = await listings.count();
+      await Promise.all([listings.clear(), priceSnapshots.clear(), leadStates.clear(), splits.clear()]);
       return count;
     });
   }
@@ -213,8 +271,8 @@ export class LeadService {
 
   async exportBackup(extensionVersion: string): Promise<BackupFile> {
     const now = this.clock();
-    const { listings, priceSnapshots, leadStates, calibration, meta } = this.db;
-    const file = await this.db.transaction('r', [listings, priceSnapshots, leadStates, calibration, meta], async () => {
+    const { listings, priceSnapshots, leadStates, calibration, meta, splits } = this.db;
+    const file = await this.db.transaction('r', [listings, priceSnapshots, leadStates, calibration, meta, splits], async () => {
       const saved = await meta.get('settings');
       return buildBackup(
         {
@@ -223,6 +281,7 @@ export class LeadService {
           priceSnapshots: await priceSnapshots.toArray(),
           leadStates: await leadStates.toArray(),
           calibration: await calibration.toArray(),
+          splits: await splits.toArray(),
         },
         now,
         extensionVersion,
@@ -241,14 +300,15 @@ export class LeadService {
   async importBackup(json: unknown): Promise<ImportSummary> {
     const file = parseBackup(json);
     const now = this.clock();
-    const { listings, priceSnapshots, leadStates, calibration, meta } = this.db;
-    return this.db.transaction('rw', [listings, priceSnapshots, leadStates, calibration, meta], async () => {
+    const { listings, priceSnapshots, leadStates, calibration, meta, splits } = this.db;
+    return this.db.transaction('rw', [listings, priceSnapshots, leadStates, calibration, meta, splits], async () => {
       const m = mergeBackup(
         {
           listings: await listings.toArray(),
           priceSnapshots: await priceSnapshots.toArray(),
           leadStates: await leadStates.toArray(),
           calibration: await calibration.toArray(),
+          splits: await splits.toArray(),
           settingsSaved: Boolean(await meta.get('settings')),
         },
         file,
@@ -258,6 +318,7 @@ export class LeadService {
       await priceSnapshots.bulkAdd(m.priceSnapshots);
       await leadStates.bulkPut(m.leadStates);
       await calibration.bulkPut(m.calibration);
+      await splits.bulkPut(m.splits);
       if (m.settings) await meta.put({ key: 'settings', value: m.settings });
       return m.summary;
     });

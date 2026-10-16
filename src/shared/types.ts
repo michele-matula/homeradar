@@ -82,6 +82,13 @@ export interface PriceSnapshot {
   source: SnapshotSource;
 }
 
+/** Due annunci che l'agente ha separato: non vanno più uniti. `a < b`, chiavi di listing. */
+export interface SplitPair {
+  a: string;
+  b: string;
+  at: number;
+}
+
 export type LeadStatus = 'new' | 'to_contact' | 'contacted' | 'discarded';
 export const LEAD_STATUSES: LeadStatus[] = ['new', 'to_contact', 'contacted', 'discarded'];
 
@@ -155,6 +162,13 @@ export interface MarketComparison {
   deltaPercent: number;
 }
 
+/** Un annuncio del lead, con la sua valutazione e il suo storico prezzi. */
+export interface LeadSource {
+  listing: ListingRecord;
+  evaluation: Evaluation;
+  prices: PriceSnapshot[];
+}
+
 export interface LeadView {
   listing: ListingRecord;
   evaluation: Evaluation;
@@ -162,6 +176,8 @@ export interface LeadView {
   prices: PriceSnapshot[];
   /** Confronto con la mediana €/m² della zona o della città; null se il campione non basta. */
   market: MarketComparison | null;
+  /** Altre fonti dello stesso immobile su portali diversi, senza il principale (`listing`); vuoto se il lead è da solo. */
+  others: LeadSource[];
 }
 
 export interface Diagnostics {

@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { priorityLabel, STATUS_LABELS } from '@/core/leads';
+import { leadPortals, priorityLabel, STATUS_LABELS } from '@/core/leads';
 import { isAboveMarket, marketSummary } from '@/core/market';
 import { formatLocalDate } from '@/core/recall';
 import { formatDate } from '@/shared/format';
@@ -8,17 +8,19 @@ import { PORTAL_SITES, type LeadView } from '@/shared/types';
 export const EXPORT_COLUMNS = [
   'Priorità', 'Stato', 'Richiamo', 'Portale', 'Titolo', 'Indirizzo', 'Città/Zona', 'Tipologia', 'm²', 'Locali', 'Prezzo attuale',
   'Prezzo massimo noto', 'Calo %', 'Sopra mercato %', 'Confronto mercato', 'Data ultimo ribasso', 'Online da (giorni)', 'Età stimata', 'Prima visita',
-  'Ultima visita', 'Note', 'URL',
+  'Ultima visita', 'Note', 'URL', 'Altri URL',
 ] as const;
 
 export type ExportRow = Record<(typeof EXPORT_COLUMNS)[number], string | number>;
 
 export function toExportRows(leads: LeadView[]): ExportRow[] {
-  return leads.map(({ listing: l, evaluation: e, state: s, market }) => ({
+  return leads.map((view) => {
+    const { listing: l, evaluation: e, state: s, market, others } = view;
+    return {
     'Priorità': priorityLabel(e.priority, l.portal),
     'Stato': STATUS_LABELS[s.status],
     'Richiamo': s.recallAt != null ? formatLocalDate(s.recallAt) : '',
-    'Portale': PORTAL_SITES[l.portal],
+    'Portale': leadPortals(view).map((p) => PORTAL_SITES[p]).join(', '),
     'Titolo': l.title,
     'Indirizzo': l.address ?? '',
     'Città/Zona': [l.city, l.zone].filter(Boolean).join(' / '),
@@ -37,7 +39,9 @@ export function toExportRows(leads: LeadView[]): ExportRow[] {
     'Ultima visita': formatDate(l.lastSeenAt),
     'Note': s.notes,
     'URL': l.url,
-  }));
+    'Altri URL': others.map((o) => o.listing.url).join(' '),
+    };
+  });
 }
 
 function csvCell(v: string | number): string {

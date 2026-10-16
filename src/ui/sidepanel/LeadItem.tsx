@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { priorityLabel, STATUS_LABELS } from '@/core/leads';
+import { leadPortals, priorityLabel, STATUS_LABELS } from '@/core/leads';
 import { aboveMarketText, isAboveMarket, marketExplanation } from '@/core/market';
 import { addDays, formatRecallDate, fromDateInput, RECALL_SHORTCUTS, recallLabel, recallStatus, startOfLocalDay, toDateInput } from '@/core/recall';
 import { formatEuro } from '@/shared/format';
@@ -13,12 +13,15 @@ interface Props {
   now: number;
   onChange(patch: { status?: LeadStatus; notes?: string; recallAt?: number | null }): void;
   onDelete(): void;
+  /** Stacca una fonte dal lead unito: non è lo stesso immobile. */
+  onSplit?(key: string): void;
 }
 
-export function LeadItem({ lead, now, onChange, onDelete }: Props) {
-  const { listing, evaluation, state, prices, market } = lead;
+export function LeadItem({ lead, now, onChange, onDelete, onSplit }: Props) {
+  const { listing, evaluation, state, prices, market, others } = lead;
   const [notes, setNotes] = useState(state.notes);
   const [confirming, setConfirming] = useState(false);
+  const [showSources, setShowSources] = useState(false);
   const [picking, setPicking] = useState(false);
   const recall = recallStatus(state.recallAt, now);
   const pick = (recallAt: number) => {
@@ -41,7 +44,10 @@ export function LeadItem({ lead, now, onChange, onDelete }: Props) {
           {evaluation.priority !== 'none' && (
             <span className={`pill pill--${evaluation.priority}`}>{priorityLabel(evaluation.priority, listing.portal)}</span>
           )}
-          <span className="portal-tag">{PORTAL_TAGS[listing.portal]}</span>
+          {leadPortals(lead).map((p) => (
+            <span key={p} className="portal-tag">{PORTAL_TAGS[p]}</span>
+          ))}
+          {others.length > 0 && <span className="pill pill--multi">{`Su ${others.length + 1} portali`}</span>}
         </div>
         <Sparkline prices={prices.map((p) => p.price)} />
       </div>
@@ -56,6 +62,43 @@ export function LeadItem({ lead, now, onChange, onDelete }: Props) {
           <InfoTip label="Sopra mercato">{marketExplanation(market)}</InfoTip>
         </div>
       )}
+      {others.length > 0 && (
+        <div className="sources">
+          <button type="button" className="btn btn--sm" aria-expanded={showSources} onClick={() => setShowSources((s) => !s)}>
+            {`Fonti (${others.length + 1})`}
+          </button>
+          {showSources && (
+            <ul className="sources__list">
+              {[{ listing, evaluation }, ...others].map((s) => (
+                <li key={s.listing.key} className="sources__item">
+                  <span className="portal-tag">{PORTAL_TAGS[s.listing.portal]}</span>
+                  <span className="sources__facts">
+                    {[
+                      s.listing.currentPrice != null ? `€ ${formatEuro(s.listing.currentPrice)}` : 'Prezzo n.d.',
+                      s.listing.surfaceM2 != null ? `${s.listing.surfaceM2} m²` : null,
+                      s.evaluation.ageDays != null ? `${s.evaluation.ageEstimated ? '~' : ''}${s.evaluation.ageDays} gg` : null,
+                    ].filter(Boolean).join(' · ')}
+                  </span>
+                  <a className="btn btn--sm" href={s.listing.url} target="_blank" rel="noreferrer">
+                    Apri <ExternalIcon />
+                  </a>
+                  {onSplit && (
+                    <button
+                      type="button"
+                      className="btn btn--sm"
+                      aria-label={`Separa ${PORTAL_TAGS[s.listing.portal]}`}
+                      title="Non è lo stesso immobile: mostralo come lead a sé"
+                      onClick={() => onSplit(s.listing.key)}
+                    >
+                      Separa
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
       <div className="lead__actions">
         <select className="field field--select" aria-label="Stato" value={state.status} onChange={(e) => onChange({ status: e.target.value as LeadStatus })}>
           {LEAD_STATUSES.map((s) => (
@@ -67,7 +110,9 @@ export function LeadItem({ lead, now, onChange, onDelete }: Props) {
         </a>
         {confirming ? (
           <>
-            <button type="button" className="btn btn--danger btn--sm" onClick={onDelete}>Conferma eliminazione</button>
+            <button type="button" className="btn btn--danger btn--sm" onClick={onDelete}>
+              {others.length ? `Conferma: elimina ${others.length + 1} annunci` : 'Conferma eliminazione'}
+            </button>
             <button type="button" className="btn btn--sm" onClick={() => setConfirming(false)}>Annulla</button>
           </>
         ) : (

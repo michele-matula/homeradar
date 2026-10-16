@@ -30,6 +30,7 @@ function lead(id: number, priority: Priority, status: LeadStatus = 'new'): LeadV
       { listingKey: key, price: 235000, at: 2, source: 'declared' },
     ],
     market: null,
+    others: [],
   };
 }
 
@@ -49,6 +50,7 @@ function from(portal: Portal, l: LeadView): LeadView {
 function fakeApi(leads: LeadView[], adapterWarning: Diagnostics['adapterWarning'] = {}): Api {
   return {
     listLeads: vi.fn(async () => leads),
+    splitListing: vi.fn(async () => {}),
     setLeadState: vi.fn(async (k, p) => ({ listingKey: k, status: p.status ?? 'new', notes: p.notes ?? '', statusChangedAt: 0, updatedAt: 0, recallAt: null })),
     deleteListing: vi.fn(async () => {}),
     deleteListings: vi.fn(async () => {}),
@@ -230,7 +232,7 @@ describe('App', () => {
     render(<App api={api} />);
     fireEvent.click(await screen.findByRole('button', { name: 'Richiama…' }));
     fireEvent.click(screen.getByRole('button', { name: 'Domani' }));
-    expect(api.setLeadState).toHaveBeenCalledWith('immobiliare:1', { recallAt: dayOffset(1) });
+    expect(api.setLeadState).toHaveBeenCalledWith(['immobiliare:1'], { recallAt: dayOffset(1) });
   });
 
   it('ordina la lista col criterio scelto, ricordandolo per scheda anche alla riapertura', async () => {
@@ -577,5 +579,72 @@ describe('App: informativa', () => {
     expect(screen.queryByRole('button', { name: 'Ho capito, inizia' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Chiudi' }));
     expect(await screen.findByRole('button', { name: 'Rivedi informativa' })).toBeTruthy();
+  });
+});
+
+/** Lead unito: il principale di Immobiliare e la stessa casa su Idealista. */
+function merged(id: number, priority: Priority = 'high'): LeadView {
+  const main = lead(id, priority);
+  const twin = from('idealista', lead(id + 1000, priority));
+  return { ...main, others: [{ listing: { ...twin.listing, currentPrice: 239000, surfaceM2: 62 }, evaluation: twin.evaluation, prices: [] }] };
+}
+
+describe('lead su più portali', () => {
+  it('mostra i portali, "Su 2 portali" e le fonti; "Separa" stacca la fonte', () => {
+    const onSplit = vi.fn();
+    render(<ul><LeadItem lead={merged(1)} now={Date.now()} onChange={() => {}} onDelete={() => {}} onSplit={onSplit} /></ul>);
+    expect(screen.getByText('Immobiliare')).toBeTruthy();
+    expect(screen.getByText('Idealista')).toBeTruthy();
+    expect(screen.getByText('Su 2 portali')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Separa Idealista' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Fonti (2)' }));
+    expect(screen.getByText('€ 239.000 · 62 m²', { exact: false })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Separa Idealista' }));
+    expect(onSplit).toHaveBeenCalledWith('idealista:1001');
+  });
+
+  it('un lead da solo non ha fonti né pillola', () => {
+    render(<ul><LeadItem lead={lead(1, 'high')} now={Date.now()} onChange={() => {}} onDelete={() => {}} /></ul>);
+    expect(screen.queryByText(/Su \d portali/)).toBeNull();
+    expect(screen.queryByRole('button', { name: /Fonti/ })).toBeNull();
+  });
+
+  it('elimina il gruppo intero, lo stato vale per tutte le fonti, separa con le altre chiavi', async () => {
+    const api = fakeApi([merged(1)]);
+    render(<App api={api} />);
+    await screen.findByText('Bilocale 1');
+    fireEvent.change(screen.getByLabelText('Stato'), { target: { value: 'contacted' } });
+    expect(api.setLeadState).toHaveBeenCalledWith(['immobiliare:1', 'idealista:1001'], { status: 'contacted' });
+    fireEvent.click(screen.getByRole('button', { name: 'Fonti (2)' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Separa Idealista' }));
+    expect(api.splitListing).toHaveBeenCalledWith('idealista:1001', ['immobiliare:1']);
+    fireEvent.click(screen.getByRole('button', { name: 'Elimina' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferma: elimina 2 annunci' }));
+    expect(api.deleteListings).toHaveBeenCalledWith(['immobiliare:1', 'idealista:1001']);
+  });
+
+  it('filtro per sito e "Su più portali"', async () => {
+    const api = fakeApi([merged(1), lead(2, 'high')]);
+    render(<App api={api} />);
+    await screen.findByText('Bilocale 1');
+    // Il lead unito ha una fonte su Idealista: il filtro Idealista lo trova.
+    fireEvent.click(screen.getByRole('button', { name: 'Idealista (1)' }));
+    expect(screen.queryByText('Bilocale 2')).toBeNull();
+    expect(screen.getByText('Bilocale 1')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Idealista (1)' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Su più portali (1)' }));
+    expect(screen.queryByText('Bilocale 2')).toBeNull();
+    expect(screen.getByText(/Elimina tutti «su più portali» \(1\)/)).toBeTruthy();
+  });
+});
+
+describe('eliminazione di massa con lead uniti', () => {
+  it('la conferma conta gli annunci che verranno eliminati, non i lead', async () => {
+    const api = fakeApi([merged(1), lead(2, 'high')]);
+    render(<App api={api} />);
+    await screen.findByText('Bilocale 1');
+    fireEvent.click(screen.getByRole('button', { name: 'Elimina tutti (2)' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferma: elimina 3 annunci' }));
+    expect(api.deleteListings).toHaveBeenCalledWith(['immobiliare:1', 'idealista:1001', 'immobiliare:2']);
   });
 });

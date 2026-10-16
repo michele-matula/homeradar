@@ -134,4 +134,21 @@ Naviga a mano, senza automazione: Idealista usa DataDome.
 47. Impostazioni → "Rivedi informativa".
     - [ ] Nella legenda c'è la riga "+18% su Navigli"; l'informativa non chiede una nuova conferma.
 
+## Stesso immobile su più portali
+
+48. Da un'installazione con l'informativa confermata alla versione precedente, apri il pannello.
+    - [ ] Il pannello chiede di riconfermare; "Cosa è cambiato" cita lo stesso immobile su più portali; la legenda ha "· 2 portali".
+49. Trova un privato pubblicato sia su Immobiliare sia su Idealista (o Subito): cerca la stessa via o lo stesso titolo con filtro "privati" su entrambi i siti e apri le due ricerche.
+    - [ ] Nel pannello compare un solo lead, con le etichette dei due portali e "Su 2 portali".
+    - [ ] Sulla card di Idealista (o Subito) il badge finisce con "· 2 portali" e mostra la stessa età del badge su Immobiliare.
+    - [ ] Il filtro "Su più portali" mostra solo i lead uniti.
+50. Cambia lo stato del lead unito in "Contattato" e scrivi una nota.
+    - [ ] "Fonti (2)" mostra le due fonti con prezzo, m² ed età; "Apri" porta all'annuncio giusto.
+51. Premi "Separa" su una delle due fonti.
+    - [ ] I lead diventano due, entrambi "Contattato" e con la nota; ricaricando le due ricerche non si riuniscono.
+52. Su un altro immobile: imposta "Contattato" e un richiamo dal lead di Immobiliare; solo dopo apri la ricerca di Idealista (o Subito) che lo contiene.
+    - [ ] Il lead unito resta "Contattato" con il richiamo; dopo "Separa" entrambi i lead lo conservano.
+53. Esporta CSV con un lead unito nella vista.
+    - [ ] Una riga per il lead, "Portale" con entrambi i siti, "Altri URL" con il link dell'altro annuncio.
+
 Se il sito è cambiato: ricattura le fixture (Immobiliare: piano MVP, Task 4; Idealista: piano 2026-10-13, Task 8; Subito: piano 2026-10-13-subito-adapter, Task 5), aggiorna schemi o selettori, riesegui `npm test`.

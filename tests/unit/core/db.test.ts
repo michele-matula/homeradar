@@ -55,3 +55,24 @@ describe('HomeRadarDB migrazioni', () => {
     expect(await db.leadStates.where('recallAt').below(Infinity).count()).toBe(0);
   });
 });
+
+describe('HomeRadarDB v6', () => {
+  it('aggiunge la tabella delle coppie separate senza toccare i dati', async () => {
+    const name = `mig-${Math.random()}`;
+    const old = new Dexie(name);
+    old.version(5).stores({
+      listings: 'key, lastSeenAt', priceSnapshots: '++id, listingKey, [listingKey+at]',
+      leadStates: 'listingKey, status, recallAt', calibration: '[portal+portalId], portal', meta: 'key',
+    });
+    await old.table('listings').put({ key: 'immobiliare:1', lastSeenAt: 5 });
+    await old.table('leadStates').put({ listingKey: 'immobiliare:1', status: 'contacted', recallAt: null, updatedAt: 3 });
+    old.close();
+
+    const db = new HomeRadarDB(name);
+    expect(await db.splits.count()).toBe(0);
+    await db.splits.put({ a: 'idealista:2', b: 'immobiliare:1', at: 7 });
+    expect(await db.splits.where('b').equals('immobiliare:1').count()).toBe(1);
+    expect(await db.listings.get('immobiliare:1')).toMatchObject({ lastSeenAt: 5 });
+    expect(await db.leadStates.get('immobiliare:1')).toMatchObject({ status: 'contacted' });
+  });
+});

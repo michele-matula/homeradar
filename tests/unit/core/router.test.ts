@@ -84,7 +84,7 @@ describe('handleRequest', () => {
     const h = hooks();
     await svc.ingest([obs()]);
     expect(((await handleRequest(svc, { type: 'listLeads' }, 'v', h)) as unknown[]).length).toBe(1);
-    expect(await handleRequest(svc, { type: 'setLeadState', listingKey: 'immobiliare:128416572', status: 'contacted' }, 'v', h)).toMatchObject({ status: 'contacted' });
+    expect(await handleRequest(svc, { type: 'setLeadState', listingKeys: ['immobiliare:128416572'], status: 'contacted' }, 'v', h)).toMatchObject({ status: 'contacted' });
     expect(await handleRequest(svc, { type: 'saveSettings', settings: { ...DEFAULT_SETTINGS, minAgeDays: 150 } }, 'v', h)).toMatchObject({ minAgeDays: 150 });
     expect(await handleRequest(svc, { type: 'getSettings' }, 'v', h)).toMatchObject({ minAgeDays: 150 });
     await handleRequest(svc, { type: 'fallbackShown' }, 'v', h);
@@ -103,7 +103,7 @@ describe('handleRequest', () => {
     const h = hooks();
     await svc.ingest([obs()]);
     const day = new Date(2026, 9, 20).getTime();
-    expect(await handleRequest(svc, { type: 'setLeadState', listingKey: 'immobiliare:128416572', recallAt: day }, 'v', h)).toMatchObject({ recallAt: day, status: 'to_contact' });
+    expect(await handleRequest(svc, { type: 'setLeadState', listingKeys: ['immobiliare:128416572'], recallAt: day }, 'v', h)).toMatchObject({ recallAt: day, status: 'to_contact' });
     expect(h.recallsChanged).toHaveBeenCalledTimes(1);
   });
 
@@ -180,5 +180,16 @@ describe('handleRequest', () => {
   it('rifiuta richieste sconosciute', async () => {
     const { svc } = await ready();
     await expect(handleRequest(svc, { type: 'boh' } as never, 'v', hooks())).rejects.toThrow('Richiesta sconosciuta: boh');
+  });
+});
+
+describe('handleRequest splitListing', () => {
+  it("separa e aggiorna il segnale sull'icona", async () => {
+    const { svc, db } = await ready();
+    await svc.ingest([obs(), obs({ portal: 'idealista', portalId: 33000001, url: 'https://www.idealista.it/immobile/33000001/', lastDrop: null, price: 239000 })]);
+    const h = hooks();
+    expect(await handleRequest(svc, { type: 'splitListing', listingKey: 'idealista:33000001', fromKeys: ['immobiliare:128416572'] }, 'v', h)).toBeNull();
+    expect(await db.splits.count()).toBe(1);
+    expect(h.recallsChanged).toHaveBeenCalled();
   });
 });

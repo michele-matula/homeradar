@@ -58,11 +58,17 @@ describe('LeadService: informativa', () => {
   });
 });
 
-describe('informativa v2', () => {
+describe('informativa', () => {
   it('la versione 2 annuncia le date di ricontatto', () => {
-    expect(ONBOARDING_VERSION).toBe(2);
     expect(ONBOARDING_CHANGES[2]).toEqual([
       'HomeRadar ora salva la data di ricontatto che imposti su un lead: resta sul tuo browser, come stati e note.',
+    ]);
+  });
+
+  it('la versione 3 annuncia lo stesso immobile su più portali', () => {
+    expect(ONBOARDING_VERSION).toBe(3);
+    expect(ONBOARDING_CHANGES[3]).toEqual([
+      'HomeRadar ora riconosce lo stesso immobile pubblicato su più portali e lo mostra come un solo lead. Se separi due annunci uniti per errore, la scelta resta salvata sul tuo browser.',
     ]);
   });
 });

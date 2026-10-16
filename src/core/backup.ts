@@ -1,8 +1,10 @@
 import { z } from 'zod';
+import { splitId } from '@/core/same-property';
 import { validateSettings } from '@/core/settings';
 import {
   LEAD_STATUSES, PORTALS, listingKey,
   type CalibrationPoint, type ImportSummary, type LeadState, type ListingRecord, type Portal, type PriceSnapshot, type Settings,
+  type SplitPair,
 } from '@/shared/types';
 
 export const BACKUP_FORMAT = 'homeradar-backup';
@@ -20,9 +22,12 @@ export interface BackupData {
   priceSnapshots: BackupSnapshot[];
   leadStates: LeadState[];
   calibration: CalibrationPoint[];
+  /** Coppie separate dall'agente; assenti nei backup precedenti. */
+  splits?: SplitPair[];
 }
 
 export interface BackupFile extends BackupData {
+  splits: SplitPair[];
   format: typeof BACKUP_FORMAT;
   formatVersion: number;
   createdAt: number;
@@ -76,6 +81,8 @@ const LeadStateSchema = z
 
 const CalibrationSchema = z.object({ portal, portalId: int, createdAt: num });
 
+const SplitSchema = z.object({ a: z.string(), b: z.string(), at: num }).refine((s) => s.a < s.b);
+
 const SettingsSchema = z.object({
   minAgeDays: num.optional(), minDropPercent: num.optional(), retentionDays: num.optional(), autoBackup: z.boolean().optional(),
   enabledPortals: z.object({ immobiliare: z.boolean().optional(), idealista: z.boolean().optional(), subito: z.boolean().optional() }).optional(),
@@ -104,6 +111,8 @@ export function parseBackup(json: unknown): BackupFile {
     priceSnapshots: table(raw, 'priceSnapshots', SnapshotSchema, 'storico prezzi'),
     leadStates: table(raw, 'leadStates', LeadStateSchema, 'stati dei lead'),
     calibration: table(raw, 'calibration', CalibrationSchema, 'calibrazione'),
+    // Facoltativo: i backup precedenti alle separazioni non lo hanno.
+    splits: raw.splits === undefined ? [] : table(raw, 'splits', SplitSchema, 'separazioni'),
   };
   if (raw.settings !== undefined) {
     const s = SettingsSchema.safeParse(raw.settings);
@@ -129,6 +138,7 @@ export function buildBackup(data: BackupData, now: number, extensionVersion: str
     priceSnapshots: data.priceSnapshots.map(({ listingKey: k, price, at, source }) => ({ listingKey: k, price, at, source })),
     leadStates: data.leadStates,
     calibration: data.calibration,
+    splits: data.splits ?? [],
   };
 }
 
@@ -153,6 +163,7 @@ export interface CurrentData {
   priceSnapshots: BackupSnapshot[];
   leadStates: LeadState[];
   calibration: CalibrationPoint[];
+  splits?: SplitPair[];
   /** Le impostazioni sono state salvate almeno una volta in questo browser. */
   settingsSaved: boolean;
 }
@@ -162,6 +173,7 @@ export interface MergeResult {
   priceSnapshots: BackupSnapshot[];
   leadStates: LeadState[];
   calibration: CalibrationPoint[];
+  splits: SplitPair[];
   settings: Settings | null;
   summary: ImportSummary;
 }
@@ -178,7 +190,7 @@ const calId = (c: CalibrationPoint) => `${c.portal}|${c.portalId}`;
 
 /** Unione che non cancella mai nulla: restituisce solo i record da scrivere. */
 export function mergeBackup(current: CurrentData, incoming: BackupData, now: number): MergeResult {
-  const out: MergeResult = { listings: [], priceSnapshots: [], leadStates: [], calibration: [], settings: null, summary: { added: 0, updated: 0, unchanged: 0 } };
+  const out: MergeResult = { listings: [], priceSnapshots: [], leadStates: [], calibration: [], splits: [], settings: null, summary: { added: 0, updated: 0, unchanged: 0 } };
   const curListings = new Map(current.listings.map((l) => [l.key, l]));
   const curStates = new Map(current.leadStates.map((s) => [s.listingKey, s]));
   const incListings = new Map(incoming.listings.map((l) => [l.key, l]));
@@ -229,6 +241,16 @@ export function mergeBackup(current: CurrentData, incoming: BackupData, now: num
     if (seenCal.has(calId(c))) continue;
     seenCal.add(calId(c));
     out.calibration.push(c);
+  }
+
+  // Una separazione serve solo se entrambi gli annunci esistono qui o nel file.
+  const known = new Set([...curListings.keys(), ...incListings.keys()]);
+  const seenSplits = new Set((current.splits ?? []).map((s) => splitId(s.a, s.b)));
+  for (const s of incoming.splits ?? []) {
+    const id = splitId(s.a, s.b);
+    if (seenSplits.has(id) || !known.has(s.a) || !known.has(s.b)) continue;
+    seenSplits.add(id);
+    out.splits.push(s);
   }
 
   if (!current.settingsSaved && incoming.settings) out.settings = incoming.settings;

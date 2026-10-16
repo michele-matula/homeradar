@@ -83,3 +83,20 @@ describe('mergeBackup', () => {
     expect(mergeBackup(empty(), file(), NOW).settings).toBeNull();
   });
 });
+
+describe('mergeBackup separazioni', () => {
+  it('unione senza doppioni, scarta quelle di annunci sconosciuti', () => {
+    const l = listing();
+    const known = { a: 'idealista:2', b: l.key, at: 1 };
+    const current: CurrentData = { listings: [l], priceSnapshots: [], leadStates: [], calibration: [], settingsSaved: true, splits: [known] };
+    const incoming: BackupData = {
+      listings: [listing({ key: 'idealista:2', portal: 'idealista', portalId: 2, url: 'https://www.idealista.it/immobile/2/' })],
+      priceSnapshots: [], leadStates: [], calibration: [],
+      splits: [{ ...known, at: 9 }, { a: 'idealista:2', b: 'subito:3', at: 2 }, { a: 'immobiliare:128416572', b: 'subito:4', at: 3 }],
+    };
+    // subito:3 e subito:4 non sono né nel browser né nel file.
+    expect(mergeBackup(current, incoming, NOW).splits).toEqual([]);
+    const withSubito: BackupData = { ...incoming, listings: [...incoming.listings, listing({ key: 'subito:3', portal: 'subito', portalId: 3, url: 'https://www.subito.it/x/3.htm' })] };
+    expect(mergeBackup(current, withSubito, NOW).splits).toEqual([{ a: 'idealista:2', b: 'subito:3', at: 2 }]);
+  });
+});
