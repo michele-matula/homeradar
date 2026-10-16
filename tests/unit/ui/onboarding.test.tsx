@@ -28,6 +28,8 @@ describe('Onboarding', () => {
     expect(screen.getByText('● Alta')).toBeTruthy();
     expect(screen.getByText(/le date di ricontatto/)).toBeTruthy();
     expect(screen.getByText(/richiami da fare oggi o in ritardo/)).toBeTruthy();
+    expect(screen.getByText('+18% su Navigli')).toBeTruthy();
+    expect(screen.getByText(/sopra la mediana degli annunci di privati che hai visto nella stessa zona/)).toBeTruthy();
     expect(screen.getByText('Per domande, rivolgiti a chi ti ha fornito HomeRadar.')).toBeTruthy();
     expect(screen.queryByText('Cosa è cambiato')).toBeNull();
   });
