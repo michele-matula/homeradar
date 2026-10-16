@@ -30,6 +30,7 @@ function lead(id: number, priority: Priority, status: LeadStatus = 'new'): LeadV
       { listingKey: key, price: 235000, at: 2, source: 'declared' },
     ],
     market: null,
+    others: [],
   };
 }
 

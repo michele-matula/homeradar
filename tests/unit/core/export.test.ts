@@ -18,6 +18,7 @@ const lead: LeadView = {
   state: { listingKey: 'immobiliare:128416572', status: 'to_contact', notes: 'chiamare la sera', statusChangedAt: 0, updatedAt: 0, recallAt: null },
   prices: [],
   market: null,
+  others: [],
 };
 
 describe('toExportRows', () => {

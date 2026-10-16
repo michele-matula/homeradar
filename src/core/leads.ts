@@ -12,7 +12,16 @@ export function priorityLabel(priority: Priority, portal: Portal): string {
 
 export const STATUS_LABELS: Record<LeadStatus, string> = { new: 'Nuovo', to_contact: 'Da contattare', contacted: 'Contattato', discarded: 'Scartato' };
 
-const PRIORITY_ORDER: Record<Priority, number> = { high: 0, medium: 1, verify: 2, none: 3 };
+/** Chiavi di tutti gli annunci del lead: il principale per primo. */
+export function leadKeys(l: LeadView): string[] {
+  return [l.listing.key, ...l.others.map((o) => o.listing.key)];
+}
+
+export function leadPortals(l: LeadView): Portal[] {
+  return [l.listing.portal, ...l.others.map((o) => o.listing.portal)];
+}
+
+export const PRIORITY_ORDER: Record<Priority, number> = { high: 0, medium: 1, verify: 2, none: 3 };
 
 function byPriority(a: LeadView, b: LeadView): number {
   const p = PRIORITY_ORDER[a.evaluation.priority] - PRIORITY_ORDER[b.evaluation.priority];

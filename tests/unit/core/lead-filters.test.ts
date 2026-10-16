@@ -11,6 +11,7 @@ function lead(key: string, f: ListingFields = {}): LeadView {
     state: { listingKey: key, status: 'new', notes: '', statusChangedAt: 0, updatedAt: 0, recallAt: null },
     prices: [],
     market: null,
+    others: [],
   };
 }
 const keys = (ls: LeadView[]) => ls.map((l) => l.listing.key);
