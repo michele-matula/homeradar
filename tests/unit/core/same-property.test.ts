@@ -86,3 +86,15 @@ describe('groupListings', () => {
     expect(expected).toEqual([['idealista:2', 'immobiliare:1', 'subito:3'], ['immobiliare:4', 'subito:5']]);
   });
 });
+
+describe('groupListings su un archivio grande', () => {
+  it('10.000 annunci nella stessa città: confronta solo i prezzi vicini', () => {
+    const portals: Portal[] = ['immobiliare', 'idealista', 'subito'];
+    const list = Array.from({ length: 10_000 }, (_, i) =>
+      rec(portals[i % 3]!, i, { currentPrice: 100_000 + ((i * 7919) % 900_000), surfaceM2: 40 + (i % 120) }),
+    );
+    const t = performance.now();
+    groupListings(list, []);
+    expect(performance.now() - t).toBeLessThan(250);
+  });
+});

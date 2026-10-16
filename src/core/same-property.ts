@@ -44,7 +44,8 @@ function compatible(x: Candidate, y: Candidate): boolean {
   );
 }
 
-const byKey = (x: Candidate, y: Candidate) => (x.listing.key < y.listing.key ? -1 : 1);
+/** Prezzo crescente, a parità chiave: l'ordine non cambia i gruppi, rende solo il confronto più rapido. */
+const byPrice = (x: Candidate, y: Candidate) => x.price - y.price || (x.listing.key < y.listing.key ? -1 : 1);
 
 /**
  * Gruppi di annunci di portali diversi che descrivono lo stesso immobile: chiavi in ordine, gruppi in ordine.
@@ -65,12 +66,14 @@ export function groupListings(listings: ListingRecord[], splits: SplitPair[]): s
 
   const groups: string[][] = [];
   for (const cs of byCity.values()) {
-    cs.sort(byKey);
+    cs.sort(byPrice);
     const ok = (i: number, j: number) => compatible(cs[i]!, cs[j]!) && !separated.has(splitId(cs[i]!.listing.key, cs[j]!.listing.key));
     const parent = cs.map((_, i) => i);
     const find = (i: number): number => (parent[i] === i ? i : (parent[i] = find(parent[i]!)));
     for (let i = 0; i < cs.length; i++) {
-      for (let j = i + 1; j < cs.length; j++) if (ok(i, j)) parent[find(j)] = find(i);
+      // Oltre lo scarto di prezzo ammesso nessun annuncio successivo può essere compatibile.
+      const limit = cs[i]!.price * (100 + PRICE_TOLERANCE_PERCENT);
+      for (let j = i + 1; j < cs.length && cs[j]!.price * 100 <= limit; j++) if (ok(i, j)) parent[find(j)] = find(i);
     }
     const components = new Map<number, number[]>();
     cs.forEach((_, i) => {
@@ -84,7 +87,7 @@ export function groupListings(listings: ListingRecord[], splits: SplitPair[]): s
       const portals = new Set(members.map((i) => cs[i]!.listing.portal));
       if (portals.size !== members.length) continue;
       if (!members.every((i, n) => members.slice(n + 1).every((j) => ok(i, j)))) continue;
-      groups.push(members.map((i) => cs[i]!.listing.key));
+      groups.push(members.map((i) => cs[i]!.listing.key).sort());
     }
   }
   return groups.sort((g, h) => (g[0]! < h[0]! ? -1 : 1));

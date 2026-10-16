@@ -146,7 +146,9 @@ Naviga a mano, senza automazione: Idealista usa DataDome.
     - [ ] "Fonti (2)" mostra le due fonti con prezzo, m² ed età; "Apri" porta all'annuncio giusto.
 51. Premi "Separa" su una delle due fonti.
     - [ ] I lead diventano due, entrambi "Contattato" e con la nota; ricaricando le due ricerche non si riuniscono.
-52. Esporta CSV con un lead unito nella vista.
+52. Su un altro immobile: imposta "Contattato" e un richiamo dal lead di Immobiliare; solo dopo apri la ricerca di Idealista (o Subito) che lo contiene.
+    - [ ] Il lead unito resta "Contattato" con il richiamo; dopo "Separa" entrambi i lead lo conservano.
+53. Esporta CSV con un lead unito nella vista.
     - [ ] Una riga per il lead, "Portale" con entrambi i siti, "Altri URL" con il link dell'altro annuncio.
 
 Se il sito è cambiato: ricattura le fixture (Immobiliare: piano MVP, Task 4; Idealista: piano 2026-10-13, Task 8; Subito: piano 2026-10-13-subito-adapter, Task 5), aggiorna schemi o selettori, riesegui `npm test`.

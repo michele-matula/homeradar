@@ -75,3 +75,15 @@ describe('buildLeadViews', () => {
     expect(isListed(v!)).toBe(true);
   });
 });
+
+describe('mergeGroupState con un annuncio mai lavorato', () => {
+  it('lo stato di un annuncio appena visto non copre quello di un annuncio già lavorato', () => {
+    const immo = rec('immobiliare', 1);
+    const idea = rec('idealista', 2);
+    const s = mergeGroupState([
+      { listing: immo, state: state(immo.key, { status: 'contacted', recallAt: 100, updatedAt: 5 }) },
+      { listing: idea, state: state(idea.key, { updatedAt: 9 }) },
+    ]);
+    expect(s).toMatchObject({ status: 'contacted', recallAt: 100, updatedAt: 5 });
+  });
+});

@@ -27,12 +27,17 @@ export interface MemberState {
 /** Il campo note è su una riga: le note di portali diversi si separano così. */
 export const NOTES_SEPARATOR = ' · ';
 
+/** Un annuncio lavorato dall'agente: stato cambiato, note o richiamo. */
+const worked = (s: LeadState) => s.status !== 'new' || s.notes.trim() !== '' || s.recallAt != null;
+
 /**
- * Stato del lead unito: stato, richiamo e date del membro modificato più di recente. Le note, se diverse,
- * si mostrano tutte con il portale davanti, così nessuna sparisce. `listingKey` è del primo membro (il principale).
+ * Stato del lead unito: stato, richiamo e date del membro lavorato più di recente (un gemello appena visto ha uno
+ * stato "Nuovo" più recente, ma non deve coprire il lavoro dell'agente). Le note, se diverse, si mostrano tutte con
+ * il portale davanti, così nessuna sparisce. `listingKey` è del primo membro (il principale).
  */
 export function mergeGroupState(members: MemberState[]): LeadState {
-  const latest = members.reduce((best, m) => (m.state.updatedAt > best.state.updatedAt ? m : best));
+  const touched = members.filter((m) => worked(m.state));
+  const latest = (touched.length ? touched : members).reduce((best, m) => (m.state.updatedAt > best.state.updatedAt ? m : best));
   const noted = members.filter((m) => m.state.notes.trim());
   const distinct = new Set(noted.map((m) => m.state.notes.trim()));
   const notes =

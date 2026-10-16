@@ -146,12 +146,12 @@ Per farlo, `evaluate` si divide in funzioni interne (fatti dell'età, fatti del 
 
 ### 6.4 Stato del gruppo
 
-- **Stato, richiamo e date:** quelli del membro con `updatedAt` più recente.
+- **Stato, richiamo e date:** quelli del membro *lavorato* (stato diverso da "Nuovo", note o richiamo) con `updatedAt` più recente; se nessuno è lavorato, del più recente. Un gemello visto per la prima volta dopo il lavoro dell'agente ha uno stato "Nuovo" più recente, ma non lo copre.
 - **Note:** se tutti i membri con note hanno lo stesso testo, quel testo. Se sono diverse, le note di ciascun membro precedute dal portale e separate da ` · ` (il campo note è su una riga): `Immobiliare: … · Idealista: …`. Nessuna nota sparisce dalla vista; al primo salvataggio dell'agente il testo mostrato diventa la nota di tutti i membri.
 
 ### 6.5 Scritture
 
-- Il messaggio `setLeadState` riceve `listingKeys: string[]` (il metodo del servizio accetta una chiave o un elenco) e scrive lo stesso stato, note e richiamo su tutti i membri in una transazione. `updatedAt` e `statusChangedAt` seguono le regole di oggi, membro per membro.
+- Il messaggio `setLeadState` riceve `listingKeys: string[]` (il metodo del servizio accetta una chiave o un elenco) e, in una transazione, applica la modifica allo stato del gruppo (6.4) con le regole di oggi e scrive lo stesso stato completo su tutti i membri, così non restano stati diversi. `updatedAt` avanza se la modifica cambia qualcosa o se un membro aveva uno stato diverso.
 - `deleteListings` riceve già più chiavi: il pannello passa le chiavi del gruppo.
 - Nuovo messaggio `splitListing { listingKey, fromKeys }`: prima scrive su tutti i membri lo stato del gruppo (stato, note unite, richiamo e date del membro più recente), così un annuncio entrato nel gruppo dopo l'ultima modifica non torna a "Nuovo"; poi salva le coppie.
 

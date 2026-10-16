@@ -91,3 +91,40 @@ describe('stesso immobile su più portali', () => {
     expect(lead.market).toMatchObject({ scope: 'zone', sampleSize: 5, medianPerM2: 3000 });
   });
 });
+
+describe('stato del gruppo nel tempo', () => {
+  it('il gemello visto giorni dopo non riporta il lead a "Nuovo"; separare non cancella il lavoro', async () => {
+    const { svc, db, advance, now } = setup();
+    await svc.ingest([obs()]);
+    advance(1000);
+    const recall = startOfLocalDay(now()) + 3 * 86_400_000;
+    await svc.setLeadState(KEY, { status: 'contacted', notes: 'sera', recallAt: recall });
+    advance(7 * 86_400_000);
+    await svc.ingest([twin()]);
+    const lead = (await svc.listLeads()).find((l) => l.listing.key === KEY || l.listing.key === TWIN)!;
+    expect(lead.others).toHaveLength(1);
+    expect(lead.state).toMatchObject({ status: 'contacted', notes: 'sera', recallAt: startOfLocalDay(recall) });
+    await svc.splitListing(TWIN, [KEY]);
+    expect(await db.leadStates.get(KEY)).toMatchObject({ status: 'contacted', recallAt: startOfLocalDay(recall) });
+    expect(await db.leadStates.get(TWIN)).toMatchObject({ status: 'contacted', recallAt: startOfLocalDay(recall) });
+  });
+
+  it('una modifica sul gruppo scrive lo stesso stato completo su tutti i membri', async () => {
+    const { svc, db, advance } = setup();
+    // Due annunci lavorati separatamente, poi uniti da un ribasso.
+    await svc.ingest([obs(), twin({ price: 280000 })]);
+    advance(1000);
+    await svc.setLeadState(KEY, { status: 'discarded' });
+    advance(1000);
+    await svc.setLeadState(TWIN, { status: 'contacted' });
+    advance(1000);
+    await svc.ingest([twin()]);
+    expect((await svc.listLeads()).find((l) => l.others.length)!.state.status).toBe('contacted');
+    advance(1000);
+    await svc.setLeadState([KEY, TWIN], { notes: 'x' });
+    expect(await db.leadStates.get(KEY)).toMatchObject({ status: 'contacted', notes: 'x' });
+    expect(await db.leadStates.get(TWIN)).toMatchObject({ status: 'contacted', notes: 'x' });
+    // Un membro era scartato: il richiamo sul gruppo "Contattato" non deve essere rifiutato.
+    await expect(svc.setLeadState([KEY, TWIN], { recallAt: Date.UTC(2026, 9, 20) })).resolves.toMatchObject({ status: 'contacted' });
+  });
+});

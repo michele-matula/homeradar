@@ -637,3 +637,14 @@ describe('lead su più portali', () => {
     expect(screen.getByText(/Elimina tutti «su più portali» \(1\)/)).toBeTruthy();
   });
 });
+
+describe('eliminazione di massa con lead uniti', () => {
+  it('la conferma conta gli annunci che verranno eliminati, non i lead', async () => {
+    const api = fakeApi([merged(1), lead(2, 'high')]);
+    render(<App api={api} />);
+    await screen.findByText('Bilocale 1');
+    fireEvent.click(screen.getByRole('button', { name: 'Elimina tutti (2)' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Conferma: elimina 3 annunci' }));
+    expect(api.deleteListings).toHaveBeenCalledWith(['immobiliare:1', 'idealista:1001', 'immobiliare:2']);
+  });
+});

@@ -20,6 +20,34 @@ export const RECALL_ON_DISCARDED = 'Impossibile impostare un richiamo su un lead
 
 type LeadPatch = { status?: LeadStatus; notes?: string; recallAt?: number | null };
 
+/** Applica la modifica dell'agente a uno stato: `updatedAt` avanza solo se qualcosa cambia. */
+function nextLeadState(prev: LeadState, patch: LeadPatch, now: number): LeadState {
+  const next: LeadState = { ...prev, recallAt: prev.recallAt ?? null };
+  const recallAt = patch.recallAt == null ? patch.recallAt : startOfLocalDay(patch.recallAt);
+  let status = patch.status ?? prev.status;
+  if (status === 'discarded' && recallAt != null) throw new Error(RECALL_ON_DISCARDED);
+  // Un lead con un richiamo è già in lavorazione: da "Nuovo" passa a "Da contattare".
+  if (recallAt != null && status === 'new') status = 'to_contact';
+  if (patch.notes !== undefined && patch.notes !== prev.notes) {
+    next.notes = patch.notes;
+    next.updatedAt = now;
+  }
+  if (status !== prev.status) {
+    next.status = status;
+    next.statusChangedAt = now;
+    next.updatedAt = now;
+  }
+  const nextRecall = status === 'discarded' ? null : recallAt === undefined ? next.recallAt : recallAt;
+  if (nextRecall !== next.recallAt) {
+    next.recallAt = nextRecall;
+    next.updatedAt = now;
+  }
+  return next;
+}
+
+const sameState = (a: LeadState, b: LeadState) =>
+  a.status === b.status && a.notes === b.notes && (a.recallAt ?? null) === b.recallAt && a.statusChangedAt === b.statusChangedAt;
+
 /** Dà una data al ribasso: quella del portale, quella già registrata per lo stesso ribasso o oggi. */
 function resolveDrop(drop: ObservedPriceDrop | null, prev: PriceDrop | null, now: number): PriceDrop | null {
   if (!drop) return null;
@@ -138,43 +166,29 @@ export class LeadService {
     return sortLeads(views.filter(isListed));
   }
 
-  /** Stato, note e richiamo di uno o più annunci (lo stesso immobile su più portali), in una transazione. */
+  /**
+   * Stato, note e richiamo di uno o più annunci, in una transazione. Per lo stesso immobile su più portali la modifica
+   * parte dallo stato del gruppo e lo stesso stato completo va su tutti i membri, così non restano stati diversi.
+   */
   async setLeadState(keys: string | string[], patch: LeadPatch): Promise<LeadState> {
     const now = this.clock();
     const list = Array.isArray(keys) ? keys : [keys];
     if (!list.length) throw new Error('Annuncio non trovato');
-    return this.db.transaction('rw', [this.db.listings, this.db.leadStates], async () => {
-      const saved: LeadState[] = [];
-      for (const key of list) saved.push(await this.applyLeadState(key, patch, now));
-      return saved[0]!;
+    const { listings, leadStates } = this.db;
+    return this.db.transaction('rw', [listings, leadStates], async () => {
+      const members = [];
+      for (const [i, listing] of (await listings.bulkGet(list)).entries()) {
+        if (!listing) throw new Error('Annuncio non trovato');
+        const own = await leadStates.get(listing.key);
+        members.push({ listing, state: own ?? { listingKey: list[i]!, status: 'new' as LeadStatus, notes: '', statusChangedAt: now, updatedAt: now, recallAt: null } });
+      }
+      const prev = members.length === 1 ? members[0]!.state : mergeGroupState(members);
+      const next = nextLeadState(prev, patch, now);
+      // Un membro che cambia rispetto al suo stato salvato è una modifica: vale per i conflitti di un backup.
+      if (members.some((m) => !sameState(m.state, next))) next.updatedAt = Math.max(next.updatedAt, now);
+      await leadStates.bulkPut(list.map((k) => ({ ...next, listingKey: k })));
+      return { ...next, listingKey: list[0]! };
     });
-  }
-
-  private async applyLeadState(key: string, patch: LeadPatch, now: number): Promise<LeadState> {
-    if (!(await this.db.listings.get(key))) throw new Error('Annuncio non trovato');
-    const prev = (await this.db.leadStates.get(key)) ?? { listingKey: key, status: 'new' as LeadStatus, notes: '', statusChangedAt: now, updatedAt: now, recallAt: null };
-    const next: LeadState = { ...prev, recallAt: prev.recallAt ?? null };
-    const recallAt = patch.recallAt == null ? patch.recallAt : startOfLocalDay(patch.recallAt);
-    let status = patch.status ?? prev.status;
-    if (status === 'discarded' && recallAt != null) throw new Error(RECALL_ON_DISCARDED);
-    // Un lead con un richiamo è già in lavorazione: da "Nuovo" passa a "Da contattare".
-    if (recallAt != null && status === 'new') status = 'to_contact';
-    if (patch.notes !== undefined && patch.notes !== prev.notes) {
-      next.notes = patch.notes;
-      next.updatedAt = now;
-    }
-    if (status !== prev.status) {
-      next.status = status;
-      next.statusChangedAt = now;
-      next.updatedAt = now;
-    }
-    const nextRecall = status === 'discarded' ? null : recallAt === undefined ? next.recallAt : recallAt;
-    if (nextRecall !== next.recallAt) {
-      next.recallAt = nextRecall;
-      next.updatedAt = now;
-    }
-    await this.db.leadStates.put(next);
-    return next;
   }
 
   /**

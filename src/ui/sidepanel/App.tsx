@@ -342,7 +342,8 @@ export function App({ api = defaultApi }: { api?: Api }) {
                           className="btn btn--danger btn--sm"
                           onClick={() => run(() => api.deleteListings(visible.flatMap(leadKeys)))}
                         >
-                          {`Conferma: elimina ${nAnnunci(visible.length)}${filterTag}`}
+                          {/* Un lead unito elimina tutte le sue fonti: si contano gli annunci, non i lead. */}
+                          {`Conferma: elimina ${nAnnunci(visible.flatMap(leadKeys).length)}${filterTag}`}
                         </button>
                         <button type="button" className="btn btn--sm" onClick={() => setConfirmingAll(false)}>Annulla</button>
                       </>
