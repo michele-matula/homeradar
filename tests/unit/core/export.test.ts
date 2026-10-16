@@ -19,6 +19,7 @@ const lead: LeadView = {
   prices: [],
   market: null,
   others: [],
+  reposted: false,
 };
 
 describe('toExportRows', () => {
@@ -99,7 +100,7 @@ describe('exportFileName', () => {
 describe('toExportRows lead unito', () => {
   it('tutti i portali e gli altri URL', () => {
     const other = { ...lead.listing, key: 'idealista:2', portal: 'idealista' as const, portalId: 2, url: 'https://www.idealista.it/immobile/2/' };
-    const row = toExportRows([{ ...lead, others: [{ listing: other, evaluation: lead.evaluation, prices: [] }] }])[0]!;
+    const row = toExportRows([{ ...lead, others: [{ listing: other, evaluation: lead.evaluation, prices: [], previous: false }] }])[0]!;
     expect(row['Portale']).toBe('Immobiliare.it, Idealista.it');
     expect(row['URL']).toBe('https://www.immobiliare.it/annunci/128416572/');
     expect(row['Altri URL']).toBe('https://www.idealista.it/immobile/2/');

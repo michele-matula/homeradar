@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { groupByRecall, groupByStatus, SORT_KEYS, sortLeads, sortLeadsBy } from '@/core/leads';
-import type { LeadStatus, LeadView, Priority } from '@/shared/types';
+import { groupByRecall, groupByStatus, leadPortals, SORT_KEYS, sortLeads, sortLeadsBy } from '@/core/leads';
+import type { LeadStatus, LeadView, Portal, Priority } from '@/shared/types';
 
 function lead(key: string, priority: Priority, ageDays: number | null, status: LeadStatus = 'new'): LeadView {
   return {
@@ -10,6 +10,7 @@ function lead(key: string, priority: Priority, ageDays: number | null, status: L
     prices: [],
     market: null,
     others: [],
+    reposted: false,
   };
 }
 
@@ -128,5 +129,20 @@ describe('richiami', () => {
       ['overdue', ['vecchio', 'ieri']],
       ['upcoming', ['presto', 'futuro']],
     ]);
+  });
+});
+
+describe('leadPortals', () => {
+  it('portali distinti, il principale per primo', () => {
+    const base = lead('immobiliare:1', 'high', 100);
+    const source = (portal: Portal, id: number) => ({
+      listing: { key: `${portal}:${id}`, portal } as LeadView['listing'], evaluation: base.evaluation, prices: [], previous: false,
+    });
+    const view: LeadView = {
+      ...base,
+      listing: { key: 'immobiliare:1', portal: 'immobiliare' } as LeadView['listing'],
+      others: [source('immobiliare', 0), source('idealista', 2), source('idealista', 3)],
+    };
+    expect(leadPortals(view)).toEqual(['immobiliare', 'idealista']);
   });
 });

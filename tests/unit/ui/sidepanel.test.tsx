@@ -31,6 +31,7 @@ function lead(id: number, priority: Priority, status: LeadStatus = 'new'): LeadV
     ],
     market: null,
     others: [],
+    reposted: false,
   };
 }
 
@@ -586,7 +587,7 @@ describe('App: informativa', () => {
 function merged(id: number, priority: Priority = 'high'): LeadView {
   const main = lead(id, priority);
   const twin = from('idealista', lead(id + 1000, priority));
-  return { ...main, others: [{ listing: { ...twin.listing, currentPrice: 239000, surfaceM2: 62 }, evaluation: twin.evaluation, prices: [] }] };
+  return { ...main, others: [{ listing: { ...twin.listing, currentPrice: 239000, surfaceM2: 62 }, evaluation: twin.evaluation, prices: [], previous: false }] };
 }
 
 describe('lead su più portali', () => {

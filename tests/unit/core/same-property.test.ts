@@ -89,6 +89,8 @@ describe('groupListings', () => {
   });
 });
 
+// Le soglie proteggono da un confronto di tutti con tutti (secondi su 10.000 annunci), non misurano i millisecondi:
+// con la suite intera in parallelo i tempi crescono di 3–4 volte.
 describe('groupListings su un archivio grande', () => {
   it('10.000 annunci nella stessa città: confronta solo i prezzi vicini', () => {
     const portals: Portal[] = ['immobiliare', 'idealista', 'subito'];
@@ -97,7 +99,7 @@ describe('groupListings su un archivio grande', () => {
     );
     const t = performance.now();
     groupListings(list, []);
-    expect(performance.now() - t).toBeLessThan(250);
+    expect(performance.now() - t).toBeLessThan(1000);
   });
 
   it('10.000 annunci dello stesso portale visti in giorni diversi, in 40 zone: entro i tempi', () => {
@@ -109,7 +111,7 @@ describe('groupListings su un archivio grande', () => {
     );
     const t = performance.now();
     groupListings(list, []);
-    expect(performance.now() - t).toBeLessThan(500);
+    expect(performance.now() - t).toBeLessThan(1000);
   });
 });
 
