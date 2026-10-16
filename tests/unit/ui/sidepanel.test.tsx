@@ -31,6 +31,7 @@ function lead(id: number, priority: Priority, status: LeadStatus = 'new'): LeadV
     ],
     market: null,
     others: [],
+    reposted: false,
   };
 }
 
@@ -586,8 +587,36 @@ describe('App: informativa', () => {
 function merged(id: number, priority: Priority = 'high'): LeadView {
   const main = lead(id, priority);
   const twin = from('idealista', lead(id + 1000, priority));
-  return { ...main, others: [{ listing: { ...twin.listing, currentPrice: 239000, surfaceM2: 62 }, evaluation: twin.evaluation, prices: [] }] };
+  return { ...main, others: [{ listing: { ...twin.listing, currentPrice: 239000, surfaceM2: 62 }, evaluation: twin.evaluation, prices: [], previous: false }] };
 }
+
+/** Lead ripubblicato: la ripubblicazione su Immobiliare e l'annuncio precedente, tolto a settembre. */
+function republished(id: number): LeadView {
+  const main = lead(id, 'high');
+  const before = lead(id - 500, 'medium');
+  const previous = { listing: { ...before.listing, currentPrice: 260000, lastSeenAt: Date.UTC(2026, 8, 12, 10) }, evaluation: before.evaluation, prices: [], previous: true };
+  return { ...main, reposted: true, others: [previous] };
+}
+
+describe('lead ripubblicato', () => {
+  it('pillola "Ripubblicato", un solo portale, riga "Annuncio precedente" con "Separa"', () => {
+    const onSplit = vi.fn();
+    render(<ul><LeadItem lead={republished(1000)} now={Date.now()} onChange={() => {}} onDelete={() => {}} onSplit={onSplit} /></ul>);
+    expect(screen.getByText('Ripubblicato')).toBeTruthy();
+    expect(screen.queryByText(/Su \d portali/)).toBeNull();
+    expect(screen.getAllByText('Immobiliare')).toHaveLength(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Fonti (2)' }));
+    expect(screen.getByText('Annuncio precedente · visto fino al 12/09')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Separa annuncio precedente Immobiliare' }));
+    expect(onSplit).toHaveBeenCalledWith('immobiliare:500');
+  });
+
+  it('"Su più portali" non conta una catena sullo stesso portale', async () => {
+    render(<App api={fakeApi([republished(1000), merged(1)])} />);
+    await screen.findByText('Bilocale 1');
+    expect(screen.getByRole('button', { name: 'Su più portali (1)' })).toBeTruthy();
+  });
+});
 
 describe('lead su più portali', () => {
   it('mostra i portali, "Su 2 portali" e le fonti; "Separa" stacca la fonte', () => {

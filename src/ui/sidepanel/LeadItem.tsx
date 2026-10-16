@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { leadPortals, priorityLabel, STATUS_LABELS } from '@/core/leads';
 import { aboveMarketText, isAboveMarket, marketExplanation } from '@/core/market';
 import { addDays, formatRecallDate, fromDateInput, RECALL_SHORTCUTS, recallLabel, recallStatus, startOfLocalDay, toDateInput } from '@/core/recall';
-import { formatEuro } from '@/shared/format';
+import { formatDayMonth, formatEuro } from '@/shared/format';
 import { LEAD_STATUSES, PORTAL_TAGS, type LeadStatus, type LeadView } from '@/shared/types';
 import { ExternalIcon, TrashIcon } from './Icons';
 import { InfoTip } from './InfoTip';
@@ -19,6 +19,7 @@ interface Props {
 
 export function LeadItem({ lead, now, onChange, onDelete, onSplit }: Props) {
   const { listing, evaluation, state, prices, market, others } = lead;
+  const portals = leadPortals(lead);
   const [notes, setNotes] = useState(state.notes);
   const [confirming, setConfirming] = useState(false);
   const [showSources, setShowSources] = useState(false);
@@ -44,10 +45,11 @@ export function LeadItem({ lead, now, onChange, onDelete, onSplit }: Props) {
           {evaluation.priority !== 'none' && (
             <span className={`pill pill--${evaluation.priority}`}>{priorityLabel(evaluation.priority, listing.portal)}</span>
           )}
-          {leadPortals(lead).map((p) => (
+          {portals.map((p) => (
             <span key={p} className="portal-tag">{PORTAL_TAGS[p]}</span>
           ))}
-          {others.length > 0 && <span className="pill pill--multi">{`Su ${others.length + 1} portali`}</span>}
+          {portals.length > 1 && <span className="pill pill--multi">{`Su ${portals.length} portali`}</span>}
+          {lead.reposted && <span className="pill pill--multi">Ripubblicato</span>}
         </div>
         <Sparkline prices={prices.map((p) => p.price)} />
       </div>
@@ -69,9 +71,12 @@ export function LeadItem({ lead, now, onChange, onDelete, onSplit }: Props) {
           </button>
           {showSources && (
             <ul className="sources__list">
-              {[{ listing, evaluation }, ...others].map((s) => (
+              {[{ listing, evaluation, previous: false }, ...others].map((s) => (
                 <li key={s.listing.key} className="sources__item">
                   <span className="portal-tag">{PORTAL_TAGS[s.listing.portal]}</span>
+                  {s.previous && (
+                    <span className="sources__previous">{`Annuncio precedente · visto fino al ${formatDayMonth(s.listing.lastSeenAt)}`}</span>
+                  )}
                   <span className="sources__facts">
                     {[
                       s.listing.currentPrice != null ? `€ ${formatEuro(s.listing.currentPrice)}` : 'Prezzo n.d.',
@@ -86,7 +91,7 @@ export function LeadItem({ lead, now, onChange, onDelete, onSplit }: Props) {
                     <button
                       type="button"
                       className="btn btn--sm"
-                      aria-label={`Separa ${PORTAL_TAGS[s.listing.portal]}`}
+                      aria-label={s.previous ? `Separa annuncio precedente ${PORTAL_TAGS[s.listing.portal]}` : `Separa ${PORTAL_TAGS[s.listing.portal]}`}
                       title="Non è lo stesso immobile: mostralo come lead a sé"
                       onClick={() => onSplit(s.listing.key)}
                     >

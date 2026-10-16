@@ -151,4 +151,17 @@ Naviga a mano, senza automazione: Idealista usa DataDome.
 53. Esporta CSV con un lead unito nella vista.
     - [ ] Una riga per il lead, "Portale" con entrambi i siti, "Altri URL" con il link dell'altro annuncio.
 
+## Ripubblicazioni
+
+54. Da un'installazione con l'informativa confermata alla versione precedente, apri il pannello.
+    - [ ] Il pannello chiede di riconfermare; "Cosa è cambiato" cita le ripubblicazioni; la legenda ha "· ripubblicato".
+55. Su un **profilo di prova** (mai sul profilo di lavoro), apri una ricerca di Immobiliare con privati e poi esporta un backup. Nel file duplica un annuncio privato e, nella copia, metti un `portalId` più basso (e `key`/`url` coerenti), `firstSeenAt` e `lastSeenAt` a un mese prima del `firstSeenAt` dell'originale, `currentPrice` del 10% più alto e, se c'è, `portalCreatedAt` di qualche mese prima. Importa il file.
+    - [ ] Il lead dell'originale mostra "Ripubblicato", il ribasso del 10% e l'età della copia.
+    - [ ] "Fonti (2)" mostra la riga "Annuncio precedente · visto fino al …"; "Su più portali" non conta il lead.
+    - [ ] Ricaricando la ricerca, il badge della card finisce con "· ripubblicato".
+56. Premi "Separa" sull'annuncio precedente.
+    - [ ] I lead diventano due; ricaricando la ricerca non si riuniscono.
+57. Esporta CSV.
+    - [ ] Colonna "Ripubblicato" con "sì" sul lead ripubblicato (prima di "Separa") e "Altri URL" con il link dell'annuncio precedente.
+
 Se il sito è cambiato: ricattura le fixture (Immobiliare: piano MVP, Task 4; Idealista: piano 2026-10-13, Task 8; Subito: piano 2026-10-13-subito-adapter, Task 5), aggiorna schemi o selettori, riesegui `npm test`.

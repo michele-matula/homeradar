@@ -38,7 +38,7 @@ describe('Onboarding', () => {
     render(<Onboarding api={api(never, { ...DEFAULT_SETTINGS, retentionDays: 60 })} mode="confirm" />);
     expect(
       await screen.findByText(
-        'Gli annunci rimasti in stato "Nuovo" che non rivedi da 60 giorni vengono cancellati da soli, anche se hanno note: per tenerli cambia lo stato. Puoi cambiare il periodo nelle impostazioni.',
+        'Gli annunci rimasti in stato "Nuovo" che non rivedi da 60 giorni vengono cancellati da soli, anche se hanno note: per tenerli cambia lo stato. Puoi cambiare il periodo nelle impostazioni. L\'annuncio precedente di una ripubblicazione resta finché rivedi la ripubblicazione.',
       ),
     ).toBeTruthy();
   });

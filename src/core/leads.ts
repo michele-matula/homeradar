@@ -17,8 +17,9 @@ export function leadKeys(l: LeadView): string[] {
   return [l.listing.key, ...l.others.map((o) => o.listing.key)];
 }
 
+/** Portali distinti del lead, quello del principale per primo. */
 export function leadPortals(l: LeadView): Portal[] {
-  return [l.listing.portal, ...l.others.map((o) => o.listing.portal)];
+  return [...new Set([l.listing.portal, ...l.others.map((o) => o.listing.portal)])];
 }
 
 export const PRIORITY_ORDER: Record<Priority, number> = { high: 0, medium: 1, verify: 2, none: 3 };

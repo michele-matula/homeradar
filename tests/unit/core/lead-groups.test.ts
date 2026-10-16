@@ -87,3 +87,45 @@ describe('mergeGroupState con un annuncio mai lavorato', () => {
     expect(s).toMatchObject({ status: 'contacted', recallAt: 100, updatedAt: 5 });
   });
 });
+
+describe('buildLeadViews: ripubblicazioni', () => {
+  const before = rec('immobiliare', 1, { portalCreatedAt: NOW - 300 * DAY_MS, currentPrice: 300000, firstSeenAt: NOW - 300 * DAY_MS, lastSeenAt: NOW - 30 * DAY_MS });
+  const head = rec('immobiliare', 2, { portalCreatedAt: NOW - 5 * DAY_MS, currentPrice: 270000, firstSeenAt: NOW - 5 * DAY_MS, lastSeenAt: NOW });
+  const snapshots = [
+    { listingKey: before.key, price: 300000, at: NOW - 300 * DAY_MS, source: 'observed' as const },
+    { listingKey: head.key, price: 270000, at: NOW - 5 * DAY_MS, source: 'observed' as const },
+  ];
+
+  it('un lead: principale la ripubblicazione, età e storico della catena, precedente in others', () => {
+    const views = buildLeadViews({ listings: [before, head], states: [], snapshots, splits: [] }, DEFAULT_SETTINGS, NOW);
+    expect(views).toHaveLength(1);
+    const v = views[0]!;
+    expect(v.listing.key).toBe('immobiliare:2');
+    expect(v.reposted).toBe(true);
+    expect(v.others.map((o) => [o.listing.key, o.previous])).toEqual([['immobiliare:1', true]]);
+    expect(v.prices.map((p) => p.price)).toEqual([300000, 270000]);
+    expect(v.evaluation).toMatchObject({ listingKey: 'immobiliare:2', priority: 'high', ageDays: 300, ageEstimated: false, dropPercent: 10 });
+    expect(v.evaluation.badgeText).toBe('● Alta · 300 gg · −10% · ripubblicato');
+  });
+
+  it("lo stato lavorato sull'annuncio precedente passa al lead", () => {
+    const states = [state(before.key, { status: 'contacted', notes: 'sera', updatedAt: 5 })];
+    const [v] = buildLeadViews({ listings: [before, head], states, snapshots, splits: [] }, DEFAULT_SETTINGS, NOW);
+    expect(v!.state).toMatchObject({ listingKey: 'immobiliare:2', status: 'contacted', notes: 'sera' });
+  });
+
+  it('con un gemello su un altro portale il principale è sempre un annuncio vivo', () => {
+    const twin = rec('idealista', 9, { currentPrice: 272000, firstSeenAt: NOW - 5 * DAY_MS, lastSeenAt: NOW });
+    const [v] = buildLeadViews({ listings: [before, head, twin], states: [], snapshots, splits: [] }, DEFAULT_SETTINGS, NOW);
+    expect(['immobiliare:2', 'idealista:9']).toContain(v!.listing.key);
+    expect([v!.listing.key, ...v!.others.map((o) => o.listing.key)].sort()).toEqual(['idealista:9', 'immobiliare:1', 'immobiliare:2']);
+    // Prima le altre teste, poi gli annunci precedenti.
+    expect(v!.others.map((o) => o.previous)).toEqual([false, true]);
+    expect(v!.evaluation.badgeText).toMatch(/· 2 portali · ripubblicato$/);
+  });
+
+  it('un lead da solo o tra portali non è ripubblicato', () => {
+    const views = buildLeadViews(archive([rec('immobiliare', 1), rec('idealista', 2), rec('subito', 3, { city: 'Roma' })]), DEFAULT_SETTINGS, NOW);
+    expect(views.every((v) => !v.reposted && v.others.every((o) => !o.previous))).toBe(true);
+  });
+});

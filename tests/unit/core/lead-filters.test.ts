@@ -12,6 +12,7 @@ function lead(key: string, f: ListingFields = {}): LeadView {
     prices: [],
     market: null,
     others: [],
+    reposted: false,
   };
 }
 const keys = (ls: LeadView[]) => ls.map((l) => l.listing.key);
@@ -132,7 +133,7 @@ describe('matchesText su un lead unito', () => {
   it("trova il lead anche dal testo di un'altra fonte", () => {
     const main = lead('immobiliare:1', { title: 'Bilocale', address: null });
     const other = lead('idealista:2', { title: 'Bilocale in via Padova' });
-    const merged: LeadView = { ...main, others: [{ listing: other.listing, evaluation: other.evaluation, prices: [] }] };
+    const merged: LeadView = { ...main, others: [{ listing: other.listing, evaluation: other.evaluation, prices: [], previous: false }] };
     expect(matchesText(merged, 'padova')).toBe(true);
     expect(matchesText(main, 'padova')).toBe(false);
   });

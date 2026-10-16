@@ -11,11 +11,11 @@ import { evaluate } from '@/core/rules';
 import { groupListings, splitPair } from '@/core/same-property';
 import { validateSettings } from '@/core/settings';
 import {
-  DAY_MS, listingKey, type BackupStatus, type CalibrationHint, type Diagnostics, type Evaluation, type ImportSummary, type LeadState, type LeadStatus, type LeadView,
+  DAY_MS, listingKey, VISIT_GAP_MS, type BackupStatus, type CalibrationHint, type Diagnostics, type Evaluation, type ImportSummary, type LeadState, type LeadStatus, type LeadView,
   type ListingObservation, type ListingRecord, type ObservedPriceDrop, type OnboardingStatus, type Portal, type PriceDrop, type PriceSnapshot, type Settings,
 } from '@/shared/types';
 
-export const VISIT_GAP_MS = 30 * 60_000;
+export { VISIT_GAP_MS } from '@/shared/types';
 export const RECALL_ON_DISCARDED = 'Impossibile impostare un richiamo su un lead scartato';
 
 type LeadPatch = { status?: LeadStatus; notes?: string; recallAt?: number | null };
@@ -207,8 +207,22 @@ export class LeadService {
       }
       const merged = mergeGroupState(members);
       await leadStates.bulkPut(keys.map((k) => ({ ...merged, listingKey: k, updatedAt: now })));
-      await splits.bulkPut(fromKeys.map((k) => splitPair(key, k, now)));
+      // Separare l'annuncio vivo di una catena vuol dire "non è l'immobile degli altri portali", non "non è la
+      // ripubblicazione dei suoi annunci precedenti": la catena si stacca intera dalle altre fonti.
+      const chain = (await this.chainEndingAt(key)) ?? [key];
+      const others = fromKeys.filter((k) => !chain.includes(k));
+      await splits.bulkPut(chain.flatMap((c) => others.map((k) => splitPair(c, k, now))));
     });
+  }
+
+  /** Catena di ripubblicazione di cui `key` è l'annuncio vivo (testa); null se non è la testa di una catena. */
+  private async chainEndingAt(key: string): Promise<string[] | null> {
+    const [listings, splits] = await Promise.all([this.db.listings.toArray(), this.db.splits.toArray()]);
+    for (const g of groupListings(listings, splits)) {
+      const chain = g.chains.find((c) => c.length > 1 && c[c.length - 1] === key);
+      if (chain) return chain;
+    }
+    return null;
   }
 
   /** Richiami da fare oggi o in ritardo, per il numero sull'icona: lo stesso immobile su più portali conta una volta. */
@@ -221,7 +235,7 @@ export class LeadService {
     if (due.length < 2) return due.length;
     const [listings, splits] = await Promise.all([this.db.listings.toArray(), this.db.splits.toArray()]);
     const groupOf = new Map<string, string>();
-    for (const g of groupListings(listings, splits)) for (const k of g) groupOf.set(k, g[0]!);
+    for (const g of groupListings(listings, splits)) for (const k of g.keys) groupOf.set(k, g.keys[0]!);
     return new Set(due.map((s) => groupOf.get(s.listingKey) ?? s.listingKey)).size;
   }
 
@@ -250,19 +264,27 @@ export class LeadService {
     });
   }
 
+  /**
+   * Cancella gli annunci non visti da `retentionDays` e non lavorati. Decide per immobile: un gruppo si cancella solo se
+   * tutti i suoi annunci sono vecchi e nessuno è lavorato, così l'annuncio sostituito da una ripubblicazione viva resta.
+   */
   async purge(): Promise<number> {
     const settings = await this.getSettings();
     const cutoff = this.clock() - settings.retentionDays * DAY_MS;
-    const stale = await this.db.listings.where('lastSeenAt').below(cutoff).primaryKeys();
-    let removed = 0;
-    for (const key of stale) {
-      const state = await this.db.leadStates.get(key);
-      // Un lead lavorato o con un richiamo resta, anche se rimesso a mano su "Nuovo".
-      if (state && (state.status !== 'new' || state.recallAt != null)) continue;
-      await this.deleteListing(key);
-      removed++;
-    }
-    return removed;
+    const [listings, states, splits] = await Promise.all([this.db.listings.toArray(), this.db.leadStates.toArray(), this.db.splits.toArray()]);
+    const stateOf = new Map(states.map((s) => [s.listingKey, s]));
+    const seenAt = new Map(listings.map((l) => [l.key, l.lastSeenAt]));
+    // Un lead lavorato o con un richiamo resta, anche se rimesso a mano su "Nuovo".
+    const keep = (k: string) => {
+      const s = stateOf.get(k);
+      return seenAt.get(k)! >= cutoff || (s != null && (s.status !== 'new' || s.recallAt != null));
+    };
+    const units = groupListings(listings, splits).map((g) => g.keys);
+    const grouped = new Set(units.flat());
+    for (const l of listings) if (!grouped.has(l.key)) units.push([l.key]);
+    const stale = units.filter((u) => !u.some(keep)).flat();
+    await this.deleteListings(stale);
+    return stale.length;
   }
 
   listingCount(): Promise<number> {

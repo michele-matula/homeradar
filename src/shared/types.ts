@@ -7,6 +7,8 @@ export type PageKind = 'search' | 'detail' | 'other';
 export type ObservationSource = 'search' | 'detail';
 
 export const DAY_MS = 86_400_000;
+/** Due visite più vicine di così sono la stessa visita: `lastSeenAt` non avanza. */
+export const VISIT_GAP_MS = 30 * 60_000;
 
 export interface PriceDrop {
   fromPrice: number;
@@ -167,17 +169,22 @@ export interface LeadSource {
   listing: ListingRecord;
   evaluation: Evaluation;
   prices: PriceSnapshot[];
+  /** Vero per un annuncio sostituito da una ripubblicazione sullo stesso portale. */
+  previous: boolean;
 }
 
 export interface LeadView {
   listing: ListingRecord;
   evaluation: Evaluation;
   state: LeadState;
+  /** Storico prezzi del principale e degli annunci che ha sostituito, in ordine di tempo. */
   prices: PriceSnapshot[];
   /** Confronto con la mediana €/m² della zona o della città; null se il campione non basta. */
   market: MarketComparison | null;
-  /** Altre fonti dello stesso immobile su portali diversi, senza il principale (`listing`); vuoto se il lead è da solo. */
+  /** Altre fonti dello stesso immobile (altri portali e annunci precedenti), senza il principale (`listing`); vuoto se il lead è da solo. */
   others: LeadSource[];
+  /** Vero se il lead contiene almeno un annuncio sostituito da una ripubblicazione. */
+  reposted: boolean;
 }
 
 export interface Diagnostics {

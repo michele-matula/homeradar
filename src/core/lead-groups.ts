@@ -69,13 +69,29 @@ export function buildLeadViews({ listings, states, snapshots, splits }: Archive,
   const sources = new Map<string, LeadSource>();
   for (const listing of listings) {
     const prices = (snapsByKey.get(listing.key) ?? []).sort((a, b) => a.at - b.at);
-    sources.set(listing.key, { listing, prices, evaluation: evaluate(listing, prices, settings, now) });
+    sources.set(listing.key, { listing, prices, evaluation: evaluate(listing, prices, settings, now), previous: false });
   }
 
   const units: LeadSource[][] = [];
   const grouped = new Set<string>();
-  for (const keys of groupListings(listings, splits)) {
-    units.push(keys.map((k) => sources.get(k)!).sort(byPrimary));
+  for (const { keys, chains } of groupListings(listings, splits)) {
+    const heads: LeadSource[] = [];
+    const previous: LeadSource[] = [];
+    for (const chain of chains) {
+      const own = chain.map((k) => sources.get(k)!);
+      const head = own[own.length - 1]!;
+      if (own.length === 1) {
+        heads.push(head);
+        continue;
+      }
+      // La testa porta lo storico di tutta la catena: il prezzo prima della ripubblicazione è un prezzo noto.
+      const prices = own.flatMap((s) => s.prices).sort((a, b) => a.at - b.at);
+      heads.push({ ...head, prices, evaluation: evaluate(head.listing, prices, settings, now) });
+      for (const s of own.slice(0, -1)) previous.push({ ...s, previous: true });
+    }
+    previous.sort((a, b) => b.listing.lastSeenAt - a.listing.lastSeenAt || (a.listing.key < b.listing.key ? -1 : 1));
+    // Il principale è sempre un annuncio vivo: titolo e "Apri" non portano a un annuncio tolto.
+    units.push([...heads.sort(byPrimary), ...previous]);
     for (const k of keys) grouped.add(k);
   }
   for (const s of sources.values()) if (!grouped.has(s.listing.key)) units.push([s]);
@@ -93,6 +109,7 @@ export function buildLeadViews({ listings, states, snapshots, splits }: Archive,
       prices: primary.prices,
       market: market.get(primary.listing.key) ?? null,
       others,
+      reposted: others.some((o) => o.previous),
     };
   });
 }
