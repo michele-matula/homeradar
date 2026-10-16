@@ -127,3 +127,13 @@ describe('applyQuery, isEmptyQuery, describeQuery', () => {
     expect(describeQuery({ text: '', minPrice: 250000, maxPrice: 150000 })).toEqual(['150–250 k€']);
   });
 });
+
+describe('matchesText su un lead unito', () => {
+  it("trova il lead anche dal testo di un'altra fonte", () => {
+    const main = lead('immobiliare:1', { title: 'Bilocale', address: null });
+    const other = lead('idealista:2', { title: 'Bilocale in via Padova' });
+    const merged: LeadView = { ...main, others: [{ listing: other.listing, evaluation: other.evaluation, prices: [] }] };
+    expect(matchesText(merged, 'padova')).toBe(true);
+    expect(matchesText(main, 'padova')).toBe(false);
+  });
+});

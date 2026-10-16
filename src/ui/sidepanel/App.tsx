@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { warnedPortals } from '@/core/diagnostics';
 import { applyQuery, describeQuery, isEmptyQuery, parseThousands, type LeadQuery } from '@/core/lead-filters';
-import { groupByRecall, groupByStatus, PRIORITY_LABELS, RECALL_GROUP_LABELS, SORT_KEYS, SORT_LABELS, sortLeadsBy, type SortKey } from '@/core/leads';
+import { groupByRecall, groupByStatus, leadKeys, leadPortals, PRIORITY_LABELS, RECALL_GROUP_LABELS, SORT_KEYS, SORT_LABELS, sortLeadsBy, type SortKey } from '@/core/leads';
 import { needsOnboarding } from '@/core/onboarding';
 import { isDue } from '@/core/recall';
 import { Onboarding } from '@/ui/onboarding/Onboarding';
@@ -21,8 +21,9 @@ type PriorityFilter = 'all' | Exclude<Priority, 'none'>;
 const PRIORITY_FILTERS: PriorityFilter[] = ['all', 'high', 'medium', 'verify'];
 const FILTER_LABELS: Record<PriorityFilter, string> = { all: 'Tutti', high: PRIORITY_LABELS.high, medium: PRIORITY_LABELS.medium, verify: PRIORITY_LABELS.verify };
 const byFilter = (leads: LeadView[], f: PriorityFilter) => (f === 'all' ? leads : leads.filter((l) => l.evaluation.priority === f));
-/** Filtro per sito: lista vuota = tutti i siti. */
-const byPortals = (leads: LeadView[], ps: Portal[]) => (ps.length ? leads.filter((l) => ps.includes(l.listing.portal)) : leads);
+/** Filtro per sito: lista vuota = tutti i siti. Un lead unito passa se ha una fonte su uno dei siti scelti. */
+const byPortals = (leads: LeadView[], ps: Portal[]) => (ps.length ? leads.filter((l) => leadPortals(l).some((p) => ps.includes(p))) : leads);
+const byMulti = (leads: LeadView[], on: boolean) => (on ? leads.filter((l) => l.others.length > 0) : leads);
 const nAnnunci = (n: number) => `${n} ${n === 1 ? 'annuncio' : 'annunci'}`;
 const errorText = (e: unknown) => `Errore: ${e instanceof Error ? e.message : String(e)}`;
 
@@ -39,6 +40,8 @@ export function App({ api = defaultApi }: { api?: Api }) {
   const tab: Tab = chosenTab ?? 'new';
   const [filter, setFilter] = useState<PriorityFilter>('all');
   const [portals, setPortals] = useState<Portal[]>([]);
+  /** Solo lead pubblicati su più portali. */
+  const [multi, setMulti] = useState(false);
   const [view, setView] = useState<'leads' | 'settings' | 'guide'>('leads');
   /** Conferma dell'informativa: finché non è 'ok' la lista non si mostra. */
   const [gate, setGate] = useState<'loading' | 'needed' | 'ok' | { error: string }>('loading');
@@ -99,7 +102,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
   const recalls = applied.filter((l) => l.state.recallAt != null);
   const dueCount = recalls.filter((l) => isDue(l.state.recallAt, now)).length;
   const tabLeads = (t: Tab) => (t === 'recall' ? recalls : groups[t]);
-  const inPortals = byPortals(tabLeads(tab), portals);
+  const inPortals = byMulti(byPortals(tabLeads(tab), portals), multi);
   const filtered = byFilter(inPortals, filter);
   const recallGroups = tab === 'recall' ? groupByRecall(filtered, now) : [];
   // Nella scheda "Richiami" l'ordine è quello dei gruppi; altrove il criterio scelto.
@@ -107,16 +110,18 @@ export function App({ api = defaultApi }: { api?: Api }) {
   const tagParts = [
     ...(filter === 'all' ? [] : [FILTER_LABELS[filter]]),
     ...(portals.length ? [joinList(portals.map((p) => PORTAL_TAGS[p]), 'e')] : []),
+    ...(multi ? ['su più portali'] : []),
     ...describeQuery(query),
   ];
   const filterTag = tagParts.length ? ` «${tagParts.join(', ')}»` : '';
-  const anyFilter = filter !== 'all' || portals.length > 0 || !isEmptyQuery(query) || minPrice === 'invalid' || maxPrice === 'invalid';
+  const anyFilter = filter !== 'all' || portals.length > 0 || multi || !isEmptyQuery(query) || minPrice === 'invalid' || maxPrice === 'invalid';
   const resetFilters = () => {
     setText('');
     setMinInput('');
     setMaxInput('');
     setFilter('all');
     setPortals([]);
+    setMulti(false);
   };
 
   // Selezionare tutti i siti equivale a nessun filtro: si torna a "Tutti i siti".
@@ -136,7 +141,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
     });
   };
 
-  useEffect(() => setConfirmingAll(false), [tab, filter, portals, visible.length, text, query.minPrice, query.maxPrice]);
+  useEffect(() => setConfirmingAll(false), [tab, filter, portals, multi, visible.length, text, query.minPrice, query.maxPrice]);
 
   return (
     <main className="panel">
@@ -284,7 +289,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
                   Tutti i siti
                 </button>
                 {PORTALS.map((p) => {
-                  const count = byFilter(tabLeads(tab), filter).filter((l) => l.listing.portal === p).length;
+                  const count = byFilter(byMulti(tabLeads(tab), multi), filter).filter((l) => leadPortals(l).includes(p)).length;
                   const on = portals.includes(p);
                   return (
                     <button
@@ -300,6 +305,21 @@ export function App({ api = defaultApi }: { api?: Api }) {
                     </button>
                   );
                 })}
+                {(() => {
+                  const count = byFilter(byPortals(tabLeads(tab), portals), filter).filter((l) => l.others.length > 0).length;
+                  return (
+                    <button
+                      type="button"
+                      aria-pressed={multi}
+                      aria-label={`Su più portali (${count})`}
+                      className={`chip${multi ? ' chip--on' : ''}`}
+                      disabled={count === 0 && !multi}
+                      onClick={() => setMulti((m) => !m)}
+                    >
+                      Su più portali <span className="chip__count">{count}</span>
+                    </button>
+                  );
+                })()}
               </div>
               {tab !== 'recall' && (
                 <label className="sort">
@@ -320,7 +340,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
                         <button
                           type="button"
                           className="btn btn--danger btn--sm"
-                          onClick={() => run(() => api.deleteListings(visible.map((l) => l.listing.key)))}
+                          onClick={() => run(() => api.deleteListings(visible.flatMap(leadKeys)))}
                         >
                           {`Conferma: elimina ${nAnnunci(visible.length)}${filterTag}`}
                         </button>
@@ -355,8 +375,9 @@ export function App({ api = defaultApi }: { api?: Api }) {
                           key={l.listing.key}
                           lead={l}
                           now={now}
-                          onChange={(patch) => run(() => api.setLeadState(l.listing.key, patch))}
-                          onDelete={() => run(() => api.deleteListing(l.listing.key))}
+                          onChange={(patch) => run(() => api.setLeadState(leadKeys(l), patch))}
+                          onDelete={() => run(() => api.deleteListings(leadKeys(l)))}
+                          onSplit={(key) => run(() => api.splitListing(key, leadKeys(l).filter((k) => k !== key)))}
                         />
                       ))}
                     </Fragment>
