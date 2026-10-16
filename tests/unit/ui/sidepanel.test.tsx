@@ -93,6 +93,20 @@ describe('LeadItem', () => {
     expect(screen.getByText('Idealista').className).toBe('portal-tag');
   });
 
+  it('mostra "sopra mercato" con la spiegazione solo da +10%', () => {
+    const market = { scope: 'zone' as const, label: 'Navigli', city: 'Milano', medianPerM2: 4200, sampleSize: 7, deltaPercent: 18.4 };
+    render(<ul><LeadItem lead={{ ...lead(1, 'high'), market }} now={Date.now()} onChange={() => {}} onDelete={() => {}} /></ul>);
+    expect(screen.getByText('+18% su Navigli')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Informazioni: Sopra mercato' })).toBeTruthy();
+    expect(screen.getByText(/Mediana dei privati visti in zona Navigli \(Milano\): 4\.200 €\/m² su 7 annunci/)).toBeTruthy();
+    cleanup();
+    render(<ul><LeadItem lead={{ ...lead(1, 'high'), market: { ...market, deltaPercent: 9.96 } }} now={Date.now()} onChange={() => {}} onDelete={() => {}} /></ul>);
+    expect(screen.queryByText(/su Navigli/)).toBeNull();
+    cleanup();
+    render(<ul><LeadItem lead={lead(1, 'high')} now={Date.now()} onChange={() => {}} onDelete={() => {}} /></ul>);
+    expect(screen.queryByRole('button', { name: 'Informazioni: Sopra mercato' })).toBeNull();
+  });
+
   it('mostra priorità, titolo, motivi e visite', () => {
     render(<ul><LeadItem lead={lead(1, 'high')} now={Date.now()} onChange={() => {}} onDelete={() => {}} /></ul>);
     expect(screen.getByText('Alta')).toBeTruthy();

@@ -187,6 +187,14 @@ button, input, select { font: inherit; color: inherit; }
 }
 .lead__price { flex: none; font-weight: 700; font-size: 14px; color: var(--brand); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .lead__meta { margin: 4px 0 10px; color: var(--muted); font-size: 12px; }
+/* Riga "sopra mercato": il fumetto della nota si apre sotto la riga, largo quanto la card. */
+.lead__market { position: relative; display: flex; align-items: center; gap: 6px; margin: -4px 0 10px; }
+.market-tag {
+  font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+  border: 1px solid var(--medium-border); background: var(--medium-soft); color: var(--medium);
+}
+/* La card taglia ciò che esce (striscia colorata a sinistra): con la nota aperta la lascia uscire. */
+.lead:has(.lead__market .info__tip:not([hidden])) { overflow: visible; z-index: 2; }
 .lead__actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .lead__actions .field--select { margin-right: auto; }
 .lead__actions .icon-btn { width: 28px; height: 28px; }
