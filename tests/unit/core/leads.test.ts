@@ -8,6 +8,7 @@ function lead(key: string, priority: Priority, ageDays: number | null, status: L
     evaluation: { listingKey: key, priority, ageDays } as LeadView['evaluation'],
     state: { listingKey: key, status, notes: '', statusChangedAt: 0, updatedAt: 0, recallAt: null },
     prices: [],
+    market: null,
   };
 }
 

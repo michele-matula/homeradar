@@ -4,6 +4,7 @@ import { AUTO_BACKUP_SLOTS, buildBackup, mergeBackup, parseBackup, type BackupFi
 import type { HomeRadarDB } from '@/core/db';
 import { warnedPortals } from '@/core/diagnostics';
 import { sortLeads } from '@/core/leads';
+import { compareToMarket } from '@/core/market';
 import { ONBOARDING_VERSION } from '@/core/onboarding';
 import { addDays, startOfLocalDay } from '@/core/recall';
 import { evaluate } from '@/core/rules';
@@ -115,6 +116,8 @@ export class LeadService {
     const snapsByKey = new Map<string, PriceSnapshot[]>();
     for (const s of snaps) snapsByKey.set(s.listingKey, [...(snapsByKey.get(s.listingKey) ?? []), s]);
 
+    // Mediana sull'archivio intero, prima di nascondere i lead senza segnali: anche loro sono prezzi della zona.
+    const market = compareToMarket(listings);
     const views = listings.map((listing): LeadView => {
       const prices = (snapsByKey.get(listing.key) ?? []).sort((a, b) => a.at - b.at);
       return {
@@ -122,6 +125,7 @@ export class LeadService {
         evaluation: evaluate(listing, prices, settings, now),
         state: stateByKey.get(listing.key) ?? { listingKey: listing.key, status: 'new', notes: '', statusChangedAt: listing.firstSeenAt, updatedAt: listing.firstSeenAt, recallAt: null },
         prices,
+        market: market.get(listing.key) ?? null,
       };
     });
     // Un lead con un richiamo resta visibile anche se è "Nuovo" senza segnali: l'icona lo conta.

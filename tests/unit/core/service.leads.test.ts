@@ -24,6 +24,22 @@ describe('LeadService.listLeads', () => {
     expect(leads.map((l) => l.listing.portalId)).toContain(131597836);
     expect(leads[0]!.prices.map((p) => p.price)).toEqual([249000, 235000]);
   });
+
+  it('confronta il €/m² con tutto l\'archivio, anche con gli annunci non mostrati', async () => {
+    const { svc } = setup();
+    // Lead Alta: 235.000 € su 62 m² ≈ 3.790 €/m². Altri 5 privati della zona a 3.000 €/m², senza segnali.
+    await svc.ingest([obs(), ...[1, 2, 3, 4, 5].map((i) => obs({ portalId: 131597836 + i, lastDrop: null, price: 186000 }))]);
+    const leads = await svc.listLeads();
+    expect(leads.map((l) => l.listing.portalId)).toEqual([128416572]);
+    expect(leads[0]!.market).toMatchObject({ scope: 'zone', label: 'Precotto', medianPerM2: 3000, sampleSize: 5 });
+    expect(leads[0]!.market!.deltaPercent).toBeCloseTo(26.34, 1);
+  });
+
+  it('senza abbastanza annunci il confronto è null', async () => {
+    const { svc } = setup();
+    await svc.ingest([obs()]);
+    expect((await svc.listLeads())[0]!.market).toBeNull();
+  });
 });
 
 describe('LeadService.setLeadState', () => {

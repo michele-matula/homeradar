@@ -160,6 +160,8 @@ export interface LeadView {
   evaluation: Evaluation;
   state: LeadState;
   prices: PriceSnapshot[];
+  /** Confronto con la mediana €/m² della zona o della città; null se il campione non basta. */
+  market: MarketComparison | null;
 }
 
 export interface Diagnostics {
