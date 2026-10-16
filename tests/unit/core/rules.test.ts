@@ -183,4 +183,37 @@ describe('evaluateGroup', () => {
     expect(e).toMatchObject({ priority: 'none', ageDays: 30 });
     expect(e.badgeText).toBe('Privato · ~30 gg · 2 portali');
   });
+
+  it('ripubblicazione: età dal precedente, ribasso dallo storico della testa, badge "ripubblicato"', () => {
+    const before = listing({ portalCreatedAt: daysAgo(300), currentPrice: 300000 });
+    const head = listing({ key: 'immobiliare:2', portalId: 2, portalCreatedAt: daysAgo(5), currentPrice: 270000 });
+    const chain = [snap(300000, daysAgo(300)), snap(270000, daysAgo(5))];
+    const e = evaluateGroup(head, [{ listing: head, prices: chain }, { listing: before, prices: [snap(300000, daysAgo(300))], previous: true }], DEFAULT_SETTINGS, NOW);
+    expect(e).toMatchObject({ listingKey: 'immobiliare:2', priority: 'high', ageDays: 300, ageEstimated: false, dropPercent: 10 });
+    expect(e.badgeText).toBe('● Alta · 300 gg · −10% · ripubblicato');
+  });
+
+  it("un ribasso vecchio dell'annuncio precedente non conta", () => {
+    const before = listing({ portalCreatedAt: daysAgo(300), currentPrice: 270000 });
+    const head = listing({ key: 'immobiliare:2', portalId: 2, portalCreatedAt: daysAgo(5), currentPrice: 283000 });
+    const beforePrices = [snap(300000, daysAgo(300)), snap(270000, daysAgo(100))];
+    const chain = [...beforePrices, snap(283000, daysAgo(5))];
+    const e = evaluateGroup(head, [{ listing: head, prices: chain }, { listing: before, prices: beforePrices, previous: true }], DEFAULT_SETTINGS, NOW);
+    expect(e.dropPercent).toBe(5.7);
+  });
+
+  it('due annunci dello stesso portale e uno di un altro: "2 portali · ripubblicato"', () => {
+    const before = listing({ portalCreatedAt: daysAgo(10) });
+    const head = listing({ key: 'immobiliare:2', portalId: 2, portalCreatedAt: daysAgo(5) });
+    const idea = listing({ key: 'idealista:3', portal: 'idealista', portalId: 3, estimatedCreatedAt: daysAgo(30) });
+    const e = evaluateGroup(head, [{ listing: head, prices: [] }, { listing: idea, prices: [] }, { listing: before, prices: [], previous: true }], DEFAULT_SETTINGS, NOW);
+    expect(e.badgeText).toBe('Privato · ~30 gg · 2 portali · ripubblicato');
+  });
+
+  it('una catena sullo stesso portale non dice "portali"', () => {
+    const before = listing({ portalCreatedAt: daysAgo(10) });
+    const head = listing({ key: 'immobiliare:2', portalId: 2, portalCreatedAt: daysAgo(5) });
+    const e = evaluateGroup(head, [{ listing: head, prices: [] }, { listing: before, prices: [], previous: true }], DEFAULT_SETTINGS, NOW);
+    expect(e.badgeText).toBe('Privato · 10 gg · ripubblicato');
+  });
 });
