@@ -82,6 +82,13 @@ export interface PriceSnapshot {
   source: SnapshotSource;
 }
 
+/** Due annunci che l'agente ha separato: non vanno più uniti. `a < b`, chiavi di listing. */
+export interface SplitPair {
+  a: string;
+  b: string;
+  at: number;
+}
+
 export type LeadStatus = 'new' | 'to_contact' | 'contacted' | 'discarded';
 export const LEAD_STATUSES: LeadStatus[] = ['new', 'to_contact', 'contacted', 'discarded'];
 
