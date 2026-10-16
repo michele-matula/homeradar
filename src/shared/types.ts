@@ -142,6 +142,19 @@ export interface Evaluation {
   badgeText: string;
 }
 
+/** Confronto del €/m² di un lead con la mediana dei privati visti nella stessa zona o città. Calcolato, mai salvato. */
+export interface MarketComparison {
+  scope: 'zone' | 'city';
+  /** Zona o città come la scrive il portale del lead. */
+  label: string;
+  /** Città del lead, per il testo della zona. */
+  city: string;
+  medianPerM2: number;
+  /** Annunci usati per la mediana, escluso il lead. */
+  sampleSize: number;
+  deltaPercent: number;
+}
+
 export interface LeadView {
   listing: ListingRecord;
   evaluation: Evaluation;
