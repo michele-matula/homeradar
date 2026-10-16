@@ -5,7 +5,8 @@ import type { BackupStatus, Diagnostics, ImportSummary, LeadState, LeadStatus, L
 
 export interface Api {
   listLeads(): Promise<LeadView[]>;
-  setLeadState(listingKey: string, patch: { status?: LeadStatus; notes?: string; recallAt?: number | null }): Promise<LeadState>;
+  setLeadState(listingKeys: string[], patch: { status?: LeadStatus; notes?: string; recallAt?: number | null }): Promise<LeadState>;
+  splitListing(listingKey: string, fromKeys: string[]): Promise<void>;
   deleteListing(listingKey: string): Promise<void>;
   deleteListings(listingKeys: string[]): Promise<void>;
   deleteAllListings(): Promise<number>;
@@ -32,7 +33,8 @@ function onBroadcast(type: string, cb: () => void): () => void {
 
 export const defaultApi: Api = {
   listLeads: () => send({ type: 'listLeads' }),
-  setLeadState: (listingKey, patch) => send({ type: 'setLeadState', listingKey, ...patch }),
+  setLeadState: (listingKeys, patch) => send({ type: 'setLeadState', listingKeys, ...patch }),
+  splitListing: (listingKey, fromKeys) => send({ type: 'splitListing', listingKey, fromKeys }),
   deleteListing: (listingKey) => send({ type: 'deleteListing', listingKey }),
   deleteListings: (listingKeys) => send({ type: 'deleteListings', listingKeys }),
   deleteAllListings: () => send({ type: 'deleteAllListings' }),
