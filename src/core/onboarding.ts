@@ -2,12 +2,13 @@
  * Versione dell'informativa. Si alza solo se cambia cosa viene salvato o come viene usato
  * (es. nuovi dati del lead): l'agente deve riconfermare. Refusi e legenda non la alzano.
  */
-export const ONBOARDING_VERSION = 3;
+export const ONBOARDING_VERSION = 4;
 
 /** Voci del riquadro "Cosa è cambiato", per versione dell'informativa. */
 export const ONBOARDING_CHANGES: Record<number, string[]> = {
   2: ['HomeRadar ora salva la data di ricontatto che imposti su un lead: resta sul tuo browser, come stati e note.'],
   3: ['HomeRadar ora riconosce lo stesso immobile pubblicato su più portali e lo mostra come un solo lead. Se separi due annunci uniti per errore, la scelta resta salvata sul tuo browser.'],
+  4: ["HomeRadar ora riconosce un annuncio tolto e ripubblicato sullo stesso portale: il lead tiene età, storico prezzi, stato e note dell'annuncio precedente, che resta salvato finché rivedi la ripubblicazione."],
 };
 
 /** Vero se l'informativa non è mai stata confermata o è stata confermata in una versione precedente. */

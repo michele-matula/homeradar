@@ -66,9 +66,15 @@ describe('informativa', () => {
   });
 
   it('la versione 3 annuncia lo stesso immobile su più portali', () => {
-    expect(ONBOARDING_VERSION).toBe(3);
     expect(ONBOARDING_CHANGES[3]).toEqual([
       'HomeRadar ora riconosce lo stesso immobile pubblicato su più portali e lo mostra come un solo lead. Se separi due annunci uniti per errore, la scelta resta salvata sul tuo browser.',
+    ]);
+  });
+
+  it('la versione 4 annuncia le ripubblicazioni', () => {
+    expect(ONBOARDING_VERSION).toBe(4);
+    expect(ONBOARDING_CHANGES[4]).toEqual([
+      "HomeRadar ora riconosce un annuncio tolto e ripubblicato sullo stesso portale: il lead tiene età, storico prezzi, stato e note dell'annuncio precedente, che resta salvato finché rivedi la ripubblicazione.",
     ]);
   });
 });

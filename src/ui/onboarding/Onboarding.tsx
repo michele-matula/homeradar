@@ -122,6 +122,11 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
             Quando lo stesso immobile compare su più portali, HomeRadar lo riconosce confrontando città, m², locali e prezzo e
             lo mostra come un solo lead. Se separi due annunci uniti per errore, la scelta viene salvata.
           </li>
+          <li>
+            Quando un annuncio viene tolto e ripubblicato sullo stesso portale, HomeRadar lo riconosce confrontando città, m²,
+            locali, tipologia, zona, indirizzo e prezzo, e il lead tiene età, storico prezzi, stato e note dell'annuncio
+            precedente. Se separi un annuncio unito per errore, la scelta viene salvata.
+          </li>
         </ul>
         <h2 className="onboarding__h">Cosa non salva mai</h2>
         <ul>
@@ -134,7 +139,7 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
         <ul>
           <li>Solo nel tuo browser, su questo computer. Non vengono inviati a nessun server, nemmeno a chi ha creato HomeRadar.</li>
           <li>
-            {`Gli annunci rimasti in stato "Nuovo" che non rivedi da ${settings.retentionDays} giorni vengono cancellati da soli, anche se hanno note: per tenerli cambia lo stato. Puoi cambiare il periodo nelle impostazioni.`}
+            {`Gli annunci rimasti in stato "Nuovo" che non rivedi da ${settings.retentionDays} giorni vengono cancellati da soli, anche se hanno note: per tenerli cambia lo stato. Puoi cambiare il periodo nelle impostazioni. L'annuncio precedente di una ripubblicazione resta finché rivedi la ripubblicazione.`}
           </li>
           <li>
             Una volta a settimana HomeRadar salva un backup nella cartella Download/HomeRadar. Se Chrome è impostato per chiedere
@@ -163,6 +168,10 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
           <li>
             <Badge priority="medium">· 2 portali</Badge>
             <span>lo stesso immobile è pubblicato su più portali: età, priorità e ribasso valgono per tutto il gruppo.</span>
+          </li>
+          <li>
+            <Badge priority="medium">· ripubblicato</Badge>
+            <span>l'annuncio è stato tolto e ripubblicato sullo stesso portale: età e ribassi partono dall'annuncio precedente.</span>
           </li>
           <li>
             <Badge priority="medium">+18% su Navigli</Badge>
