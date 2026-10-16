@@ -119,11 +119,13 @@ export interface LeadView {
   state: LeadState;           // del gruppo
   prices: PriceSnapshot[];    // del principale
   market: MarketComparison | null;
-  sources: LeadSource[];      // tutte le fonti, principale compreso; una sola se non c'è gruppo
+  others: LeadSource[];       // le altre fonti del gruppo, senza il principale; vuoto se non c'è gruppo
 }
 ```
 
-Il codice che legge `listing` continua a funzionare. `sources.map((s) => s.listing.key)` sono le chiavi del gruppo.
+Il codice che legge `listing` continua a funzionare. Le chiavi del gruppo sono `[listing.key, ...others.map((o) => o.listing.key)]` (helper `leadKeys` in `leads.ts`, insieme a `leadPortals`). `Evaluation` non cambia forma.
+
+La costruzione dei lead (valutazioni, gruppi, principale, stato del gruppo, mercato) passa in un modulo puro `src/core/lead-groups.ts`; `listLeads` legge il database e lo chiama.
 
 ### 6.2 Principale
 
@@ -131,31 +133,31 @@ Il membro con la priorità più alta; a parità quello con l'età maggiore; poi 
 
 ### 6.3 Valutazione del gruppo
 
-Nuova funzione pura `evaluateGroup(members: Evaluation[], settings)` in `rules.ts`, con le regole di priorità di oggi applicate ai fatti del gruppo:
+Nuova funzione pura `evaluateGroup` in `rules.ts`, con le regole di priorità di oggi applicate ai fatti del gruppo:
 
-- **Età:** quella del membro con l'età maggiore, con il suo `ageEstimated` e `ageUncertain`.
+- **Età:** quella del membro più vecchio tra quelli con il segnale A (se nessuno lo ha, del membro più vecchio), con il suo `ageEstimated` e `ageUncertain`.
 - **Segnale A (anzianità):** presente se lo è su almeno un membro.
 - **Segnale B (ribasso):** presente se lo è su almeno un membro; `dropPercent`, `dropCount` e `maxKnownPrice` vengono dal membro con il ribasso maggiore.
 - **Priorità:** Alta con A e B, Media con uno dei due, Da verificare/Età incerta se nessuno dei due e l'età del gruppo è incerta, altrimenti nessuna. Un'età vecchia su Idealista e un ribasso su Immobiliare fanno quindi un lead Alta.
-- **Motivi:** quelli dei membri, senza ripetizioni.
+- **Motivi:** composti come oggi dall'età e dal ribasso scelti.
 - **Badge:** come oggi, più `· N portali` in fondo.
 
-Per farlo, `Evaluation` espone i due segnali (`ageSignal`, `dropSignal`) già calcolati da `evaluate`. Per un lead senza gruppo `evaluateGroup` non si chiama e nulla cambia.
+Per farlo, `evaluate` si divide in funzioni interne (fatti dell'età, fatti del ribasso, composizione di priorità, motivi e badge) e `evaluateGroup(target, members, settings, now)` riceve annunci e storici dei membri e riusa le stesse funzioni. L'età del gruppo è quella del membro più vecchio tra quelli con il segnale A; se nessuno lo ha, del membro più vecchio. Per un lead senza gruppo `evaluateGroup` non si chiama e nulla cambia.
 
 ### 6.4 Stato del gruppo
 
 - **Stato, richiamo e date:** quelli del membro con `updatedAt` più recente.
-- **Note:** se tutti i membri con note hanno lo stesso testo, quel testo. Se sono diverse, le note di ciascun membro, una per riga, precedute dal portale: `Idealista: …`. Nessuna nota sparisce dalla vista; al primo salvataggio dell'agente il testo mostrato diventa la nota di tutti i membri.
+- **Note:** se tutti i membri con note hanno lo stesso testo, quel testo. Se sono diverse, le note di ciascun membro precedute dal portale e separate da ` · ` (il campo note è su una riga): `Immobiliare: … · Idealista: …`. Nessuna nota sparisce dalla vista; al primo salvataggio dell'agente il testo mostrato diventa la nota di tutti i membri.
 
 ### 6.5 Scritture
 
-- `setLeadState` riceve `listingKeys: string[]` e scrive lo stesso stato, note e richiamo su tutti i membri in una transazione. `updatedAt` e `statusChangedAt` seguono le regole di oggi, membro per membro.
+- Il messaggio `setLeadState` riceve `listingKeys: string[]` (il metodo del servizio accetta una chiave o un elenco) e scrive lo stesso stato, note e richiamo su tutti i membri in una transazione. `updatedAt` e `statusChangedAt` seguono le regole di oggi, membro per membro.
 - `deleteListings` riceve già più chiavi: il pannello passa le chiavi del gruppo.
-- Nuovo messaggio `splitListing { listingKey, fromKeys }`: salva le coppie e non tocca stato e note (ogni membro ha già la sua copia).
+- Nuovo messaggio `splitListing { listingKey, fromKeys }`: prima scrive su tutti i membri lo stato del gruppo (stato, note unite, richiamo e date del membro più recente), così un annuncio entrato nel gruppo dopo l'ultima modifica non torna a "Nuovo"; poi salva le coppie.
 
 ### 6.6 Visibilità
 
-Il lead unito compare se almeno un membro comparirebbe oggi (priorità, stato diverso da "Nuovo" o richiamo).
+Il lead unito compare secondo la regola di oggi applicata a valutazione e stato del gruppo (priorità, stato diverso da "Nuovo" o richiamo). La priorità del gruppo non è mai più bassa di quella di un membro.
 
 ### 6.7 Badge delle card
 
