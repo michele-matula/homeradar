@@ -133,7 +133,7 @@ Si sceglie solo tra le teste, con le regole del punto 6 (priorità, età, visto 
 
 ### 5.3 Valutazione
 
-- **Membri per la valutazione:** `evaluateGroup` riceve un membro per annuncio per l'età e, per il ribasso, un membro per catena: la testa con lo storico di tutta la catena (snapshot di tutti gli annunci della catena, in ordine di tempo, più i prezzi attuali e i `lastDrop.fromPrice` degli annunci precedenti come prezzi noti). Il prezzo attuale è quello della testa.
+- **Membri per la valutazione:** `evaluateGroup` riceve un membro per annuncio per l'età e, per il ribasso, un membro per catena: la testa con lo storico di tutta la catena (snapshot di tutti gli annunci della catena, in ordine di tempo: `ingest` salva già come snapshot ogni prezzo osservato e i due prezzi di un ribasso dichiarato). Il prezzo attuale è quello della testa. Gli annunci precedenti contano per l'età, non per il ribasso: il loro storico è già in quello della testa, e un loro ribasso vecchio non deve superare quello calcolato sul prezzo attuale.
 - **Età:** regola del punto 6, il membro più vecchio tra quelli con il segnale A. L'annuncio precedente porta l'età vera; su Immobiliare anche esatta.
 - **Ribasso:** dalla catena, quindi 300.000 → 270.000 € alla ripubblicazione è un ribasso del 10% e conta in `dropCount`.
 - **Badge:** `· N portali` conta i **portali distinti** (oggi conta i membri; con una catena sarebbe sbagliato). Se il gruppo contiene annunci precedenti si aggiunge `· ripubblicato` in fondo. Esempi: `● Alta · 300 gg · −10% · ripubblicato`, `● Media · 200 gg · 2 portali · ripubblicato`.
