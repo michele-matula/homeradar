@@ -27,11 +27,22 @@ describe('toExportRows', () => {
     expect(EXPORT_COLUMNS.indexOf('Richiamo')).toBe(EXPORT_COLUMNS.indexOf('Stato') + 1);
   });
 
+  it('colonne del mercato solo da +10% in su', () => {
+    const market = { scope: 'zone' as const, label: 'Precotto', city: 'Milano', medianPerM2: 4200, sampleSize: 7, deltaPercent: 18.4 };
+    const row = toExportRows([{ ...lead, market }])[0]!;
+    expect(row['Sopra mercato %']).toBe(18);
+    expect(row['Confronto mercato']).toBe('Precotto (Milano), 7 annunci, 4.200 €/m²');
+    expect(EXPORT_COLUMNS.indexOf('Sopra mercato %')).toBe(EXPORT_COLUMNS.indexOf('Calo %') + 1);
+    const below = toExportRows([{ ...lead, market: { ...market, deltaPercent: 9.96 } }])[0]!;
+    expect(below['Sopra mercato %']).toBe('');
+    expect(below['Confronto mercato']).toBe('');
+  });
+
   it('mappa tutte le colonne', () => {
     expect(toExportRows([lead])).toEqual([{
       'Priorità': 'Alta', 'Stato': 'Da contattare', 'Richiamo': '', 'Portale': 'Immobiliare.it', 'Titolo': 'Bilocale via Esempio 1, Precotto, Milano',
       'Indirizzo': 'Via Esempio', 'Città/Zona': 'Milano / Precotto', 'Tipologia': 'Appartamento', 'm²': 62, 'Locali': 2,
-      'Prezzo attuale': 235000, 'Prezzo massimo noto': 249000, 'Calo %': 5.6, 'Data ultimo ribasso': '21/09/2026',
+      'Prezzo attuale': 235000, 'Prezzo massimo noto': 249000, 'Calo %': 5.6, 'Sopra mercato %': '', 'Confronto mercato': '','Data ultimo ribasso': '21/09/2026',
       'Online da (giorni)': 173, 'Età stimata': 'sì', 'Prima visita': '01/10/2026', 'Ultima visita': '10/10/2026',
       'Note': 'chiamare la sera', 'URL': 'https://www.immobiliare.it/annunci/128416572/',
     }]);

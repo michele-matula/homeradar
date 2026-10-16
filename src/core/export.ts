@@ -1,19 +1,20 @@
 import * as XLSX from 'xlsx';
 import { priorityLabel, STATUS_LABELS } from '@/core/leads';
+import { isAboveMarket, marketSummary } from '@/core/market';
 import { formatLocalDate } from '@/core/recall';
 import { formatDate } from '@/shared/format';
 import { PORTAL_SITES, type LeadView } from '@/shared/types';
 
 export const EXPORT_COLUMNS = [
   'Priorità', 'Stato', 'Richiamo', 'Portale', 'Titolo', 'Indirizzo', 'Città/Zona', 'Tipologia', 'm²', 'Locali', 'Prezzo attuale',
-  'Prezzo massimo noto', 'Calo %', 'Data ultimo ribasso', 'Online da (giorni)', 'Età stimata', 'Prima visita',
+  'Prezzo massimo noto', 'Calo %', 'Sopra mercato %', 'Confronto mercato', 'Data ultimo ribasso', 'Online da (giorni)', 'Età stimata', 'Prima visita',
   'Ultima visita', 'Note', 'URL',
 ] as const;
 
 export type ExportRow = Record<(typeof EXPORT_COLUMNS)[number], string | number>;
 
 export function toExportRows(leads: LeadView[]): ExportRow[] {
-  return leads.map(({ listing: l, evaluation: e, state: s }) => ({
+  return leads.map(({ listing: l, evaluation: e, state: s, market }) => ({
     'Priorità': priorityLabel(e.priority, l.portal),
     'Stato': STATUS_LABELS[s.status],
     'Richiamo': s.recallAt != null ? formatLocalDate(s.recallAt) : '',
@@ -27,6 +28,8 @@ export function toExportRows(leads: LeadView[]): ExportRow[] {
     'Prezzo attuale': l.currentPrice ?? '',
     'Prezzo massimo noto': e.maxKnownPrice ?? '',
     'Calo %': e.dropPercent || '',
+    'Sopra mercato %': isAboveMarket(market) ? Math.round(market.deltaPercent) : '',
+    'Confronto mercato': isAboveMarket(market) ? marketSummary(market) : '',
     'Data ultimo ribasso': l.lastDrop ? formatDate(l.lastDrop.date) : '',
     'Online da (giorni)': e.ageDays ?? '',
     'Età stimata': e.ageDays == null ? '' : e.ageEstimated ? 'sì' : 'no',

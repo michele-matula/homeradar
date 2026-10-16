@@ -24,8 +24,8 @@ export function sortLeads(leads: LeadView[]): LeadView[] {
   return [...leads].sort(byPriority);
 }
 
-export type SortKey = 'priority' | 'recall' | 'oldest' | 'newest' | 'drop' | 'price_asc' | 'price_desc' | 'price_m2' | 'first_seen' | 'last_seen' | 'status_changed';
-export const SORT_KEYS: SortKey[] = ['priority', 'recall', 'oldest', 'newest', 'drop', 'price_asc', 'price_desc', 'price_m2', 'first_seen', 'last_seen', 'status_changed'];
+export type SortKey = 'priority' | 'recall' | 'oldest' | 'newest' | 'drop' | 'price_asc' | 'price_desc' | 'price_m2' | 'above_market' | 'first_seen' | 'last_seen' | 'status_changed';
+export const SORT_KEYS: SortKey[] = ['priority', 'recall', 'oldest', 'newest', 'drop', 'price_asc', 'price_desc', 'price_m2', 'above_market', 'first_seen', 'last_seen', 'status_changed'];
 export const SORT_LABELS: Record<SortKey, string> = {
   priority: 'Priorità',
   recall: 'Richiamo più vicino',
@@ -35,6 +35,7 @@ export const SORT_LABELS: Record<SortKey, string> = {
   price_asc: 'Prezzo crescente',
   price_desc: 'Prezzo decrescente',
   price_m2: '€/m² più basso',
+  above_market: 'Sopra mercato',
   first_seen: 'Scoperti di recente',
   last_seen: 'Visti di recente',
   status_changed: 'Stato cambiato di recente',
@@ -51,6 +52,7 @@ const SORT_VALUES: Record<Exclude<SortKey, 'priority'>, [(l: LeadView) => number
   price_asc: [(l) => l.listing.currentPrice, 1],
   price_desc: [(l) => l.listing.currentPrice, -1],
   price_m2: [pricePerM2, 1],
+  above_market: [(l) => l.market?.deltaPercent ?? null, -1],
   first_seen: [(l) => l.listing.firstSeenAt, -1],
   last_seen: [(l) => l.listing.lastSeenAt, -1],
   status_changed: [(l) => l.state.statusChangedAt, -1],

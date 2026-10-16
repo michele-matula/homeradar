@@ -19,7 +19,7 @@ describe('sortLeads', () => {
   });
 });
 
-interface Fields { priority?: Priority; age?: number | null; drop?: number; price?: number | null; m2?: number | null; first?: number; last?: number; changed?: number; recall?: number | null }
+interface Fields { priority?: Priority; age?: number | null; drop?: number; price?: number | null; m2?: number | null; first?: number; last?: number; changed?: number; recall?: number | null; above?: number | null }
 
 function item(key: string, f: Fields): LeadView {
   const base = lead(key, f.priority ?? 'high', f.age === undefined ? 100 : f.age);
@@ -28,11 +28,17 @@ function item(key: string, f: Fields): LeadView {
     listing: { key, currentPrice: f.price ?? null, surfaceM2: f.m2 ?? null, firstSeenAt: f.first ?? 0, lastSeenAt: f.last ?? 0 } as LeadView['listing'],
     evaluation: { ...base.evaluation, dropPercent: f.drop ?? 0 },
     state: { ...base.state, statusChangedAt: f.changed ?? 0, recallAt: f.recall ?? null },
+    market: f.above == null ? null : { scope: 'zone', label: 'Z', city: 'C', medianPerM2: 1, sampleSize: 5, deltaPercent: f.above },
   };
 }
 const keys = (ls: LeadView[]) => ls.map((l) => l.listing.key);
 
 describe('sortLeadsBy', () => {
+  it('"Sopra mercato": scarto più alto prima, anche sotto il 10%; senza confronto in fondo', () => {
+    const ls = [item('a', { above: 12 }), item('b', { above: -5 }), item('c', {}), item('d', { above: 30 })];
+    expect(keys(sortLeadsBy(ls, 'above_market'))).toEqual(['d', 'a', 'b', 'c']);
+  });
+
   it('"priority" coincide con l\'ordine predefinito', () => {
     const ls = [item('a', { priority: 'medium', age: 130 }), item('b', { priority: 'high', age: 125 }), item('c', { priority: 'medium', age: 200 })];
     expect(keys(sortLeadsBy(ls, 'priority'))).toEqual(keys(sortLeads(ls)));
