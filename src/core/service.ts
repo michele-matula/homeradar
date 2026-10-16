@@ -221,7 +221,7 @@ export class LeadService {
     if (due.length < 2) return due.length;
     const [listings, splits] = await Promise.all([this.db.listings.toArray(), this.db.splits.toArray()]);
     const groupOf = new Map<string, string>();
-    for (const g of groupListings(listings, splits)) for (const k of g) groupOf.set(k, g[0]!);
+    for (const g of groupListings(listings, splits)) for (const k of g.keys) groupOf.set(k, g.keys[0]!);
     return new Set(due.map((s) => groupOf.get(s.listingKey) ?? s.listingKey)).size;
   }
 

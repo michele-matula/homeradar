@@ -74,7 +74,7 @@ export function buildLeadViews({ listings, states, snapshots, splits }: Archive,
 
   const units: LeadSource[][] = [];
   const grouped = new Set<string>();
-  for (const keys of groupListings(listings, splits)) {
+  for (const { keys } of groupListings(listings, splits)) {
     units.push(keys.map((k) => sources.get(k)!).sort(byPrimary));
     for (const k of keys) grouped.add(k);
   }
