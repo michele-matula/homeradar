@@ -45,7 +45,7 @@ describe('toExportRows', () => {
       'Indirizzo': 'Via Esempio', 'Città/Zona': 'Milano / Precotto', 'Tipologia': 'Appartamento', 'm²': 62, 'Locali': 2,
       'Prezzo attuale': 235000, 'Prezzo massimo noto': 249000, 'Calo %': 5.6, 'Sopra mercato %': '', 'Confronto mercato': '','Data ultimo ribasso': '21/09/2026',
       'Online da (giorni)': 173, 'Età stimata': 'sì', 'Prima visita': '01/10/2026', 'Ultima visita': '10/10/2026',
-      'Note': 'chiamare la sera', 'URL': 'https://www.immobiliare.it/annunci/128416572/',
+      'Note': 'chiamare la sera', 'URL': 'https://www.immobiliare.it/annunci/128416572/', 'Altri URL': '',
     }]);
     expect(Object.keys(toExportRows([lead])[0]!)).toEqual([...EXPORT_COLUMNS]);
   });
@@ -93,5 +93,17 @@ describe('toXlsx', () => {
 describe('exportFileName', () => {
   it('include la data', () => {
     expect(exportFileName('xlsx', Date.UTC(2026, 9, 10))).toBe('homeradar-lead-2026-10-10.xlsx');
+  });
+});
+
+describe('toExportRows lead unito', () => {
+  it('tutti i portali e gli altri URL', () => {
+    const other = { ...lead.listing, key: 'idealista:2', portal: 'idealista' as const, portalId: 2, url: 'https://www.idealista.it/immobile/2/' };
+    const row = toExportRows([{ ...lead, others: [{ listing: other, evaluation: lead.evaluation, prices: [] }] }])[0]!;
+    expect(row['Portale']).toBe('Immobiliare.it, Idealista.it');
+    expect(row['URL']).toBe('https://www.immobiliare.it/annunci/128416572/');
+    expect(row['Altri URL']).toBe('https://www.idealista.it/immobile/2/');
+    expect(EXPORT_COLUMNS.indexOf('Altri URL')).toBe(EXPORT_COLUMNS.indexOf('URL') + 1);
+    expect(toExportRows([lead])[0]!['Altri URL']).toBe('');
   });
 });
