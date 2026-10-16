@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { priorityLabel, STATUS_LABELS } from '@/core/leads';
+import { aboveMarketText, isAboveMarket, marketExplanation } from '@/core/market';
 import { addDays, formatRecallDate, fromDateInput, RECALL_SHORTCUTS, recallLabel, recallStatus, startOfLocalDay, toDateInput } from '@/core/recall';
 import { formatEuro } from '@/shared/format';
 import { LEAD_STATUSES, PORTAL_TAGS, type LeadStatus, type LeadView } from '@/shared/types';
 import { ExternalIcon, TrashIcon } from './Icons';
+import { InfoTip } from './InfoTip';
 import { Sparkline } from './Sparkline';
 
 interface Props {
@@ -14,7 +16,7 @@ interface Props {
 }
 
 export function LeadItem({ lead, now, onChange, onDelete }: Props) {
-  const { listing, evaluation, state, prices } = lead;
+  const { listing, evaluation, state, prices, market } = lead;
   const [notes, setNotes] = useState(state.notes);
   const [confirming, setConfirming] = useState(false);
   const [picking, setPicking] = useState(false);
@@ -48,6 +50,12 @@ export function LeadItem({ lead, now, onChange, onDelete }: Props) {
         <div className="lead__price">{price}</div>
       </div>
       <div className="lead__meta">{[...evaluation.reasons, visits].join(' · ')}</div>
+      {isAboveMarket(market) && (
+        <div className="lead__market">
+          <span className="market-tag">{aboveMarketText(market)}</span>
+          <InfoTip label="Sopra mercato">{marketExplanation(market)}</InfoTip>
+        </div>
+      )}
       <div className="lead__actions">
         <select className="field field--select" aria-label="Stato" value={state.status} onChange={(e) => onChange({ status: e.target.value as LeadStatus })}>
           {LEAD_STATUSES.map((s) => (

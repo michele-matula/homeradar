@@ -10,6 +10,7 @@ function lead(key: string, f: ListingFields = {}): LeadView {
     evaluation: { listingKey: key } as LeadView['evaluation'],
     state: { listingKey: key, status: 'new', notes: '', statusChangedAt: 0, updatedAt: 0, recallAt: null },
     prices: [],
+    market: null,
   };
 }
 const keys = (ls: LeadView[]) => ls.map((l) => l.listing.key);

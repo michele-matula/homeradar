@@ -157,6 +157,13 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
           </li>
           <li><Badge priority="medium">−8%</Badge><span>ribasso rispetto al prezzo più alto visto.</span></li>
           <li>
+            <Badge priority="medium">+18% su Navigli</Badge>
+            <span>
+              nel pannello: €/m² sopra la mediana degli annunci di privati che hai visto nella stessa zona (o città, se in zona
+              sono pochi). È un'indicazione, non una valutazione.
+            </span>
+          </li>
+          <li>
             <Badge priority="high">3</Badge>
             <span>sull'icona di HomeRadar: i richiami da fare oggi o in ritardo. Li trovi nella scheda «Richiami» del pannello.</span>
           </li>

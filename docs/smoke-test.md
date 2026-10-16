@@ -122,4 +122,16 @@ Naviga a mano, senza automazione: Idealista usa DataDome.
 43. Con un richiamo di oggi: "Esporta backup ora", "Azzera archivio annunci", poi "Importa backup".
     - [ ] Il richiamo torna con la stessa data e il numero sull'icona ricompare.
 
+## Prezzo rispetto alla zona
+
+44. Su Immobiliare, cerca in una città con filtro "privati" e scorri qualche pagina finché il pannello ha almeno 6 privati con m² nella stessa zona (oppure 9 nella stessa città).
+    - [ ] Su qualche lead compare "+N% su <zona>" (o "su <città>"); mai sotto il 10%.
+    - [ ] L'icona "i" accanto apre la nota: zona, mediana €/m², numero di annunci, "È un'indicazione, non una valutazione". La nota si legge per intero, anche su un lead "Scartato".
+45. Ordina per "Sopra mercato".
+    - [ ] In cima i lead con la percentuale più alta; seguono quelli senza etichetta ma con un confronto (scarto sotto il 10%); in fondo quelli senza confronto (senza m², zona e città con pochi annunci).
+46. Esporta CSV.
+    - [ ] Colonne "Sopra mercato %" e "Confronto mercato" valorizzate solo sui lead con l'etichetta.
+47. Impostazioni → "Rivedi informativa".
+    - [ ] Nella legenda c'è la riga "+18% su Navigli"; l'informativa non chiede una nuova conferma.
+
 Se il sito è cambiato: ricattura le fixture (Immobiliare: piano MVP, Task 4; Idealista: piano 2026-10-13, Task 8; Subito: piano 2026-10-13-subito-adapter, Task 5), aggiorna schemi o selettori, riesegui `npm test`.
