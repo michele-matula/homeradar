@@ -250,19 +250,27 @@ export class LeadService {
     });
   }
 
+  /**
+   * Cancella gli annunci non visti da `retentionDays` e non lavorati. Decide per immobile: un gruppo si cancella solo se
+   * tutti i suoi annunci sono vecchi e nessuno è lavorato, così l'annuncio sostituito da una ripubblicazione viva resta.
+   */
   async purge(): Promise<number> {
     const settings = await this.getSettings();
     const cutoff = this.clock() - settings.retentionDays * DAY_MS;
-    const stale = await this.db.listings.where('lastSeenAt').below(cutoff).primaryKeys();
-    let removed = 0;
-    for (const key of stale) {
-      const state = await this.db.leadStates.get(key);
-      // Un lead lavorato o con un richiamo resta, anche se rimesso a mano su "Nuovo".
-      if (state && (state.status !== 'new' || state.recallAt != null)) continue;
-      await this.deleteListing(key);
-      removed++;
-    }
-    return removed;
+    const [listings, states, splits] = await Promise.all([this.db.listings.toArray(), this.db.leadStates.toArray(), this.db.splits.toArray()]);
+    const stateOf = new Map(states.map((s) => [s.listingKey, s]));
+    const seenAt = new Map(listings.map((l) => [l.key, l.lastSeenAt]));
+    // Un lead lavorato o con un richiamo resta, anche se rimesso a mano su "Nuovo".
+    const keep = (k: string) => {
+      const s = stateOf.get(k);
+      return seenAt.get(k)! >= cutoff || (s != null && (s.status !== 'new' || s.recallAt != null));
+    };
+    const units = groupListings(listings, splits).map((g) => g.keys);
+    const grouped = new Set(units.flat());
+    for (const l of listings) if (!grouped.has(l.key)) units.push([l.key]);
+    const stale = units.filter((u) => !u.some(keep)).flat();
+    await this.deleteListings(stale);
+    return stale.length;
   }
 
   listingCount(): Promise<number> {
