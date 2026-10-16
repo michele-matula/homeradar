@@ -128,7 +128,7 @@ Naviga a mano, senza automazione: Idealista usa DataDome.
     - [ ] Su qualche lead compare "+N% su <zona>" (o "su <città>"); mai sotto il 10%.
     - [ ] L'icona "i" accanto apre la nota: zona, mediana €/m², numero di annunci, "È un'indicazione, non una valutazione". La nota si legge per intero, anche su un lead "Scartato".
 45. Ordina per "Sopra mercato".
-    - [ ] In cima i lead con la percentuale più alta; i lead senza etichetta seguono, quelli senza m² in fondo.
+    - [ ] In cima i lead con la percentuale più alta; seguono quelli senza etichetta ma con un confronto (scarto sotto il 10%); in fondo quelli senza confronto (senza m², zona e città con pochi annunci).
 46. Esporta CSV.
     - [ ] Colonne "Sopra mercato %" e "Confronto mercato" valorizzate solo sui lead con l'etichetta.
 47. Impostazioni → "Rivedi informativa".
