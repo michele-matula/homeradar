@@ -1,7 +1,7 @@
 import { priorityLabel } from '@/core/leads';
 import { formatDayMonth, formatEuro, formatPercent } from '@/shared/format';
 import {
-  DAY_MS, type Evaluation, type ListingRecord, type Portal, type PriceSnapshot, type Priority, type Settings,
+  DAY_MS, type Evaluation, type ListingRecord, type Portal, type PriceDrop, type PriceSnapshot, type Priority, type Settings,
 } from '@/shared/types';
 
 export const UNCERTAINTY_DAYS = 15;
@@ -17,8 +17,17 @@ const VERIFY_REASON: Record<Portal, string> = {
   subito: 'Età stimata vicina alla soglia',
 };
 
-export function evaluate(listing: ListingRecord, snapshots: PriceSnapshot[], settings: Settings, now: number): Evaluation {
-  // Segnale A: anzianità
+interface AgeFacts {
+  /** Portale dell'annuncio da cui viene l'età: decide i testi dell'età incerta. */
+  portal: Portal;
+  ageDays: number | null;
+  ageEstimated: boolean;
+  ageUncertain: boolean;
+  /** Segnale A: anzianità. */
+  signal: boolean;
+}
+
+function ageFacts(listing: ListingRecord, settings: Settings, now: number): AgeFacts {
   const created = listing.portalCreatedAt ?? listing.estimatedCreatedAt;
   const ageEstimated = listing.portalCreatedAt == null;
   const ageDays = created == null ? null : Math.max(0, Math.floor((now - created) / DAY_MS));
@@ -27,9 +36,22 @@ export function evaluate(listing: ListingRecord, snapshots: PriceSnapshot[], set
     ageEstimated &&
     ageDays >= settings.minAgeDays - UNCERTAINTY_DAYS &&
     ageDays < settings.minAgeDays + UNCERTAINTY_DAYS;
-  const signalA = ageDays != null && !ageUncertain && ageDays >= settings.minAgeDays;
+  const signal = ageDays != null && !ageUncertain && ageDays >= settings.minAgeDays;
+  return { portal: listing.portal, ageDays, ageEstimated, ageUncertain, signal };
+}
 
-  // Segnale B: ribassi rispetto al massimo prezzo noto
+interface DropFacts {
+  current: number | null;
+  lastDrop: PriceDrop | null;
+  maxKnownPrice: number | null;
+  dropPercent: number;
+  dropCount: number;
+  /** Segnale B: ribasso. */
+  signal: boolean;
+}
+
+/** Ribassi rispetto al massimo prezzo noto. */
+function dropFacts(listing: ListingRecord, snapshots: PriceSnapshot[], settings: Settings): DropFacts {
   const ordered = [...snapshots].sort((a, b) => a.at - b.at);
   const current = listing.currentPrice;
   const known = ordered.map((s) => s.price);
@@ -40,13 +62,20 @@ export function evaluate(listing: ListingRecord, snapshots: PriceSnapshot[], set
     current != null && maxKnownPrice != null && maxKnownPrice > current
       ? round1(((maxKnownPrice - current) / maxKnownPrice) * 100)
       : 0;
-  const signalB = dropPercent > 0 && dropPercent >= settings.minDropPercent;
+  const signal = dropPercent > 0 && dropPercent >= settings.minDropPercent;
   let dropCount = 0;
   for (let i = 1; i < ordered.length; i++) if (ordered[i]!.price < ordered[i - 1]!.price) dropCount++;
+  return { current, lastDrop: listing.lastDrop, maxKnownPrice, dropPercent, dropCount, signal };
+}
+
+/** Priorità, motivi e badge da età e ribasso; `portals` > 1 aggiunge "· N portali" al badge. */
+function compose(target: ListingRecord, age: AgeFacts, drop: DropFacts, portals = 1): Evaluation {
+  const { ageDays, ageEstimated, ageUncertain } = age;
+  const { current, maxKnownPrice, dropPercent, dropCount } = drop;
 
   let priority: Priority = 'none';
-  if (signalA && signalB) priority = 'high';
-  else if (signalA || signalB) priority = 'medium';
+  if (age.signal && drop.signal) priority = 'high';
+  else if (age.signal || drop.signal) priority = 'medium';
   else if (ageUncertain) priority = 'verify';
 
   const agePart =
@@ -55,24 +84,25 @@ export function evaluate(listing: ListingRecord, snapshots: PriceSnapshot[], set
     : `${ageEstimated ? '~' : ''}${ageDays} gg`;
   const reasons: string[] = [];
   if (agePart) reasons.push(`Online da ${agePart}`);
-  if (ageUncertain) reasons.push(VERIFY_REASON[listing.portal]);
-  if (signalB && current != null && maxKnownPrice != null) {
+  if (ageUncertain) reasons.push(VERIFY_REASON[age.portal]);
+  if (drop.signal && current != null && maxKnownPrice != null) {
     if (dropCount >= 2) {
       reasons.push(`${dropCount} ribassi, −${formatPercent(dropPercent)}% totale`);
     } else {
-      const d = listing.lastDrop;
+      const d = drop.lastDrop;
       const when = d && d.toPrice === current ? ` ${d.dateEstimated ? 'rilevato il' : 'il'} ${formatDayMonth(d.date)}` : '';
       reasons.push(`Ribassato del ${formatPercent(dropPercent)}% (${formatEuro(maxKnownPrice)} → ${formatEuro(current)} €)${when}`);
     }
   }
 
-  const dropPart = signalB ? `−${formatPercent(dropPercent)}%` : null;
-  const head = { high: '● Alta', medium: '● Media', verify: `◐ ${priorityLabel('verify', listing.portal)}`, none: 'Privato' }[priority];
+  const dropPart = drop.signal ? `−${formatPercent(dropPercent)}%` : null;
+  const head = { high: '● Alta', medium: '● Media', verify: `◐ ${priorityLabel('verify', age.portal)}`, none: 'Privato' }[priority];
   const parts = priority === 'high' || priority === 'medium' ? [head, agePart, dropPart] : [head, agePart];
+  if (portals > 1) parts.push(`${portals} portali`);
 
   return {
-    listingKey: listing.key,
-    portalId: listing.portalId,
+    listingKey: target.key,
+    portalId: target.portalId,
     priority,
     ageDays,
     ageEstimated,
@@ -83,4 +113,31 @@ export function evaluate(listing: ListingRecord, snapshots: PriceSnapshot[], set
     reasons,
     badgeText: parts.filter(Boolean).join(' · '),
   };
+}
+
+export function evaluate(listing: ListingRecord, snapshots: PriceSnapshot[], settings: Settings, now: number): Evaluation {
+  return compose(listing, ageFacts(listing, settings, now), dropFacts(listing, snapshots, settings));
+}
+
+export interface GroupMember {
+  listing: ListingRecord;
+  prices: PriceSnapshot[];
+}
+
+const days = (a: AgeFacts) => a.ageDays ?? -1;
+
+/**
+ * Valutazione dello stesso immobile su più portali: le regole di `evaluate` sui fatti del gruppo.
+ * Età del membro più vecchio tra quelli con il segnale A (altrimenti del più vecchio), ribasso maggiore.
+ * `listingKey` e `portalId` sono quelli di `target`.
+ */
+export function evaluateGroup(target: ListingRecord, members: GroupMember[], settings: Settings, now: number): Evaluation {
+  const ages = members.map((m) => ageFacts(m.listing, settings, now));
+  const pool = ages.some((a) => a.signal) ? ages.filter((a) => a.signal) : ages;
+  // A parità di giorni vince l'età esatta.
+  const age = pool.reduce((best, a) => (days(a) > days(best) || (days(a) === days(best) && best.ageEstimated && !a.ageEstimated) ? a : best));
+  const drop = members
+    .map((m) => dropFacts(m.listing, m.prices, settings))
+    .reduce((best, d) => ((d.signal && !best.signal) || (d.signal === best.signal && d.dropPercent > best.dropPercent) ? d : best));
+  return compose(target, age, drop, members.length);
 }

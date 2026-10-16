@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { evaluate } from '@/core/rules';
+import { evaluate, evaluateGroup } from '@/core/rules';
 import { DAY_MS, DEFAULT_SETTINGS, type ListingRecord, type PriceSnapshot } from '@/shared/types';
 
 const NOW = Date.UTC(2026, 9, 10, 12);
@@ -154,5 +154,33 @@ describe('evaluate', () => {
     const e = ev(listing({ estimatedCreatedAt: NOW + 5 * DAY_MS }));
     expect(e.ageDays).toBe(0);
     expect(e.badgeText).toBe('Privato · ~0 gg');
+  });
+});
+
+describe('evaluateGroup', () => {
+  const immo = listing({ portalCreatedAt: daysAgo(45), lastDrop }); // Media: solo ribasso
+  const idea = listing({ key: 'idealista:2', portal: 'idealista', portalId: 2, estimatedCreatedAt: daysAgo(200), currentPrice: 239000 }); // Media: solo età
+
+  it('età da un portale e ribasso da un altro fanno Alta', () => {
+    const e = evaluateGroup(immo, [{ listing: immo, prices: declaredDrop }, { listing: idea, prices: [] }], DEFAULT_SETTINGS, NOW);
+    expect(ev(immo, declaredDrop).priority).toBe('medium');
+    expect(ev(idea).priority).toBe('medium');
+    expect(e).toMatchObject({ listingKey: 'immobiliare:1', portalId: 1, priority: 'high', ageDays: 200, ageEstimated: true, dropPercent: 5.6 });
+    expect(e.badgeText).toBe('● Alta · ~200 gg · −5,6% · 2 portali');
+  });
+
+  it("l'età è del membro più vecchio con il segnale A, anche se un altro è più vecchio ma incerto", () => {
+    const certain = listing({ portalCreatedAt: daysAgo(130) });
+    const uncertain = listing({ key: 'subito:3', portal: 'subito', portalId: 3, estimatedCreatedAt: daysAgo(134) });
+    const e = evaluateGroup(certain, [{ listing: certain, prices: [] }, { listing: uncertain, prices: [] }], DEFAULT_SETTINGS, NOW);
+    expect(e).toMatchObject({ priority: 'medium', ageDays: 130, ageEstimated: false, ageUncertain: false });
+  });
+
+  it('senza segnali: età del più vecchio, nessuna priorità, badge con i portali', () => {
+    const a = listing({ portalCreatedAt: daysAgo(10) });
+    const b = listing({ key: 'idealista:2', portal: 'idealista', portalId: 2, estimatedCreatedAt: daysAgo(30) });
+    const e = evaluateGroup(a, [{ listing: a, prices: [] }, { listing: b, prices: [] }], DEFAULT_SETTINGS, NOW);
+    expect(e).toMatchObject({ priority: 'none', ageDays: 30 });
+    expect(e.badgeText).toBe('Privato · ~30 gg · 2 portali');
   });
 });
