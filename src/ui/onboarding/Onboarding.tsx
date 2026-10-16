@@ -118,6 +118,10 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
             Lo stato che dai a ogni lead, le date di ricontatto e le tue note. Le note le scrivi tu: non inserire dati personali
             che non ti servono.
           </li>
+          <li>
+            Quando lo stesso immobile compare su più portali, HomeRadar lo riconosce confrontando città, m², locali e prezzo e
+            lo mostra come un solo lead. Se separi due annunci uniti per errore, la scelta viene salvata.
+          </li>
         </ul>
         <h2 className="onboarding__h">Cosa non salva mai</h2>
         <ul>
@@ -156,6 +160,10 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
             <span>età stimata: Idealista e Subito non pubblicano la data dell'annuncio, quindi HomeRadar la stima; su Immobiliare l'età è esatta.</span>
           </li>
           <li><Badge priority="medium">−8%</Badge><span>ribasso rispetto al prezzo più alto visto.</span></li>
+          <li>
+            <Badge priority="medium">· 2 portali</Badge>
+            <span>lo stesso immobile è pubblicato su più portali: età, priorità e ribasso valgono per tutto il gruppo.</span>
+          </li>
           <li>
             <Badge priority="medium">+18% su Navigli</Badge>
             <span>
