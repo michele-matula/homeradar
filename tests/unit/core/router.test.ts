@@ -1,10 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
+import { ONBOARDING_VERSION } from '@/core/onboarding';
 import { handleRequest } from '@/core/router';
 import { DEFAULT_SETTINGS } from '@/shared/types';
 import { obs, setup } from './helpers';
 
 function hooks() {
-  return { setWarning: vi.fn(), leadsChanged: vi.fn(), onboardingChanged: vi.fn(), openOnboarding: vi.fn(async () => {}) };
+  return { setWarning: vi.fn(), leadsChanged: vi.fn(), onboardingChanged: vi.fn(), recallsChanged: vi.fn(), openOnboarding: vi.fn(async () => {}) };
 }
 
 /** Servizio con l'informativa già confermata: i test esistenti lavorano su un'estensione attiva. */
@@ -97,6 +98,15 @@ describe('handleRequest', () => {
     expect(h.leadsChanged).toHaveBeenCalledTimes(1);
   });
 
+  it("setLeadState inoltra il richiamo e aggiorna il segnale sull'icona", async () => {
+    const { svc } = await ready();
+    const h = hooks();
+    await svc.ingest([obs()]);
+    const day = new Date(2026, 9, 20).getTime();
+    expect(await handleRequest(svc, { type: 'setLeadState', listingKey: 'immobiliare:128416572', recallAt: day }, 'v', h)).toMatchObject({ recallAt: day, status: 'to_contact' });
+    expect(h.recallsChanged).toHaveBeenCalledTimes(1);
+  });
+
   it('exportBackup registra il backup manuale; importBackup aggiorna il pannello', async () => {
     const { svc } = await ready();
     const h = hooks();
@@ -151,7 +161,7 @@ describe('handleRequest', () => {
     const { svc, now } = setup();
     const h = hooks();
     expect(await handleRequest(svc, { type: 'getOnboardingStatus' }, 'v', h)).toMatchObject({ acceptedVersion: null });
-    expect(await handleRequest(svc, { type: 'acceptOnboarding' }, 'v', h)).toMatchObject({ acceptedVersion: 1, acceptedAt: now() });
+    expect(await handleRequest(svc, { type: 'acceptOnboarding' }, 'v', h)).toMatchObject({ acceptedVersion: ONBOARDING_VERSION, acceptedAt: now() });
     expect(h.onboardingChanged).toHaveBeenCalledTimes(1);
     const evs = (await handleRequest(svc, { type: 'ingest', observations: [obs()] }, 'v', h)) as unknown[];
     expect(evs).toHaveLength(1);

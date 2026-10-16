@@ -4,6 +4,7 @@ import { runAutoBackup, settleAutoBackup, type AutoBackupDeps } from '@/core/aut
 import { HomeRadarDB } from '@/core/db';
 import { warnedPortals } from '@/core/diagnostics';
 import { needsOnboarding } from '@/core/onboarding';
+import { nextRecallCheck } from '@/core/recall';
 import { handleRequest, type RouterHooks } from '@/core/router';
 import { LeadService } from '@/core/service';
 import { LEADS_CHANGED, ONBOARDING_CHANGED, type Request } from '@/shared/messages';
@@ -14,10 +15,15 @@ export default defineBackground(() => {
 
   /** Un solo punto decide il segnale sull'icona: conferma mancante prima dell'avviso dei portali. */
   async function refreshActionBadge(): Promise<void> {
-    const [status, diag] = await Promise.all([service.onboardingStatus(), service.getDiagnostics(version)]);
+    const [status, diag, due] = await Promise.all([
+      service.onboardingStatus(),
+      service.getDiagnostics(version),
+      service.dueRecallCount(Date.now()),
+    ]);
     const badge = actionBadge({
       onboarding: needsOnboarding(status.acceptedVersion, status.current),
       warning: warnedPortals(diag.adapterWarning).length > 0,
+      due,
     });
     await browser.action.setBadgeText({ text: badge.text });
     if (badge.color) await browser.action.setBadgeBackgroundColor({ color: badge.color });
@@ -34,7 +40,10 @@ export default defineBackground(() => {
     setWarning: () => updateBadge(),
     leadsChanged() {
       browser.runtime.sendMessage({ type: LEADS_CHANGED }).catch(() => {});
+      // Eliminazioni e importazione di un backup cambiano anche i richiami.
+      updateBadge();
     },
+    recallsChanged: () => updateBadge(),
     onboardingChanged() {
       browser.runtime.sendMessage({ type: ONBOARDING_CHANGED }).catch(() => {});
       updateBadge();
@@ -101,12 +110,21 @@ export default defineBackground(() => {
     return true;
   });
 
+  // A mezzanotte i richiami di domani diventano di oggi. Non periodico: ricreato a ogni scatto, resta allineato all'ora legale.
+  const scheduleRecallCheck = () => void browser.alarms.create('recall', { when: nextRecallCheck(Date.now()) });
+
   void (async () => {
+    if (!(await browser.alarms.get('recall'))) scheduleRecallCheck();
     if (!(await browser.alarms.get('purge'))) browser.alarms.create('purge', { delayInMinutes: 1, periodInMinutes: 24 * 60 });
     if (!(await browser.alarms.get('backup'))) browser.alarms.create('backup', { delayInMinutes: 5, periodInMinutes: 24 * 60 });
   })();
   browser.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === 'purge') void service.purge();
     if (alarm.name === 'backup') void runAutoBackup(backupDeps).catch(backupError);
+    if (alarm.name === 'recall') {
+      // Anche il pannello aperto ricalcola gruppi ed etichette: "domani" diventa "oggi".
+      hooks.leadsChanged();
+      scheduleRecallCheck();
+    }
   });
 });

@@ -2,10 +2,12 @@
  * Versione dell'informativa. Si alza solo se cambia cosa viene salvato o come viene usato
  * (es. nuovi dati del lead): l'agente deve riconfermare. Refusi e legenda non la alzano.
  */
-export const ONBOARDING_VERSION = 1;
+export const ONBOARDING_VERSION = 2;
 
 /** Voci del riquadro "Cosa è cambiato", per versione dell'informativa. */
-export const ONBOARDING_CHANGES: Record<number, string[]> = {};
+export const ONBOARDING_CHANGES: Record<number, string[]> = {
+  2: ['HomeRadar ora salva la data di ricontatto che imposti su un lead: resta sul tuo browser, come stati e note.'],
+};
 
 /** Vero se l'informativa non è mai stata confermata o è stata confermata in una versione precedente. */
 export function needsOnboarding(acceptedVersion: number | null, current = ONBOARDING_VERSION): boolean {

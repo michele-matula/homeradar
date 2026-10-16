@@ -38,5 +38,13 @@ export class HomeRadarDB extends Dexie {
           s.updatedAt ??= s.statusChangedAt ?? 0;
         });
       });
+    // v5: giorno di ricontatto del lead, indicizzato per contare i richiami da fare.
+    this.version(5)
+      .stores({ leadStates: 'listingKey, status, recallAt' })
+      .upgrade(async (tx) => {
+        await tx.table<Partial<LeadState>>('leadStates').toCollection().modify((s) => {
+          s.recallAt ??= null;
+        });
+      });
   }
 }

@@ -37,4 +37,21 @@ describe('HomeRadarDB migrazioni', () => {
     expect(await db.leadStates.get('immobiliare:1')).toMatchObject({ status: 'contacted', statusChangedAt: 123, updatedAt: 123 });
     expect(await db.leadStates.get('immobiliare:2')).toMatchObject({ updatedAt: 0 });
   });
+
+  it('v5: aggiunge recallAt nullo ai lead senza toccare updatedAt', async () => {
+    const name = `mig5-${Math.random()}`;
+    const old = new Dexie(name);
+    old.version(4).stores({
+      listings: 'key, lastSeenAt', priceSnapshots: '++id, listingKey, [listingKey+at]',
+      leadStates: 'listingKey, status', calibration: '[portal+portalId], portal', meta: 'key',
+    });
+    await old.table('leadStates').put({ listingKey: 'immobiliare:1', status: 'contacted', notes: 'x', statusChangedAt: 123, updatedAt: 456 });
+    old.close();
+
+    const db = new HomeRadarDB(name);
+    expect(await db.leadStates.get('immobiliare:1')).toEqual({
+      listingKey: 'immobiliare:1', status: 'contacted', notes: 'x', statusChangedAt: 123, updatedAt: 456, recallAt: null,
+    });
+    expect(await db.leadStates.where('recallAt').below(Infinity).count()).toBe(0);
+  });
 });

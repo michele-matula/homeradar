@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { warnedPortals } from '@/core/diagnostics';
 import { applyQuery, describeQuery, isEmptyQuery, parseThousands, type LeadQuery } from '@/core/lead-filters';
-import { groupByStatus, PRIORITY_LABELS, SORT_KEYS, SORT_LABELS, sortLeadsBy, type SortKey } from '@/core/leads';
+import { groupByRecall, groupByStatus, PRIORITY_LABELS, RECALL_GROUP_LABELS, SORT_KEYS, SORT_LABELS, sortLeadsBy, type SortKey } from '@/core/leads';
 import { needsOnboarding } from '@/core/onboarding';
+import { isDue } from '@/core/recall';
 import { Onboarding } from '@/ui/onboarding/Onboarding';
 import { joinList } from '@/shared/format';
 import { LEAD_STATUSES, PORTAL_SITES, PORTAL_TAGS, PORTALS, type LeadStatus, type LeadView, type Portal, type Priority } from '@/shared/types';
@@ -13,7 +14,9 @@ import { LeadItem } from './LeadItem';
 import { SettingsView } from './SettingsView';
 import { loadSortByTab, saveSortByTab, type SortByTab } from './sortPrefs';
 
-const TAB_LABELS: Record<LeadStatus, string> = { new: 'Nuovi', to_contact: 'Da contattare', contacted: 'Contattati', discarded: 'Scartati' };
+type Tab = 'recall' | LeadStatus;
+const TABS: Tab[] = ['recall', ...LEAD_STATUSES];
+const TAB_LABELS: Record<Tab, string> = { recall: 'Richiami', new: 'Nuovi', to_contact: 'Da contattare', contacted: 'Contattati', discarded: 'Scartati' };
 type PriorityFilter = 'all' | Exclude<Priority, 'none'>;
 const PRIORITY_FILTERS: PriorityFilter[] = ['all', 'high', 'medium', 'verify'];
 const FILTER_LABELS: Record<PriorityFilter, string> = { all: 'Tutti', high: PRIORITY_LABELS.high, medium: PRIORITY_LABELS.medium, verify: PRIORITY_LABELS.verify };
@@ -32,7 +35,8 @@ function warningText(portals: Portal[]): string {
 
 export function App({ api = defaultApi }: { api?: Api }) {
   const [leads, setLeads] = useState<LeadView[]>([]);
-  const [tab, setTab] = useState<LeadStatus>('new');
+  const [chosenTab, setTab] = useState<Tab | null>(null);
+  const tab: Tab = chosenTab ?? 'new';
   const [filter, setFilter] = useState<PriorityFilter>('all');
   const [portals, setPortals] = useState<Portal[]>([]);
   const [view, setView] = useState<'leads' | 'settings' | 'guide'>('leads');
@@ -51,6 +55,8 @@ export function App({ api = defaultApi }: { api?: Api }) {
     try {
       const [list, diag] = await Promise.all([api.listLeads(), api.getDiagnostics()]);
       setLeads(list);
+      // Si apre su "Richiami" solo se c'è qualcosa da fare oggi; poi decide l'agente.
+      setTab((t) => t ?? (list.some((l) => isDue(l.state.recallAt, Date.now())) ? 'recall' : 'new'));
       setWarned(warnedPortals(diag.adapterWarning));
       setError(null);
     } catch (e) {
@@ -87,9 +93,17 @@ export function App({ api = defaultApi }: { api?: Api }) {
   // Un prezzo non valido non filtra: il campo è segnato in rosso.
   const query: LeadQuery = { text, minPrice: minPrice === 'invalid' ? null : minPrice, maxPrice: maxPrice === 'invalid' ? null : maxPrice };
   // Ricerca e prezzo agiscono prima delle schede, così anche i loro conteggi li seguono.
-  const groups = groupByStatus(applyQuery(leads, query));
-  const inPortals = byPortals(groups[tab], portals);
-  const visible = sortLeadsBy(byFilter(inPortals, filter), sortByTab[tab]);
+  const now = Date.now();
+  const applied = applyQuery(leads, query);
+  const groups = groupByStatus(applied);
+  const recalls = applied.filter((l) => l.state.recallAt != null);
+  const dueCount = recalls.filter((l) => isDue(l.state.recallAt, now)).length;
+  const tabLeads = (t: Tab) => (t === 'recall' ? recalls : groups[t]);
+  const inPortals = byPortals(tabLeads(tab), portals);
+  const filtered = byFilter(inPortals, filter);
+  const recallGroups = tab === 'recall' ? groupByRecall(filtered, now) : [];
+  // Nella scheda "Richiami" l'ordine è quello dei gruppi; altrove il criterio scelto.
+  const visible = tab === 'recall' ? recallGroups.flatMap((g) => g.leads) : sortLeadsBy(filtered, sortByTab[tab]);
   const tagParts = [
     ...(filter === 'all' ? [] : [FILTER_LABELS[filter]]),
     ...(portals.length ? [joinList(portals.map((p) => PORTAL_TAGS[p]), 'e')] : []),
@@ -113,12 +127,14 @@ export function App({ api = defaultApi }: { api?: Api }) {
     });
 
   // L'ordinamento è ricordato per scheda: "Contattati" può seguire un criterio diverso da "Nuovi".
-  const setSort = (key: SortKey) =>
+  const setSort = (key: SortKey) => {
+    if (tab === 'recall') return;
     setSortByTab((prev) => {
       const next = { ...prev, [tab]: key };
       saveSortByTab(next);
       return next;
     });
+  };
 
   useEffect(() => setConfirmingAll(false), [tab, filter, portals, visible.length, text, query.minPrice, query.maxPrice]);
 
@@ -179,20 +195,24 @@ export function App({ api = defaultApi }: { api?: Api }) {
           ) : (
             <>
               <nav className="tabs" role="tablist">
-                {LEAD_STATUSES.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    role="tab"
-                    aria-selected={s === tab}
-                    aria-label={`${TAB_LABELS[s]} (${groups[s].length})`}
-                    className={s === tab ? 'tab tab--on' : 'tab'}
-                    onClick={() => setTab(s)}
-                  >
-                    <span className="tab__count">{groups[s].length}</span>
-                    <span className="tab__label">{TAB_LABELS[s]}</span>
-                  </button>
-                ))}
+                {TABS.map((t) => {
+                  const due = t === 'recall' && dueCount > 0;
+                  const count = t === 'recall' ? (due ? dueCount : recalls.length) : groups[t].length;
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      role="tab"
+                      aria-selected={t === tab}
+                      aria-label={`${TAB_LABELS[t]} (${due ? `${count} da fare` : count})`}
+                      className={t === tab ? 'tab tab--on' : 'tab'}
+                      onClick={() => setTab(t)}
+                    >
+                      <span className={due ? 'tab__count tab__count--due' : 'tab__count'}>{count}</span>
+                      <span className="tab__label">{TAB_LABELS[t]}</span>
+                    </button>
+                  );
+                })}
               </nav>
               <div className="search">
                 <SearchIcon size={16} />
@@ -264,7 +284,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
                   Tutti i siti
                 </button>
                 {PORTALS.map((p) => {
-                  const count = byFilter(groups[tab], filter).filter((l) => l.listing.portal === p).length;
+                  const count = byFilter(tabLeads(tab), filter).filter((l) => l.listing.portal === p).length;
                   const on = portals.includes(p);
                   return (
                     <button
@@ -281,15 +301,17 @@ export function App({ api = defaultApi }: { api?: Api }) {
                   );
                 })}
               </div>
-              <label className="sort">
-                <span className="sort__label">Ordina per</span>
-                <select className="field field--select" value={sortByTab[tab]} onChange={(e) => setSort(e.target.value as SortKey)}>
-                  {SORT_KEYS.map((k) => (
-                    <option key={k} value={k}>{SORT_LABELS[k]}</option>
-                  ))}
-                </select>
-              </label>
-              {visible.length > 0 && (
+              {tab !== 'recall' && (
+                <label className="sort">
+                  <span className="sort__label">Ordina per</span>
+                  <select className="field field--select" value={sortByTab[tab]} onChange={(e) => setSort(e.target.value as SortKey)}>
+                    {SORT_KEYS.map((k) => (
+                      <option key={k} value={k}>{SORT_LABELS[k]}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              {tab !== 'recall' && visible.length > 0 && (
                 <div className="bulk">
                   <span className="bulk__count">{nAnnunci(visible.length)}</span>
                   <div className="bulk__actions">
@@ -315,17 +337,29 @@ export function App({ api = defaultApi }: { api?: Api }) {
               {visible.length === 0 ? (
                 <div className="empty">
                   <SearchIcon />
-                  <p>{!filterTag ? `Nessun lead in questa scheda. Naviga su ${joinList(PORTALS.map((p) => PORTAL_SITES[p]), 'o')} per raccoglierne.` : `Nessun lead${filterTag} in questa scheda.`}</p>
+                  <p>
+                    {filterTag
+                      ? `Nessun lead${filterTag} in questa scheda.`
+                      : tab === 'recall'
+                        ? 'Nessun richiamo. Imposta una data di ricontatto su un lead con «Richiama…».'
+                        : `Nessun lead in questa scheda. Naviga su ${joinList(PORTALS.map((p) => PORTAL_SITES[p]), 'o')} per raccoglierne.`}
+                  </p>
                 </div>
               ) : (
                 <ul className="leads">
-                  {visible.map((l) => (
-                    <LeadItem
-                      key={l.listing.key}
-                      lead={l}
-                      onChange={(patch) => run(() => api.setLeadState(l.listing.key, patch))}
-                      onDelete={() => run(() => api.deleteListing(l.listing.key))}
-                    />
+                  {(tab === 'recall' ? recallGroups : [{ kind: null, leads: visible }]).map((g) => (
+                    <Fragment key={g.kind ?? 'all'}>
+                      {g.kind && <li className="leads__group"><h3>{RECALL_GROUP_LABELS[g.kind]}</h3></li>}
+                      {g.leads.map((l) => (
+                        <LeadItem
+                          key={l.listing.key}
+                          lead={l}
+                          now={now}
+                          onChange={(patch) => run(() => api.setLeadState(l.listing.key, patch))}
+                          onDelete={() => run(() => api.deleteListing(l.listing.key))}
+                        />
+                      ))}
+                    </Fragment>
                   ))}
                 </ul>
               )}

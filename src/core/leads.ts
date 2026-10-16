@@ -1,3 +1,4 @@
+import { recallStatus, type RecallKind } from '@/core/recall';
 import { LEAD_STATUSES, type LeadStatus, type LeadView, type Portal, type Priority } from '@/shared/types';
 
 export const PRIORITY_LABELS: Record<Priority, string> = { high: 'Alta', medium: 'Media', verify: 'Da verificare', none: '' };
@@ -23,10 +24,11 @@ export function sortLeads(leads: LeadView[]): LeadView[] {
   return [...leads].sort(byPriority);
 }
 
-export type SortKey = 'priority' | 'oldest' | 'newest' | 'drop' | 'price_asc' | 'price_desc' | 'price_m2' | 'first_seen' | 'last_seen' | 'status_changed';
-export const SORT_KEYS: SortKey[] = ['priority', 'oldest', 'newest', 'drop', 'price_asc', 'price_desc', 'price_m2', 'first_seen', 'last_seen', 'status_changed'];
+export type SortKey = 'priority' | 'recall' | 'oldest' | 'newest' | 'drop' | 'price_asc' | 'price_desc' | 'price_m2' | 'first_seen' | 'last_seen' | 'status_changed';
+export const SORT_KEYS: SortKey[] = ['priority', 'recall', 'oldest', 'newest', 'drop', 'price_asc', 'price_desc', 'price_m2', 'first_seen', 'last_seen', 'status_changed'];
 export const SORT_LABELS: Record<SortKey, string> = {
   priority: 'Priorità',
+  recall: 'Richiamo più vicino',
   oldest: 'Più vecchi online',
   newest: 'Più recenti online',
   drop: 'Ribasso maggiore',
@@ -42,6 +44,7 @@ const pricePerM2 = ({ listing: { currentPrice: p, surfaceM2: m2 } }: LeadView) =
 
 /** Valore da confrontare e verso (1 crescente, -1 decrescente) per ogni criterio diverso dalla priorità. */
 const SORT_VALUES: Record<Exclude<SortKey, 'priority'>, [(l: LeadView) => number | null, 1 | -1]> = {
+  recall: [(l) => l.state.recallAt, 1],
   oldest: [(l) => l.evaluation.ageDays, -1],
   newest: [(l) => l.evaluation.ageDays, 1],
   drop: [(l) => l.evaluation.dropPercent, -1],
@@ -73,4 +76,17 @@ export function groupByStatus(leads: LeadView[]): Record<LeadStatus, LeadView[]>
   const groups = Object.fromEntries(LEAD_STATUSES.map((s) => [s, [] as LeadView[]])) as Record<LeadStatus, LeadView[]>;
   for (const l of leads) groups[l.state.status].push(l);
   return groups;
+}
+
+export const RECALL_GROUP_LABELS: Record<RecallKind, string> = { overdue: 'Scaduti', today: 'Oggi', upcoming: 'Prossimi' };
+const RECALL_KINDS: RecallKind[] = ['overdue', 'today', 'upcoming'];
+
+/** Lead con un richiamo, per la scheda "Richiami": scaduti, di oggi, futuri; ciascun gruppo in ordine di data. */
+export function groupByRecall(leads: LeadView[], now: number): { kind: RecallKind; leads: LeadView[] }[] {
+  const byKind = new Map<RecallKind, LeadView[]>(RECALL_KINDS.map((k) => [k, []]));
+  for (const l of leads) {
+    const s = recallStatus(l.state.recallAt, now);
+    if (s) byKind.get(s.kind)!.push(l);
+  }
+  return RECALL_KINDS.filter((k) => byKind.get(k)!.length).map((kind) => ({ kind, leads: sortLeadsBy(byKind.get(kind)!, 'recall') }));
 }

@@ -92,6 +92,8 @@ export interface LeadState {
   statusChangedAt: number;
   /** Ultimo cambio di stato o di note: decide quale versione vince quando si importa un backup. */
   updatedAt: number;
+  /** Giorno del ricontatto: mezzanotte locale in ms epoch; null se non c'è un richiamo. */
+  recallAt: number | null;
 }
 
 export interface Settings {

@@ -24,13 +24,21 @@ function lead(id: number, priority: Priority, status: LeadStatus = 'new'): LeadV
       listingKey: key, portalId: id, priority, ageDays: 173, ageEstimated: false, ageUncertain: false, dropPercent: 5.6,
       dropCount: 1, maxKnownPrice: 249000, reasons: ['Online da 173 gg', 'Ribassato del 5,6%'], badgeText: '',
     },
-    state: { listingKey: key, status, notes: '', statusChangedAt: 0, updatedAt: 0 },
+    state: { listingKey: key, status, notes: '', statusChangedAt: 0, updatedAt: 0, recallAt: null },
     prices: [
       { listingKey: key, price: 249000, at: 1, source: 'declared' },
       { listingKey: key, price: 235000, at: 2, source: 'declared' },
     ],
   };
 }
+
+const today = () => new Date(new Date().setHours(0, 0, 0, 0)).getTime();
+const dayOffset = (n: number) => {
+  const d = new Date(today());
+  d.setDate(d.getDate() + n);
+  return d.getTime();
+};
+const withRecall = (l: LeadView, recallAt: number | null, status: LeadStatus = 'contacted'): LeadView => ({ ...l, state: { ...l.state, status, recallAt } });
 
 function from(portal: Portal, l: LeadView): LeadView {
   const key = `${portal}:${l.listing.portalId}`;
@@ -40,7 +48,7 @@ function from(portal: Portal, l: LeadView): LeadView {
 function fakeApi(leads: LeadView[], adapterWarning: Diagnostics['adapterWarning'] = {}): Api {
   return {
     listLeads: vi.fn(async () => leads),
-    setLeadState: vi.fn(async (k, p) => ({ listingKey: k, status: p.status ?? 'new', notes: p.notes ?? '', statusChangedAt: 0, updatedAt: 0 })),
+    setLeadState: vi.fn(async (k, p) => ({ listingKey: k, status: p.status ?? 'new', notes: p.notes ?? '', statusChangedAt: 0, updatedAt: 0, recallAt: null })),
     deleteListing: vi.fn(async () => {}),
     deleteListings: vi.fn(async () => {}),
     deleteAllListings: vi.fn(async () => leads.length),
@@ -72,7 +80,7 @@ describe('LeadItem', () => {
   it('per Idealista chiama "Età incerta" la priorità da verificare', () => {
     const l = lead(1, 'verify');
     const fromIdealista = { ...l, listing: { ...l.listing, key: 'idealista:1', portal: 'idealista' as const } };
-    render(<ul><LeadItem lead={fromIdealista} onChange={() => {}} onDelete={() => {}} /></ul>);
+    render(<ul><LeadItem lead={fromIdealista} now={Date.now()} onChange={() => {}} onDelete={() => {}} /></ul>);
     expect(screen.getByText('Età incerta')).toBeTruthy();
     expect(screen.queryByText('Da verificare')).toBeNull();
   });
@@ -80,12 +88,12 @@ describe('LeadItem', () => {
   it('mostra il portale di provenienza', () => {
     const l = lead(1, 'high');
     const fromIdealista = { ...l, listing: { ...l.listing, key: 'idealista:1', portal: 'idealista' as const } };
-    render(<ul><LeadItem lead={fromIdealista} onChange={() => {}} onDelete={() => {}} /></ul>);
+    render(<ul><LeadItem lead={fromIdealista} now={Date.now()} onChange={() => {}} onDelete={() => {}} /></ul>);
     expect(screen.getByText('Idealista').className).toBe('portal-tag');
   });
 
   it('mostra priorità, titolo, motivi e visite', () => {
-    render(<ul><LeadItem lead={lead(1, 'high')} onChange={() => {}} onDelete={() => {}} /></ul>);
+    render(<ul><LeadItem lead={lead(1, 'high')} now={Date.now()} onChange={() => {}} onDelete={() => {}} /></ul>);
     expect(screen.getByText('Alta')).toBeTruthy();
     expect(screen.getByText('Bilocale 1')).toBeTruthy();
     expect(screen.getByText('€ 235.000')).toBeTruthy();
@@ -95,7 +103,7 @@ describe('LeadItem', () => {
   it('cambia stato, salva le note all\'uscita e chiede conferma prima di eliminare', () => {
     const onChange = vi.fn();
     const onDelete = vi.fn();
-    render(<ul><LeadItem lead={lead(1, 'high')} onChange={onChange} onDelete={onDelete} /></ul>);
+    render(<ul><LeadItem lead={lead(1, 'high')} now={Date.now()} onChange={onChange} onDelete={onDelete} /></ul>);
     fireEvent.change(screen.getByLabelText('Stato'), { target: { value: 'to_contact' } });
     expect(onChange).toHaveBeenCalledWith({ status: 'to_contact' });
     const notes = screen.getByLabelText('Note');
@@ -108,12 +116,107 @@ describe('LeadItem', () => {
     fireEvent.click(screen.getByText('Conferma eliminazione'));
     expect(onDelete).toHaveBeenCalledTimes(1);
   });
+
+  it('senza richiamo: "Richiama…" apre data e scorciatoie; una scorciatoia salva il giorno', () => {
+    const onChange = vi.fn();
+    render(<ul><LeadItem lead={lead(1, 'high')} now={Date.now()} onChange={onChange} onDelete={() => {}} /></ul>);
+    expect(screen.queryByLabelText('Data del richiamo')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Richiama…' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Tra 3 giorni' }));
+    expect(onChange).toHaveBeenCalledWith({ recallAt: dayOffset(3) });
+    expect(screen.queryByLabelText('Data del richiamo')).toBeNull();
+  });
+
+  it('il campo data salva solo uscendo dal campo o con Invio, non a ogni cifra; un campo svuotato non salva nulla', () => {
+    const onChange = vi.fn();
+    render(<ul><LeadItem lead={withRecall(lead(1, 'high'), dayOffset(4))} now={Date.now()} onChange={onChange} onDelete={() => {}} /></ul>);
+    fireEvent.click(screen.getByRole('button', { name: 'Sposta…' }));
+    const field = () => screen.getByLabelText('Data del richiamo');
+    // Scrivendo l'anno da tastiera Chrome passa da date intermedie valide (0202-03-09).
+    fireEvent.change(field(), { target: { value: '0202-03-09' } });
+    fireEvent.change(field(), { target: { value: '2031-03-09' } });
+    expect(onChange).not.toHaveBeenCalled();
+    fireEvent.keyDown(field(), { key: 'Enter' });
+    expect(onChange).toHaveBeenCalledWith({ recallAt: new Date(2031, 2, 9).getTime() });
+
+    onChange.mockClear();
+    fireEvent.click(screen.getByRole('button', { name: 'Sposta…' }));
+    fireEvent.change(field(), { target: { value: '' } });
+    fireEvent.blur(field());
+    expect(onChange).not.toHaveBeenCalled();
+    fireEvent.change(field(), { target: { value: '2031-04-01' } });
+    fireEvent.blur(field());
+    expect(onChange).toHaveBeenCalledWith({ recallAt: new Date(2031, 3, 1).getTime() });
+  });
+
+  it('le scorciatoie contano dal giorno in cui si clicca, anche se il pannello è aperto da ieri', () => {
+    const onChange = vi.fn();
+    render(<ul><LeadItem lead={lead(1, 'high')} now={dayOffset(-1) + 12 * 3600_000} onChange={onChange} onDelete={() => {}} /></ul>);
+    fireEvent.click(screen.getByRole('button', { name: 'Richiama…' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Domani' }));
+    expect(onChange).toHaveBeenCalledWith({ recallAt: dayOffset(1) });
+  });
+
+  it('con un richiamo scaduto: etichetta rossa, "Fatto" lo toglie, "Sposta…" riapre le scorciatoie', () => {
+    const onChange = vi.fn();
+    const { container } = render(<ul><LeadItem lead={withRecall(lead(1, 'high'), dayOffset(-2))} now={Date.now()} onChange={onChange} onDelete={() => {}} /></ul>);
+    expect(screen.getByText(/scaduto da 2 giorni/)).toBeTruthy();
+    expect(container.querySelector('.lead--overdue')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Fatto' }));
+    expect(onChange).toHaveBeenCalledWith({ recallAt: null });
+    fireEvent.click(screen.getByRole('button', { name: 'Sposta…' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Domani' }));
+    expect(onChange).toHaveBeenLastCalledWith({ recallAt: dayOffset(1) });
+  });
+
+  it("su un lead scartato non c'è la riga del richiamo", () => {
+    render(<ul><LeadItem lead={lead(1, 'high', 'discarded')} now={Date.now()} onChange={() => {}} onDelete={() => {}} /></ul>);
+    expect(screen.queryByRole('button', { name: 'Richiama…' })).toBeNull();
+  });
 });
 
 describe('App', () => {
   const titles = () => screen.getAllByText(/^Bilocale \d+$/).map((e) => e.textContent);
   const withPrice = (l: LeadView, currentPrice: number): LeadView => ({ ...l, listing: { ...l.listing, currentPrice } });
   const at = (l: LeadView, listing: Partial<LeadView['listing']>): LeadView => ({ ...l, listing: { ...l.listing, ...listing } });
+
+  it('scheda "Richiami": tutti gli stati, gruppi Scaduti/Oggi/Prossimi, senza ordinamento né "Elimina tutti"', async () => {
+    const leads = [
+      withRecall(lead(1, 'high'), dayOffset(3), 'to_contact'),
+      withRecall(lead(2, 'medium'), dayOffset(-1), 'contacted'),
+      withRecall(lead(3, 'medium'), today(), 'contacted'),
+      lead(4, 'high'),
+    ];
+    render(<App api={fakeApi(leads)} />);
+    // Ci sono richiami da fare: il pannello parte dalla scheda "Richiami".
+    const tab = await screen.findByRole('tab', { name: 'Richiami (2 da fare)' });
+    expect(tab.getAttribute('aria-selected')).toBe('true');
+    expect(screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual(['Scaduti', 'Oggi', 'Prossimi']);
+    expect(titles()).toEqual(['Bilocale 2', 'Bilocale 3', 'Bilocale 1']);
+    expect(screen.queryByText('Ordina per')).toBeNull();
+    expect(screen.queryByText(/^Elimina tutti/)).toBeNull();
+  });
+
+  it('senza richiami da fare parte da "Nuovi" e la scheda mostra il totale', async () => {
+    render(<App api={fakeApi([withRecall(lead(1, 'high'), dayOffset(5)), lead(2, 'high')])} />);
+    expect((await screen.findByRole('tab', { name: 'Nuovi (1)' })).getAttribute('aria-selected')).toBe('true');
+    fireEvent.click(screen.getByRole('tab', { name: 'Richiami (1)' }));
+    expect(titles()).toEqual(['Bilocale 1']);
+  });
+
+  it('scheda "Richiami" vuota: spiega come impostarne uno', async () => {
+    render(<App api={fakeApi([lead(1, 'high')])} />);
+    fireEvent.click(await screen.findByRole('tab', { name: 'Richiami (0)' }));
+    expect(screen.getByText('Nessun richiamo. Imposta una data di ricontatto su un lead con «Richiama…».')).toBeTruthy();
+  });
+
+  it('un richiamo impostato dal pannello passa al servizio', async () => {
+    const api = fakeApi([lead(1, 'high')]);
+    render(<App api={api} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Richiama…' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Domani' }));
+    expect(api.setLeadState).toHaveBeenCalledWith('immobiliare:1', { recallAt: dayOffset(1) });
+  });
 
   it('ordina la lista col criterio scelto, ricordandolo per scheda anche alla riapertura', async () => {
     const leads = [withPrice(lead(1, 'high'), 300000), withPrice(lead(2, 'medium'), 100000), withPrice(lead(3, 'high', 'contacted'), 50000), withPrice(lead(4, 'high', 'contacted'), 90000)];

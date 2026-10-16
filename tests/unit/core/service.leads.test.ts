@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { addDays, startOfLocalDay } from '@/core/recall';
+import { RECALL_ON_DISCARDED } from '@/core/service';
 import { DAY_MS } from '@/shared/types';
 import { START, obs, setup } from './helpers';
 
@@ -147,5 +149,81 @@ describe('LeadService diagnostica', () => {
     const { db, svc } = setup();
     await db.meta.put({ key: 'diagnostics', value: { counters: {}, errors: [], adapterWarning: true } });
     expect((await svc.getDiagnostics('v')).adapterWarning).toEqual({ immobiliare: true });
+  });
+});
+
+describe('LeadService: richiami', () => {
+  const today = startOfLocalDay(START);
+
+  it('un richiamo su un lead "Nuovo" lo porta a "Da contattare" e viene salvato come mezzanotte locale', async () => {
+    const { svc, advance, now } = setup();
+    await svc.ingest([obs()]);
+    advance(1000);
+    const s = await svc.setLeadState(KEY, { recallAt: addDays(today, 3) + 5 * 3600_000 });
+    expect(s).toMatchObject({ status: 'to_contact', statusChangedAt: now(), updatedAt: now(), recallAt: addDays(today, 3) });
+  });
+
+  it('su "Contattato" lo stato non cambia; "Fatto" toglie la data e aggiorna updatedAt', async () => {
+    const { svc, advance, now } = setup();
+    await svc.ingest([obs()]);
+    await svc.setLeadState(KEY, { status: 'contacted' });
+    advance(1000);
+    const set = await svc.setLeadState(KEY, { recallAt: addDays(today, 7) });
+    expect(set).toMatchObject({ status: 'contacted', statusChangedAt: now() - 1000, updatedAt: now(), recallAt: addDays(today, 7) });
+    advance(1000);
+    expect(await svc.setLeadState(KEY, { recallAt: null })).toMatchObject({ recallAt: null, updatedAt: now() });
+    advance(1000);
+    expect((await svc.setLeadState(KEY, { recallAt: null })).updatedAt).toBe(now() - 1000);
+  });
+
+  it('passare a "Scartato" toglie il richiamo; impostarlo su uno scartato è un errore', async () => {
+    const { svc } = setup();
+    await svc.ingest([obs()]);
+    await svc.setLeadState(KEY, { recallAt: addDays(today, 1) });
+    expect(await svc.setLeadState(KEY, { status: 'discarded' })).toMatchObject({ status: 'discarded', recallAt: null });
+    await expect(svc.setLeadState(KEY, { recallAt: addDays(today, 1) })).rejects.toThrow(RECALL_ON_DISCARDED);
+    await expect(svc.setLeadState(KEY, { status: 'discarded', recallAt: addDays(today, 1) })).rejects.toThrow(RECALL_ON_DISCARDED);
+  });
+
+  it('rimesso a mano su "Nuovo", il lead tiene il richiamo', async () => {
+    const { svc } = setup();
+    await svc.ingest([obs()]);
+    await svc.setLeadState(KEY, { recallAt: addDays(today, 1) });
+    expect(await svc.setLeadState(KEY, { status: 'new' })).toMatchObject({ status: 'new', recallAt: addDays(today, 1) });
+  });
+
+  it('dueRecallCount conta oggi e i giorni passati, non domani né gli scartati', async () => {
+    const { db, svc } = setup();
+    await svc.ingest([obs(), obs({ portalId: 2 }), obs({ portalId: 3 }), obs({ portalId: 4 })]);
+    await svc.setLeadState(KEY, { recallAt: addDays(today, -2) });
+    await svc.setLeadState('immobiliare:2', { recallAt: today });
+    await svc.setLeadState('immobiliare:3', { recallAt: addDays(today, 1) });
+    // Un dato incoerente (es. da un vecchio backup) non va contato.
+    await db.leadStates.put({ listingKey: 'immobiliare:4', status: 'discarded', notes: '', statusChangedAt: 0, updatedAt: 0, recallAt: today });
+    expect(await svc.dueRecallCount(START)).toBe(2);
+    expect(await svc.dueRecallCount(addDays(today, 1) + 1)).toBe(3);
+  });
+
+  it('la pulizia non cancella un lead "Nuovo" con un richiamo', async () => {
+    const { db, svc, advance } = setup();
+    await svc.ingest([obs(), obs({ portalId: 2 })]);
+    await svc.setLeadState(KEY, { recallAt: addDays(today, 200) });
+    await svc.setLeadState(KEY, { status: 'new' });
+    advance(400 * DAY_MS);
+    expect(await svc.purge()).toBe(1);
+    expect(await db.listings.toCollection().primaryKeys()).toEqual([KEY]);
+  });
+});
+
+describe('LeadService.listLeads: richiami', () => {
+  it('mostra un lead "Nuovo" senza segnali se ha un richiamo, così il pannello lo vede come l\'icona', async () => {
+    const { svc } = setup();
+    await svc.ingest([obs({ portalId: 131597836, lastDrop: null, price: 410000 })]); // nessun segnale
+    const key = 'immobiliare:131597836';
+    await svc.setLeadState(key, { recallAt: startOfLocalDay(START) });
+    await svc.setLeadState(key, { status: 'new' });
+    const leads = await svc.listLeads();
+    expect(leads.map((l) => [l.listing.key, l.evaluation.priority, l.state.status])).toEqual([[key, 'none', 'new']]);
+    expect(await svc.dueRecallCount(START)).toBe(1);
   });
 });

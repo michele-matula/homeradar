@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { changesSince, needsOnboarding, ONBOARDING_VERSION } from '@/core/onboarding';
+import { changesSince, needsOnboarding, ONBOARDING_CHANGES, ONBOARDING_VERSION } from '@/core/onboarding';
 import { obs, setup } from './helpers';
 
 describe('needsOnboarding', () => {
@@ -55,5 +55,14 @@ describe('LeadService: informativa', () => {
     const json = JSON.stringify(await svc.exportBackup('v'));
     expect(json).not.toContain('onboarding');
     expect(json).not.toContain('acceptedAt');
+  });
+});
+
+describe('informativa v2', () => {
+  it('la versione 2 annuncia le date di ricontatto', () => {
+    expect(ONBOARDING_VERSION).toBe(2);
+    expect(ONBOARDING_CHANGES[2]).toEqual([
+      'HomeRadar ora salva la data di ricontatto che imposti su un lead: resta sul tuo browser, come stati e note.',
+    ]);
   });
 });

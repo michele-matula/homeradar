@@ -8,7 +8,7 @@ function lead(key: string, f: ListingFields = {}): LeadView {
   return {
     listing: { key, title: '', address: null, city: null, zone: null, typology: null, currentPrice: null, ...f } as LeadView['listing'],
     evaluation: { listingKey: key } as LeadView['evaluation'],
-    state: { listingKey: key, status: 'new', notes: '', statusChangedAt: 0, updatedAt: 0 },
+    state: { listingKey: key, status: 'new', notes: '', statusChangedAt: 0, updatedAt: 0, recallAt: null },
     prices: [],
   };
 }

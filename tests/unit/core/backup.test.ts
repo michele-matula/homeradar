@@ -8,7 +8,7 @@ function data(): BackupData {
     settings: { ...DEFAULT_SETTINGS, minAgeDays: 90 },
     listings: [listing()],
     priceSnapshots: [{ listingKey: 'immobiliare:128416572', price: 235000, at: NOW, source: 'observed' }],
-    leadStates: [{ listingKey: 'immobiliare:128416572', status: 'to_contact', notes: 'sera', statusChangedAt: 5, updatedAt: 6 }],
+    leadStates: [{ listingKey: 'immobiliare:128416572', status: 'to_contact', notes: 'sera', statusChangedAt: 5, updatedAt: 6, recallAt: null }],
     calibration: [{ portal: 'idealista', portalId: 34000000, createdAt: Date.UTC(2026, 9, 1) }],
   };
 }
@@ -19,6 +19,22 @@ describe('buildBackup / parseBackup', () => {
   it('il file letto torna uguale ai dati esportati', () => {
     const file = parseBackup(roundTrip(data()));
     expect(file).toEqual({ format: 'homeradar-backup', formatVersion: 1, createdAt: NOW, extensionVersion: '0.1.0', ...data() });
+  });
+
+  it('conserva il richiamo; un file senza richiamo si legge come null', () => {
+    const d = data();
+    d.leadStates = [{ ...d.leadStates[0]!, recallAt: Date.UTC(2026, 9, 16, 22) }];
+    expect(parseBackup(roundTrip(d)).leadStates[0]!.recallAt).toBe(Date.UTC(2026, 9, 16, 22));
+    const raw = roundTrip(data());
+    delete raw.leadStates[0].recallAt;
+    expect(parseBackup(raw).leadStates[0]!.recallAt).toBeNull();
+  });
+
+  it('un lead scartato non porta un richiamo', () => {
+    const raw = roundTrip(data());
+    raw.leadStates[0].status = 'discarded';
+    raw.leadStates[0].recallAt = Date.UTC(2026, 9, 16, 22);
+    expect(parseBackup(raw).leadStates[0]!.recallAt).toBeNull();
   });
 
   it('toglie gli id degli snapshot ed esclude le impostazioni mai salvate', () => {
