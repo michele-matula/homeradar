@@ -177,17 +177,21 @@ export class LeadService {
 
   async deleteListings(keys: string[]): Promise<void> {
     if (!keys.length) return;
-    await this.db.transaction('rw', [this.db.listings, this.db.priceSnapshots, this.db.leadStates], async () => {
-      await this.db.listings.bulkDelete(keys);
-      await this.db.priceSnapshots.where('listingKey').anyOf(keys).delete();
-      await this.db.leadStates.bulkDelete(keys);
+    const { listings, priceSnapshots, leadStates, splits } = this.db;
+    await this.db.transaction('rw', [listings, priceSnapshots, leadStates, splits], async () => {
+      await listings.bulkDelete(keys);
+      await priceSnapshots.where('listingKey').anyOf(keys).delete();
+      await leadStates.bulkDelete(keys);
+      await splits.where('a').anyOf(keys).delete();
+      await splits.where('b').anyOf(keys).delete();
     });
   }
 
   async deleteAllListings(): Promise<number> {
-    return this.db.transaction('rw', [this.db.listings, this.db.priceSnapshots, this.db.leadStates], async () => {
-      const count = await this.db.listings.count();
-      await Promise.all([this.db.listings.clear(), this.db.priceSnapshots.clear(), this.db.leadStates.clear()]);
+    const { listings, priceSnapshots, leadStates, splits } = this.db;
+    return this.db.transaction('rw', [listings, priceSnapshots, leadStates, splits], async () => {
+      const count = await listings.count();
+      await Promise.all([listings.clear(), priceSnapshots.clear(), leadStates.clear(), splits.clear()]);
       return count;
     });
   }

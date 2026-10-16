@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { addDays, startOfLocalDay } from '@/core/recall';
+import { splitPair } from '@/core/same-property';
 import { RECALL_ON_DISCARDED } from '@/core/service';
 import { DAY_MS } from '@/shared/types';
 import { START, obs, setup } from './helpers';
@@ -241,5 +242,17 @@ describe('LeadService.listLeads: richiami', () => {
     const leads = await svc.listLeads();
     expect(leads.map((l) => [l.listing.key, l.evaluation.priority, l.state.status])).toEqual([[key, 'none', 'new']]);
     expect(await svc.dueRecallCount(START)).toBe(1);
+  });
+});
+
+describe('coppie separate e cancellazioni', () => {
+  it('eliminare un annuncio cancella le coppie che lo contengono; azzerare le cancella tutte', async () => {
+    const { svc, db } = setup();
+    await svc.ingest([obs(), obs({ portalId: 2, url: 'https://www.immobiliare.it/annunci/2/' })]);
+    await db.splits.bulkPut([splitPair(KEY, 'idealista:9', 1), splitPair('subito:8', KEY, 1), splitPair('idealista:9', 'subito:8', 1)]);
+    await svc.deleteListings([KEY]);
+    expect(await db.splits.toArray()).toEqual([{ a: 'idealista:9', b: 'subito:8', at: 1 }]);
+    await svc.deleteAllListings();
+    expect(await db.splits.count()).toBe(0);
   });
 });

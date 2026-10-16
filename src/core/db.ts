@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie';
-import type { CalibrationPoint, LeadState, ListingRecord, Portal, PriceSnapshot } from '@/shared/types';
+import type { CalibrationPoint, LeadState, ListingRecord, Portal, PriceSnapshot, SplitPair } from '@/shared/types';
 
 export interface MetaRecord {
   key: string;
@@ -12,6 +12,7 @@ export class HomeRadarDB extends Dexie {
   declare leadStates: Table<LeadState, string>;
   declare calibration: Table<CalibrationPoint, [Portal, number]>;
   declare meta: Table<MetaRecord, string>;
+  declare splits: Table<SplitPair, [string, string]>;
 
   constructor(name = 'homeradar') {
     super(name);
@@ -46,5 +47,7 @@ export class HomeRadarDB extends Dexie {
           s.recallAt ??= null;
         });
       });
+    // v6: coppie di annunci che l'agente ha separato, per non unirle più come stesso immobile.
+    this.version(6).stores({ splits: '[a+b], a, b' });
   }
 }
