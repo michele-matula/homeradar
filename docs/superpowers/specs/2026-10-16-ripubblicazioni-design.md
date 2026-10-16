@@ -56,7 +56,8 @@ Un annuncio vecchio `o` e uno nuovo `n` formano una coppia se valgono tutte:
 |---|---|
 | Portale | uguale |
 | ID | `n.portalId > o.portalId` (gli ID sono contatori crescenti su tutti e tre i portali) |
-| Tempi | `o.lastSeenAt < n.firstSeenAt`: mai visti insieme. Nessun limite massimo all'intervallo |
+| Tempi | `n.firstSeenAt − o.lastSeenAt > 30 minuti` (`VISIT_GAP_MS`): mai visti insieme. Una visita entro 30 minuti dalla precedente non aggiorna `lastSeenAt`, quindi un intervallo più breve non esclude che fossero nella stessa pagina. Nessun limite massimo all'intervallo |
+| Creazione | la data di creazione di `n` (`portalCreatedAt`, altrimenti `estimatedCreatedAt`) non è anteriore a `o.lastSeenAt` meno un margine: 1 giorno per la data del portale, 15 giorni per quella stimata. Senza data il criterio non si applica. Esclude l'annuncio online da mesi che l'agente trova solo dopo aver visto il vecchio |
 | Candidati | città, m² e prezzo presenti; città uguale (normalizzata con `normalize` di `lead-filters.ts`), come nel punto 6 |
 | m² | `|o − n| ≤ max(3, 5% del minore)` (costanti del punto 6) |
 | Locali | uguali, oppure mancanti su almeno uno dei due |
@@ -104,6 +105,8 @@ export function groupListings(listings: ListingRecord[], splits: SplitPair[]): L
 ### 4.5 Separazione
 
 "Separa" usa il meccanismo del punto 6: salva una coppia in `splits` tra l'annuncio separato e ciascun altro membro del gruppo. Separare un anello in mezzo (A2 in A1 → A2 → A3) salva anche A2–A1 e A2–A3; A1 e A3 restano compatibili tra loro e si uniscono in una catena A1 → A3, senza A2. È il comportamento voluto: l'agente ha detto che A2 non c'entra, non che A1 e A3 siano immobili diversi.
+
+"Separa" sull'annuncio vivo di una catena (la testa) dentro un gruppo con altri portali vuol dire "non è l'immobile degli altri portali": la catena si stacca intera, con le coppie tra ciascun suo annuncio e le altre fonti, e resta unita. Altrimenti l'annuncio precedente, staccato dalla sua ripubblicazione, potrebbe unirsi all'altro portale e diventare il principale di un lead pur essendo stato tolto.
 
 ## 5. Lead unito (`src/core/lead-groups.ts`, `src/core/rules.ts`)
 

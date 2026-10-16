@@ -7,6 +7,8 @@ export type PageKind = 'search' | 'detail' | 'other';
 export type ObservationSource = 'search' | 'detail';
 
 export const DAY_MS = 86_400_000;
+/** Due visite più vicine di così sono la stessa visita: `lastSeenAt` non avanza. */
+export const VISIT_GAP_MS = 30 * 60_000;
 
 export interface PriceDrop {
   fromPrice: number;

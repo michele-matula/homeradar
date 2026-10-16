@@ -1,5 +1,5 @@
 import { normalize } from '@/core/lead-filters';
-import type { ListingRecord, SplitPair } from '@/shared/types';
+import { DAY_MS, VISIT_GAP_MS, type ListingRecord, type SplitPair } from '@/shared/types';
 
 /** Scarto ammesso sui m²: il più largo tra la percentuale del minore e i metri assoluti. */
 export const SURFACE_TOLERANCE_PERCENT = 5;
@@ -9,6 +9,12 @@ export const PRICE_TOLERANCE_PERCENT = 5;
 /** Ripubblicazione sullo stesso portale: il prezzo nuovo può scendere fino al 20% o salire fino al 5% rispetto al vecchio. */
 export const REPOST_MAX_DROP_PERCENT = 20;
 export const REPOST_MAX_RISE_PERCENT = 5;
+/**
+ * Margine sulla data di creazione dell'annuncio nuovo, che non può essere anteriore all'ultima volta che si è visto il
+ * vecchio: un giorno sulla data del portale, 15 giorni su quella stimata dall'ID.
+ */
+export const REPOST_CREATED_MARGIN_MS = DAY_MS;
+export const REPOST_ESTIMATED_MARGIN_MS = 15 * DAY_MS;
 
 /** Un immobile: le chiavi di tutti i suoi annunci e, per ogni annuncio vivo (testa), la sua catena di ripubblicazioni. */
 export interface ListingGroup {
@@ -69,14 +75,26 @@ function compatible(x: Candidate, y: Candidate): boolean {
   );
 }
 
-/** `n` ripubblica `o`: stesso portale, ID più alto, mai visti insieme, stessi dati, prezzo tra −20% e +5%. */
+/**
+ * Il nuovo è comparso dopo che il vecchio è sparito: visto per la prima volta più di una visita dopo l'ultima del
+ * vecchio (una visita entro `VISIT_GAP_MS` non aggiorna `lastSeenAt`) e creato non prima di allora. Senza il controllo
+ * sulla data, un annuncio online da mesi trovato solo dopo sembrerebbe una ripubblicazione.
+ */
+function appearedAfter(a: ListingRecord, b: ListingRecord): boolean {
+  if (b.firstSeenAt - a.lastSeenAt <= VISIT_GAP_MS) return false;
+  if (b.portalCreatedAt != null) return b.portalCreatedAt >= a.lastSeenAt - REPOST_CREATED_MARGIN_MS;
+  if (b.estimatedCreatedAt != null) return b.estimatedCreatedAt >= a.lastSeenAt - REPOST_ESTIMATED_MARGIN_MS;
+  return true;
+}
+
+/** `n` ripubblica `o`: stesso portale, ID più alto, comparso dopo che `o` è sparito, stessi dati, prezzo tra −20% e +5%. */
 function isRepost(o: Candidate, n: Candidate): boolean {
   const a = o.listing;
   const b = n.listing;
   return (
     a.portal === b.portal &&
     b.portalId > a.portalId &&
-    a.lastSeenAt < b.firstSeenAt &&
+    appearedAfter(a, b) &&
     n.price * 100 >= o.price * (100 - REPOST_MAX_DROP_PERCENT) &&
     n.price * 100 <= o.price * (100 + REPOST_MAX_RISE_PERCENT) &&
     close(o.m2, n.m2, SURFACE_TOLERANCE_PERCENT, SURFACE_TOLERANCE_M2) &&

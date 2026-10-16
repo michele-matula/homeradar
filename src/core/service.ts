@@ -11,11 +11,11 @@ import { evaluate } from '@/core/rules';
 import { groupListings, splitPair } from '@/core/same-property';
 import { validateSettings } from '@/core/settings';
 import {
-  DAY_MS, listingKey, type BackupStatus, type CalibrationHint, type Diagnostics, type Evaluation, type ImportSummary, type LeadState, type LeadStatus, type LeadView,
+  DAY_MS, listingKey, VISIT_GAP_MS, type BackupStatus, type CalibrationHint, type Diagnostics, type Evaluation, type ImportSummary, type LeadState, type LeadStatus, type LeadView,
   type ListingObservation, type ListingRecord, type ObservedPriceDrop, type OnboardingStatus, type Portal, type PriceDrop, type PriceSnapshot, type Settings,
 } from '@/shared/types';
 
-export const VISIT_GAP_MS = 30 * 60_000;
+export { VISIT_GAP_MS } from '@/shared/types';
 export const RECALL_ON_DISCARDED = 'Impossibile impostare un richiamo su un lead scartato';
 
 type LeadPatch = { status?: LeadStatus; notes?: string; recallAt?: number | null };
@@ -207,8 +207,22 @@ export class LeadService {
       }
       const merged = mergeGroupState(members);
       await leadStates.bulkPut(keys.map((k) => ({ ...merged, listingKey: k, updatedAt: now })));
-      await splits.bulkPut(fromKeys.map((k) => splitPair(key, k, now)));
+      // Separare l'annuncio vivo di una catena vuol dire "non è l'immobile degli altri portali", non "non è la
+      // ripubblicazione dei suoi annunci precedenti": la catena si stacca intera dalle altre fonti.
+      const chain = (await this.chainEndingAt(key)) ?? [key];
+      const others = fromKeys.filter((k) => !chain.includes(k));
+      await splits.bulkPut(chain.flatMap((c) => others.map((k) => splitPair(c, k, now))));
     });
+  }
+
+  /** Catena di ripubblicazione di cui `key` è l'annuncio vivo (testa); null se non è la testa di una catena. */
+  private async chainEndingAt(key: string): Promise<string[] | null> {
+    const [listings, splits] = await Promise.all([this.db.listings.toArray(), this.db.splits.toArray()]);
+    for (const g of groupListings(listings, splits)) {
+      const chain = g.chains.find((c) => c.length > 1 && c[c.length - 1] === key);
+      if (chain) return chain;
+    }
+    return null;
   }
 
   /** Richiami da fare oggi o in ritardo, per il numero sull'icona: lo stesso immobile su più portali conta una volta. */
