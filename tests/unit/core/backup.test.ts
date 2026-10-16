@@ -18,7 +18,7 @@ const roundTrip = (d: BackupData) => JSON.parse(JSON.stringify(buildBackup(d, NO
 describe('buildBackup / parseBackup', () => {
   it('il file letto torna uguale ai dati esportati', () => {
     const file = parseBackup(roundTrip(data()));
-    expect(file).toEqual({ format: 'homeradar-backup', formatVersion: 1, createdAt: NOW, extensionVersion: '0.1.0', ...data() });
+    expect(file).toEqual({ format: 'homeradar-backup', formatVersion: 1, createdAt: NOW, extensionVersion: '0.1.0', splits: [], ...data() });
   });
 
   it('conserva il richiamo; un file senza richiamo si legge come null', () => {
@@ -112,5 +112,25 @@ describe('nomi dei file e riepilogo', () => {
   it('riepilogo al plurale e al singolare', () => {
     expect(importSummaryText({ added: 120, updated: 34, unchanged: 210 })).toBe('Backup importato: 120 annunci nuovi, 34 aggiornati, 210 già presenti');
     expect(importSummaryText({ added: 1, updated: 1, unchanged: 1 })).toBe('Backup importato: 1 annuncio nuovo, 1 aggiornato, 1 già presente');
+  });
+});
+
+describe('separazioni nel backup', () => {
+  const base = () => buildBackup({ listings: [listing()], priceSnapshots: [], leadStates: [], calibration: [] }, NOW, 'v');
+
+  it('un file senza separazioni resta valido', () => {
+    const json = JSON.parse(JSON.stringify(base())) as Record<string, unknown>;
+    delete json.splits;
+    expect(parseBackup(json).splits).toEqual([]);
+  });
+
+  it('esporta e rilegge le separazioni', () => {
+    const file = buildBackup({ listings: [listing()], priceSnapshots: [], leadStates: [], calibration: [], splits: [{ a: 'idealista:2', b: 'immobiliare:128416572', at: 5 }] }, NOW, 'v');
+    expect(parseBackup(JSON.parse(JSON.stringify(file))).splits).toEqual([{ a: 'idealista:2', b: 'immobiliare:128416572', at: 5 }]);
+  });
+
+  it('rifiuta una separazione con le chiavi non in ordine', () => {
+    const json = { ...JSON.parse(JSON.stringify(base())), splits: [{ a: 'subito:1', b: 'idealista:2', at: 5 }] };
+    expect(() => parseBackup(json)).toThrow('Backup non valido (separazioni)');
   });
 });

@@ -217,8 +217,8 @@ export class LeadService {
 
   async exportBackup(extensionVersion: string): Promise<BackupFile> {
     const now = this.clock();
-    const { listings, priceSnapshots, leadStates, calibration, meta } = this.db;
-    const file = await this.db.transaction('r', [listings, priceSnapshots, leadStates, calibration, meta], async () => {
+    const { listings, priceSnapshots, leadStates, calibration, meta, splits } = this.db;
+    const file = await this.db.transaction('r', [listings, priceSnapshots, leadStates, calibration, meta, splits], async () => {
       const saved = await meta.get('settings');
       return buildBackup(
         {
@@ -227,6 +227,7 @@ export class LeadService {
           priceSnapshots: await priceSnapshots.toArray(),
           leadStates: await leadStates.toArray(),
           calibration: await calibration.toArray(),
+          splits: await splits.toArray(),
         },
         now,
         extensionVersion,
@@ -245,14 +246,15 @@ export class LeadService {
   async importBackup(json: unknown): Promise<ImportSummary> {
     const file = parseBackup(json);
     const now = this.clock();
-    const { listings, priceSnapshots, leadStates, calibration, meta } = this.db;
-    return this.db.transaction('rw', [listings, priceSnapshots, leadStates, calibration, meta], async () => {
+    const { listings, priceSnapshots, leadStates, calibration, meta, splits } = this.db;
+    return this.db.transaction('rw', [listings, priceSnapshots, leadStates, calibration, meta, splits], async () => {
       const m = mergeBackup(
         {
           listings: await listings.toArray(),
           priceSnapshots: await priceSnapshots.toArray(),
           leadStates: await leadStates.toArray(),
           calibration: await calibration.toArray(),
+          splits: await splits.toArray(),
           settingsSaved: Boolean(await meta.get('settings')),
         },
         file,
@@ -262,6 +264,7 @@ export class LeadService {
       await priceSnapshots.bulkAdd(m.priceSnapshots);
       await leadStates.bulkPut(m.leadStates);
       await calibration.bulkPut(m.calibration);
+      await splits.bulkPut(m.splits);
       if (m.settings) await meta.put({ key: 'settings', value: m.settings });
       return m.summary;
     });
