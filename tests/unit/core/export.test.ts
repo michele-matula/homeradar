@@ -45,7 +45,7 @@ describe('toExportRows', () => {
       'Priorità': 'Alta', 'Stato': 'Da contattare', 'Richiamo': '', 'Portale': 'Immobiliare.it', 'Titolo': 'Bilocale via Esempio 1, Precotto, Milano',
       'Indirizzo': 'Via Esempio', 'Città/Zona': 'Milano / Precotto', 'Tipologia': 'Appartamento', 'm²': 62, 'Locali': 2,
       'Prezzo attuale': 235000, 'Prezzo massimo noto': 249000, 'Calo %': 5.6, 'Sopra mercato %': '', 'Confronto mercato': '','Data ultimo ribasso': '21/09/2026',
-      'Online da (giorni)': 173, 'Età stimata': 'sì', 'Prima visita': '01/10/2026', 'Ultima visita': '10/10/2026',
+      'Online da (giorni)': 173, 'Età stimata': 'sì', 'Ripubblicato': '', 'Prima visita': '01/10/2026', 'Ultima visita': '10/10/2026',
       'Note': 'chiamare la sera', 'URL': 'https://www.immobiliare.it/annunci/128416572/', 'Altri URL': '',
     }]);
     expect(Object.keys(toExportRows([lead])[0]!)).toEqual([...EXPORT_COLUMNS]);
@@ -106,5 +106,16 @@ describe('toExportRows lead unito', () => {
     expect(row['Altri URL']).toBe('https://www.idealista.it/immobile/2/');
     expect(EXPORT_COLUMNS.indexOf('Altri URL')).toBe(EXPORT_COLUMNS.indexOf('URL') + 1);
     expect(toExportRows([lead])[0]!['Altri URL']).toBe('');
+  });
+
+  it('ripubblicato: colonna "Ripubblicato", URL del precedente tra gli altri, un solo portale', () => {
+    const previous = { ...lead.listing, key: 'immobiliare:1', portalId: 1, url: 'https://www.immobiliare.it/annunci/1/' };
+    const row = toExportRows([{ ...lead, reposted: true, others: [{ listing: previous, evaluation: lead.evaluation, prices: [], previous: true }] }])[0]!;
+    expect(row['Ripubblicato']).toBe('sì');
+    expect(row['Altri URL']).toBe('https://www.immobiliare.it/annunci/1/');
+    expect(row['Portale']).toBe('Immobiliare.it');
+    expect(toExportRows([lead])[0]!['Ripubblicato']).toBe('');
+    expect(EXPORT_COLUMNS.indexOf('Ripubblicato')).toBe(EXPORT_COLUMNS.indexOf('Età stimata') + 1);
+    expect(EXPORT_COLUMNS.indexOf('Prima visita')).toBe(EXPORT_COLUMNS.indexOf('Ripubblicato') + 1);
   });
 });

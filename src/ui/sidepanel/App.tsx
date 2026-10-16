@@ -23,7 +23,7 @@ const FILTER_LABELS: Record<PriorityFilter, string> = { all: 'Tutti', high: PRIO
 const byFilter = (leads: LeadView[], f: PriorityFilter) => (f === 'all' ? leads : leads.filter((l) => l.evaluation.priority === f));
 /** Filtro per sito: lista vuota = tutti i siti. Un lead unito passa se ha una fonte su uno dei siti scelti. */
 const byPortals = (leads: LeadView[], ps: Portal[]) => (ps.length ? leads.filter((l) => leadPortals(l).some((p) => ps.includes(p))) : leads);
-const byMulti = (leads: LeadView[], on: boolean) => (on ? leads.filter((l) => l.others.length > 0) : leads);
+const byMulti = (leads: LeadView[], on: boolean) => (on ? leads.filter((l) => leadPortals(l).length > 1) : leads);
 const nAnnunci = (n: number) => `${n} ${n === 1 ? 'annuncio' : 'annunci'}`;
 const errorText = (e: unknown) => `Errore: ${e instanceof Error ? e.message : String(e)}`;
 
@@ -306,7 +306,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
                   );
                 })}
                 {(() => {
-                  const count = byFilter(byPortals(tabLeads(tab), portals), filter).filter((l) => l.others.length > 0).length;
+                  const count = byFilter(byPortals(tabLeads(tab), portals), filter).filter((l) => leadPortals(l).length > 1).length;
                   return (
                     <button
                       type="button"

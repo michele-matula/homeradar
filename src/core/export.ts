@@ -7,7 +7,7 @@ import { PORTAL_SITES, type LeadView } from '@/shared/types';
 
 export const EXPORT_COLUMNS = [
   'Priorità', 'Stato', 'Richiamo', 'Portale', 'Titolo', 'Indirizzo', 'Città/Zona', 'Tipologia', 'm²', 'Locali', 'Prezzo attuale',
-  'Prezzo massimo noto', 'Calo %', 'Sopra mercato %', 'Confronto mercato', 'Data ultimo ribasso', 'Online da (giorni)', 'Età stimata', 'Prima visita',
+  'Prezzo massimo noto', 'Calo %', 'Sopra mercato %', 'Confronto mercato', 'Data ultimo ribasso', 'Online da (giorni)', 'Età stimata', 'Ripubblicato', 'Prima visita',
   'Ultima visita', 'Note', 'URL', 'Altri URL',
 ] as const;
 
@@ -35,6 +35,7 @@ export function toExportRows(leads: LeadView[]): ExportRow[] {
     'Data ultimo ribasso': l.lastDrop ? formatDate(l.lastDrop.date) : '',
     'Online da (giorni)': e.ageDays ?? '',
     'Età stimata': e.ageDays == null ? '' : e.ageEstimated ? 'sì' : 'no',
+    'Ripubblicato': view.reposted ? 'sì' : '',
     'Prima visita': formatDate(l.firstSeenAt),
     'Ultima visita': formatDate(l.lastSeenAt),
     'Note': s.notes,
