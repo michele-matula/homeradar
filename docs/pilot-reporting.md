@@ -50,6 +50,8 @@ Da `worker/`:
 4. Nella radice, `.env` con `WXT_REPORT_URL=http://localhost:8787/`, poi `npm run build` e ricarica l'estensione da `.output/chrome-mv3`.
 5. La pagina admin è su `http://localhost:8787/admin` (password `prova`).
 
+Ogni `npm run build` o `npm run test:e2e` ricompila `.output/chrome-mv3` con il `.env` presente in quel momento: senza `.env` la scheda Pilota dice "Invio non configurato in questa versione" e campo e pulsanti restano disattivati. In quel caso ricrea `.env`, rifai la build e ricarica l'estensione.
+
 Ricordati di cancellare `.env` prima di una build per il pilota con l'URL vera.
 
 ## Test
