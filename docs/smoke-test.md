@@ -164,4 +164,27 @@ Naviga a mano, senza automazione: Idealista usa DataDome.
 57. Esporta CSV.
     - [ ] Colonna "Ripubblicato" con "sì" sul lead ripubblicato (prima di "Separa") e "Altri URL" con il link dell'annuncio precedente.
 
+## Misura del pilota
+
+Con il Worker in locale (`docs/pilot-reporting.md`, "Prova in locale") e un'estensione compilata con `WXT_REPORT_URL=http://localhost:8787/`.
+
+58. Da un'installazione con l'informativa confermata alla versione precedente, apri il pannello.
+    - [ ] Il pannello chiede di riconfermare; "Cosa è cambiato" cita le statistiche d'uso anonime; c'è il campo "Codice pilota (facoltativo)".
+59. Inserisci `prova-0001` e conferma. Impostazioni → Pilota.
+    - [ ] Il codice è `PROVA-0001`; "Invia ora" porta a "Ultimo invio: oggi alle …"; in `/admin` compare la riga dell'agenzia "Prova".
+60. "Mostra cosa viene inviato".
+    - [ ] Il JSON non contiene titoli, indirizzi, prezzi, ID o URL degli annunci, né il testo delle note.
+61. Cambia il codice in `SBAGLIATO-1`, "Salva codice", poi "Invia ora".
+    - [ ] "Codice non riconosciuto: controlla il codice che hai ricevuto". Rimetti `PROVA-0001`.
+62. Ferma `wrangler dev` e premi "Invia ora".
+    - [ ] "Ultimo tentativo non riuscito (nessuna connessione): si riprova da solo". Riavvialo e premi "Invia ora": invio riuscito.
+63. Con `wrangler dev` fermo scrivi un feedback e invialo.
+    - [ ] "Salvato: verrà inviato appena possibile" e "1 messaggio in attesa di invio"; riavviato il Worker, "Invia ora" lo manda e compare in `/admin/feedback`.
+64. Spegni "Invia statistiche d'uso anonime".
+    - [ ] "Invio spento", "Invia ora" disattivato; un feedback parte lo stesso.
+65. "Copia report diagnostico".
+    - [ ] Ci sono le righe "Uso:" e "Invio:".
+66. Build senza `.env` (`npm run build`).
+    - [ ] Nel manifest ci sono solo i tre portali tra gli `host_permissions`; la scheda Pilota dice "Invio non configurato in questa versione".
+
 Se il sito è cambiato: ricattura le fixture (Immobiliare: piano MVP, Task 4; Idealista: piano 2026-10-13, Task 8; Subito: piano 2026-10-13-subito-adapter, Task 5), aggiorna schemi o selettori, riesegui `npm test`.

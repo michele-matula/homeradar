@@ -1,4 +1,5 @@
 import { createFileSaver, isOffscreenRequest } from '@/background/file-saver';
+import { createReporter } from '@/background/reporter';
 import { actionBadge } from '@/core/action-badge';
 import { runAutoBackup, settleAutoBackup, type AutoBackupDeps } from '@/core/auto-backup';
 import { HomeRadarDB } from '@/core/db';
@@ -8,10 +9,36 @@ import { nextRecallCheck } from '@/core/recall';
 import { handleRequest, type RouterHooks } from '@/core/router';
 import { LeadService } from '@/core/service';
 import { LEADS_CHANGED, ONBOARDING_CHANGED, type Request } from '@/shared/messages';
+import { REPORT_URL } from '@/shared/report-config';
 
 export default defineBackground(() => {
   const service = new LeadService(new HomeRadarDB());
   const version = browser.runtime.getManifest().version;
+
+  const reporter = createReporter({
+    url: REPORT_URL,
+    version,
+    now: Date.now,
+    timezoneOffset: () => new Date().getTimezoneOffset(),
+    fetch: (input, init) => fetch(input, init),
+    settings: () => service.getSettings(),
+    onboardingAccepted: async () => {
+      const s = await service.onboardingStatus();
+      return !needsOnboarding(s.acceptedVersion, s.current);
+    },
+    installId: () => service.pilot.installId(),
+    usage: () => service.pilot.usage(),
+    diagnostics: () => service.getDiagnostics(version),
+    leads: () => service.listLeads(),
+    status: () => service.pilot.reportingStatus(),
+    updateStatus: (fn) => service.pilot.updateReporting(fn),
+    queue: () => service.pilot.feedbackQueue(),
+    enqueue: (text) => service.pilot.enqueueFeedback(text, version),
+    dropFeedback: (id) => service.pilot.dropFeedback(id),
+    recordError: (m) => service.recordError(m),
+  });
+  const reportError = (err: unknown) =>
+    service.recordError(`Invio del report: ${err instanceof Error ? err.message : String(err)}`).catch(() => {});
 
   /** Un solo punto decide il segnale sull'icona: conferma mancante prima dell'avviso dei portali. */
   async function refreshActionBadge(): Promise<void> {
@@ -49,6 +76,7 @@ export default defineBackground(() => {
       updateBadge();
     },
     openOnboarding,
+    reporter,
   };
 
   const saver = createFileSaver({
@@ -117,10 +145,14 @@ export default defineBackground(() => {
     if (!(await browser.alarms.get('recall'))) scheduleRecallCheck();
     if (!(await browser.alarms.get('purge'))) browser.alarms.create('purge', { delayInMinutes: 1, periodInMinutes: 24 * 60 });
     if (!(await browser.alarms.get('backup'))) browser.alarms.create('backup', { delayInMinutes: 5, periodInMinutes: 24 * 60 });
+    if (!(await browser.alarms.get('report'))) browser.alarms.create('report', { delayInMinutes: 10, periodInMinutes: 24 * 60 });
   })();
+  // Chrome spegne il worker spesso: all'avvio si recupera l'invio se l'ultimo ha più di 20 ore.
+  void reporter.sendReport('startup').catch(reportError);
   browser.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === 'purge') void service.purge();
     if (alarm.name === 'backup') void runAutoBackup(backupDeps).catch(backupError);
+    if (alarm.name === 'report') void reporter.sendReport('alarm').catch(reportError);
     if (alarm.name === 'recall') {
       // Anche il pannello aperto ricalcola gruppi ed etichette: "domani" diventa "oggi".
       hooks.leadsChanged();

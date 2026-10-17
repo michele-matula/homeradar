@@ -1,4 +1,5 @@
 import { browser } from 'wxt/browser';
+import type { UsageClientEvent } from '@/core/usage';
 import type { CalibrationHint, LeadStatus, ListingObservation, Portal, PortalState, Settings } from '@/shared/types';
 
 export const LEADS_CHANGED = 'leadsChanged';
@@ -25,7 +26,12 @@ export type Request =
   | { type: 'getOnboardingStatus' }
   | { type: 'acceptOnboarding' }
   | { type: 'getPortalState'; portal: Portal }
-  | { type: 'openOnboarding' };
+  | { type: 'openOnboarding' }
+  | { type: 'trackUsage'; event: UsageClientEvent }
+  | { type: 'getReportingInfo' }
+  | { type: 'sendReportNow' }
+  | { type: 'previewReport' }
+  | { type: 'sendFeedback'; text: string };
 
 /** Per i content script: leggere (attivo), no (spento) o no e avvisare (informativa da confermare). */
 export function portalState(portal: Portal): Promise<PortalState> {

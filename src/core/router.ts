@@ -1,3 +1,4 @@
+import type { Reporter } from '@/background/reporter';
 import { needsOnboarding } from '@/core/onboarding';
 import type { LeadService } from '@/core/service';
 import type { Request } from '@/shared/messages';
@@ -12,6 +13,8 @@ export interface RouterHooks {
   onboardingChanged(): void;
   /** Apre la scheda di benvenuto. */
   openOnboarding(): Promise<void>;
+  /** Invio dei report e dei feedback del pilota. */
+  reporter: Reporter;
 }
 
 /** Finché l'informativa non è confermata non si legge né si salva nulla dai portali. */
@@ -33,6 +36,7 @@ export async function handleRequest(service: LeadService, req: Request, version:
       const hint = req.calibrationHint && enabled[req.calibrationHint.portal] ? req.calibrationHint : undefined;
       const evaluations = await service.ingest(observations, hint);
       await service.bumpCounter('ingested', observations.length);
+      await service.trackUsage({ kind: 'browsing' });
       if (evaluations.length) hooks.leadsChanged();
       return evaluations;
     }
@@ -64,7 +68,15 @@ export async function handleRequest(service: LeadService, req: Request, version:
     case 'getSettings':
       return service.getSettings();
     case 'saveSettings': {
+      const before = (await service.getSettings()).pilotCode;
       const saved = await service.saveSettings(req.settings);
+      // Un codice nuovo va riprovato: il rifiuto valeva per quello vecchio.
+      if (saved.pilotCode !== before) {
+        await service.pilot.updateReporting((s) => {
+          s.codeRejected = false;
+          if (s.lastError === 'rejected') s.lastError = null;
+        });
+      }
       // Un portale spento non viene più letto: un suo avviso resterebbe acceso per sempre.
       let warning: { any: boolean } | null = null;
       for (const p of PORTALS) if (!saved.enabledPortals[p]) warning = await service.setAdapterWarning(p, false);
@@ -88,7 +100,7 @@ export async function handleRequest(service: LeadService, req: Request, version:
       await service.bumpCounter('fallbackShown');
       return null;
     case 'getDiagnostics':
-      return service.getDiagnostics(version);
+      return { ...(await service.getDiagnostics(version)), usage: await service.pilot.usage(), reporting: await hooks.reporter.info() };
     case 'exportBackup': {
       const file = await service.exportBackup(version);
       await service.recordBackup();
@@ -113,6 +125,17 @@ export async function handleRequest(service: LeadService, req: Request, version:
       if (!(await awaitingOnboarding(service))) state = (await service.getSettings()).enabledPortals[req.portal] ? 'active' : 'off';
       return state;
     }
+    case 'trackUsage':
+      await service.trackUsage(req.event);
+      return null;
+    case 'getReportingInfo':
+      return hooks.reporter.info();
+    case 'sendReportNow':
+      return hooks.reporter.sendReport('manual');
+    case 'previewReport':
+      return hooks.reporter.preview();
+    case 'sendFeedback':
+      return hooks.reporter.sendFeedback(req.text);
     case 'openOnboarding':
       try {
         await hooks.openOnboarding();

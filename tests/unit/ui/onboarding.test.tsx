@@ -1,7 +1,7 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Onboarding } from '@/ui/onboarding/Onboarding';
-import { DEFAULT_SETTINGS, type OnboardingStatus } from '@/shared/types';
+import { DEFAULT_SETTINGS, type OnboardingStatus, type Settings } from '@/shared/types';
 
 afterEach(cleanup);
 
@@ -13,6 +13,7 @@ function api(status: OnboardingStatus = never, settings = DEFAULT_SETTINGS) {
     getOnboardingStatus: vi.fn(async () => status),
     acceptOnboarding: vi.fn(async () => accepted),
     getSettings: vi.fn(async () => settings),
+    saveSettings: vi.fn(async (s: Settings) => ({ ...s, pilotCode: s.pilotCode.trim().toUpperCase() })),
   };
 }
 
@@ -93,5 +94,40 @@ describe('Onboarding', () => {
     render(<Onboarding api={a} mode="confirm" />);
     fireEvent.click(await screen.findByRole('button', { name: 'Riprova' }));
     expect(await screen.findByRole('heading', { name: 'Benvenuto in HomeRadar' })).toBeTruthy();
+  });
+});
+describe('Onboarding: codice pilota e invio dei report', () => {
+  it('salva il codice pilota prima di confermare', async () => {
+    const a = api();
+    render(<Onboarding api={a} mode="confirm" />);
+    fireEvent.change(await screen.findByLabelText('Codice pilota (facoltativo)'), { target: { value: ' rossi-7k2p ' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Ho capito, inizia' }));
+    await waitFor(() => expect(a.acceptOnboarding).toHaveBeenCalled());
+    expect(a.saveSettings).toHaveBeenCalledWith(expect.objectContaining({ pilotCode: ' rossi-7k2p ' }));
+  });
+
+  it("con un codice non valido mostra l'errore e non conferma", async () => {
+    const a = api();
+    a.saveSettings.mockRejectedValueOnce(new Error('Codice pilota non valido: usa da 4 a 32 tra lettere, cifre e trattini'));
+    render(<Onboarding api={a} mode="confirm" />);
+    fireEvent.change(await screen.findByLabelText('Codice pilota (facoltativo)'), { target: { value: 'ab' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Ho capito, inizia' }));
+    expect(await screen.findByText(/Codice pilota non valido/)).toBeTruthy();
+    expect(a.acceptOnboarding).not.toHaveBeenCalled();
+  });
+
+  it('senza codice conferma senza salvare le impostazioni', async () => {
+    const a = api();
+    render(<Onboarding api={a} mode="confirm" />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Ho capito, inizia' }));
+    await waitFor(() => expect(a.acceptOnboarding).toHaveBeenCalled());
+    expect(a.saveSettings).not.toHaveBeenCalled();
+  });
+
+  it("dichiara l'invio giornaliero e non mostra il campo in sola lettura", async () => {
+    render(<Onboarding api={api(accepted)} mode="review" onDone={() => {}} />);
+    expect(await screen.findByText(/Ogni giorno HomeRadar invia al gestore del pilota/)).toBeTruthy();
+    expect(screen.getByText(/Annunci, stati e note restano solo nel tuo browser/)).toBeTruthy();
+    expect(screen.queryByLabelText('Codice pilota (facoltativo)')).toBeNull();
   });
 });

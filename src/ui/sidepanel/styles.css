@@ -288,3 +288,8 @@ button, input, select { font: inherit; color: inherit; }
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 .btn:focus-within { box-shadow: var(--focus); }
+
+/* Scheda Pilota e Feedback (misura del pilota) */
+.pilot__preview { max-height: 240px; overflow: auto; margin: 8px 0 0; padding: 8px; border-radius: 6px; background: var(--surface-muted); font-size: 11px; white-space: pre-wrap; word-break: break-word; }
+.feedback__text { width: 100%; box-sizing: border-box; resize: vertical; font: inherit; }
+.feedback__count { margin-right: auto; color: var(--muted); font-size: 12px; }

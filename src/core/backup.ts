@@ -86,6 +86,7 @@ const SplitSchema = z.object({ a: z.string(), b: z.string(), at: num }).refine((
 const SettingsSchema = z.object({
   minAgeDays: num.optional(), minDropPercent: num.optional(), retentionDays: num.optional(), autoBackup: z.boolean().optional(),
   enabledPortals: z.object({ immobiliare: z.boolean().optional(), idealista: z.boolean().optional(), subito: z.boolean().optional() }).optional(),
+  pilotCode: z.string().optional(), reportingEnabled: z.boolean().optional(),
 });
 
 const VersionSchema = z.object({ format: z.literal(BACKUP_FORMAT), formatVersion: int.min(1) });

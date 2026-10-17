@@ -1,3 +1,5 @@
+import type { UsageStats } from '@/core/usage';
+
 export type Portal = 'immobiliare' | 'idealista' | 'subito';
 export const PORTALS: Portal[] = ['immobiliare', 'idealista', 'subito'];
 export const PORTAL_SITES: Record<Portal, string> = { immobiliare: 'Immobiliare.it', idealista: 'Idealista.it', subito: 'Subito.it' };
@@ -113,6 +115,10 @@ export interface Settings {
   autoBackup: boolean;
   /** Portali su cui l'estensione lavora: su un portale spento non legge né salva nulla. */
   enabledPortals: Record<Portal, boolean>;
+  /** Codice dell'agenzia per l'invio dei report del pilota; vuoto = nessun invio. */
+  pilotCode: string;
+  /** Invio giornaliero delle statistiche d'uso anonime al gestore del pilota. */
+  reportingEnabled: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -121,6 +127,8 @@ export const DEFAULT_SETTINGS: Settings = {
   retentionDays: 90,
   autoBackup: true,
   enabledPortals: { immobiliare: true, idealista: true, subito: true },
+  pilotCode: '',
+  reportingEnabled: true,
 };
 
 export interface CalibrationPoint {
@@ -192,6 +200,31 @@ export interface Diagnostics {
   counters: Record<string, number>;
   errors: { at: number; message: string }[];
   adapterWarning: Partial<Record<Portal, boolean>>;
+  /** Aggiunti dal router per il report copiato; assenti nel diagnostico salvato. */
+  usage?: UsageStats;
+  reporting?: ReportingInfo;
+}
+
+export interface ReportingStatus {
+  lastSentAt: number | null;
+  lastAttemptAt: number | null;
+  lastError: 'network' | 'server' | 'rejected' | 'invalid' | null;
+  /** Il Worker non riconosce il codice pilota: niente invii automatici finché il codice cambia. */
+  codeRejected: boolean;
+}
+
+export interface QueuedFeedback {
+  id: string;
+  text: string;
+  createdAt: number;
+  version: string;
+}
+
+/** Per la scheda Pilota: invio configurato nella build, stato, feedback in coda. */
+export interface ReportingInfo {
+  configured: boolean;
+  status: ReportingStatus;
+  queued: number;
 }
 
 export function listingKey(portal: Portal, portalId: number): string {

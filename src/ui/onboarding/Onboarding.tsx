@@ -6,7 +6,7 @@ import type { OnboardingStatus, Priority, Settings } from '@/shared/types';
 import type { Api } from '@/ui/sidepanel/api';
 import './onboarding.css';
 
-type OnboardingApi = Pick<Api, 'getOnboardingStatus' | 'acceptOnboarding' | 'getSettings'>;
+type OnboardingApi = Pick<Api, 'getOnboardingStatus' | 'acceptOnboarding' | 'getSettings' | 'saveSettings'>;
 
 const errorText = (e: unknown) => `Errore: ${e instanceof Error ? e.message : String(e)}`;
 
@@ -29,12 +29,14 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [code, setCode] = useState('');
 
   const load = useCallback(async () => {
     setError(null);
     try {
       const [status, settings] = await Promise.all([api.getOnboardingStatus(), api.getSettings()]);
       setData({ status, settings });
+      setCode(settings.pilotCode);
     } catch (e) {
       setError(errorText(e));
     }
@@ -48,6 +50,11 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
     setBusy(true);
     setError(null);
     try {
+      // Il codice si salva prima: se non è valido, l'errore resta a video e la conferma non avviene.
+      if (data && code.trim() !== data.settings.pilotCode) {
+        const settings = await api.saveSettings({ ...data.settings, pilotCode: code });
+        setData((d) => (d ? { ...d, settings } : d));
+      }
       const status = await api.acceptOnboarding();
       setData((d) => (d ? { ...d, status } : d));
       if (onDone) onDone();
@@ -137,7 +144,15 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
       <section className="card">
         <h2 className="onboarding__h">Dove restano i dati</h2>
         <ul>
-          <li>Solo nel tuo browser, su questo computer. Non vengono inviati a nessun server, nemmeno a chi ha creato HomeRadar.</li>
+          <li>
+            Annunci, stati e note restano solo nel tuo browser, su questo computer: non vengono inviati a nessun server, nemmeno
+            a chi ha creato HomeRadar.
+          </li>
+          <li>
+            Ogni giorno HomeRadar invia al gestore del pilota statistiche d'uso anonime (giorni d'uso, numero di lead, passaggi
+            di stato, export) e gli errori tecnici, con il codice pilota della tua agenzia. Non invia mai annunci, indirizzi,
+            prezzi, note o nomi. Puoi spegnere l'invio dalle impostazioni.
+          </li>
           <li>
             {`Gli annunci rimasti in stato "Nuovo" che non rivedi da ${settings.retentionDays} giorni vengono cancellati da soli, anche se hanno note: per tenerli cambia lo stato. Puoi cambiare il periodo nelle impostazioni. L'annuncio precedente di una ripubblicazione resta finché rivedi la ripubblicazione.`}
           </li>
@@ -187,6 +202,13 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
         </ul>
       </section>
       <p className="onboarding__contact">Per domande, rivolgiti a chi ti ha fornito HomeRadar.</p>
+      {mode === 'confirm' && (
+        <section className="card onboarding__code">
+          <label className="onboarding__h" htmlFor="onboarding-code">Codice pilota (facoltativo)</label>
+          <input id="onboarding-code" className="field" value={code} onChange={(e) => setCode(e.target.value)} />
+          <p className="onboarding__hint">Te lo dà chi gestisce il pilota. Puoi inserirlo anche dopo, nelle impostazioni.</p>
+        </section>
+      )}
       {error && <p className="banner banner--error"><span>{error}</span></p>}
       {mode === 'confirm' ? (
         <button type="button" className="btn btn--primary onboarding__cta" disabled={busy} onClick={() => void accept()}>

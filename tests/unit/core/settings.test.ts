@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateSettings } from '@/core/settings';
+import { INVALID_PILOT_CODE, validateSettings } from '@/core/settings';
 import { DEFAULT_SETTINGS, type Settings } from '@/shared/types';
 
 describe('validateSettings', () => {
@@ -26,5 +26,14 @@ describe('validateSettings', () => {
   it('completa i portali attivi uno per uno e scarta chiavi sconosciute', () => {
     const s = validateSettings({ enabledPortals: { subito: false, altro: true } as unknown as Settings['enabledPortals'] });
     expect(s.enabledPortals).toEqual({ immobiliare: true, idealista: true, subito: false });
+  });
+  it('normalizza il codice pilota e rifiuta quelli non validi', () => {
+    expect(validateSettings({ pilotCode: ' rossi-7k2p ' }).pilotCode).toBe('ROSSI-7K2P');
+    expect(validateSettings({ pilotCode: 'ro ssi 7k' }).pilotCode).toBe('ROSSI7K');
+    expect(validateSettings({}).pilotCode).toBe('');
+    expect(validateSettings({}).reportingEnabled).toBe(true);
+    expect(() => validateSettings({ pilotCode: 'ab' })).toThrow(INVALID_PILOT_CODE);
+    expect(() => validateSettings({ pilotCode: 'ROSSI_7K' })).toThrow(INVALID_PILOT_CODE);
+    expect(() => validateSettings({ reportingEnabled: 'sì' as unknown as boolean })).toThrow('Invio statistiche non valido');
   });
 });
