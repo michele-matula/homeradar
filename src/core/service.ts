@@ -6,10 +6,12 @@ import { warnedPortals } from '@/core/diagnostics';
 import { buildLeadViews, defaultState, isListed, mergeGroupState, type Archive } from '@/core/lead-groups';
 import { leadKeys, sortLeads } from '@/core/leads';
 import { ONBOARDING_VERSION } from '@/core/onboarding';
+import { PilotStore } from '@/core/pilot-store';
 import { addDays, startOfLocalDay } from '@/core/recall';
 import { evaluate } from '@/core/rules';
 import { groupListings, splitPair } from '@/core/same-property';
 import { validateSettings } from '@/core/settings';
+import type { UsageEvent } from '@/core/usage';
 import {
   DAY_MS, listingKey, VISIT_GAP_MS, type BackupStatus, type CalibrationHint, type Diagnostics, type Evaluation, type ImportSummary, type LeadState, type LeadStatus, type LeadView,
   type ListingObservation, type ListingRecord, type ObservedPriceDrop, type OnboardingStatus, type Portal, type PriceDrop, type PriceSnapshot, type Settings,
@@ -57,10 +59,24 @@ function resolveDrop(drop: ObservedPriceDrop | null, prev: PriceDrop | null, now
 }
 
 export class LeadService {
+  /** Dati della misura del pilota (contatori, invio, feedback), fuori dal backup. */
+  readonly pilot: PilotStore;
+
   constructor(
     private readonly db: HomeRadarDB,
     private readonly clock: () => number = Date.now,
-  ) {}
+  ) {
+    this.pilot = new PilotStore(db, clock);
+  }
+
+  /** Registra un evento d'uso; un errore dei contatori non deve mai far fallire l'azione dell'agente. */
+  async trackUsage(e: UsageEvent): Promise<void> {
+    try {
+      await this.pilot.recordUsage(e);
+    } catch (err) {
+      await this.recordError(`Contatori d'uso: ${err instanceof Error ? err.message : String(err)}`).catch(() => {});
+    }
+  }
 
   async getSettings(): Promise<Settings> {
     const rec = await this.db.meta.get('settings');
@@ -175,7 +191,7 @@ export class LeadService {
     const list = Array.isArray(keys) ? keys : [keys];
     if (!list.length) throw new Error('Annuncio non trovato');
     const { listings, leadStates } = this.db;
-    return this.db.transaction('rw', [listings, leadStates], async () => {
+    const { prev, next } = await this.db.transaction('rw', [listings, leadStates], async () => {
       const members = [];
       for (const [i, listing] of (await listings.bulkGet(list)).entries()) {
         if (!listing) throw new Error('Annuncio non trovato');
@@ -187,8 +203,11 @@ export class LeadService {
       // Un membro che cambia rispetto al suo stato salvato è una modifica: vale per i conflitti di un backup.
       if (members.some((m) => !sameState(m.state, next))) next.updatedAt = Math.max(next.updatedAt, now);
       await leadStates.bulkPut(list.map((k) => ({ ...next, listingKey: k })));
-      return { ...next, listingKey: list[0]! };
+      return { prev, next };
     });
+    // Un gruppo vale un'azione dell'agente: si conta una volta sola.
+    await this.trackUsage({ kind: 'leadChange', prev, next });
+    return { ...next, listingKey: list[0]! };
   }
 
   /**

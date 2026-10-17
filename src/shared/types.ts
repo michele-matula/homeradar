@@ -200,6 +200,28 @@ export interface Diagnostics {
   adapterWarning: Partial<Record<Portal, boolean>>;
 }
 
+export interface ReportingStatus {
+  lastSentAt: number | null;
+  lastAttemptAt: number | null;
+  lastError: 'network' | 'server' | 'rejected' | 'invalid' | null;
+  /** Il Worker non riconosce il codice pilota: niente invii automatici finché il codice cambia. */
+  codeRejected: boolean;
+}
+
+export interface QueuedFeedback {
+  id: string;
+  text: string;
+  createdAt: number;
+  version: string;
+}
+
+/** Per la scheda Pilota: invio configurato nella build, stato, feedback in coda. */
+export interface ReportingInfo {
+  configured: boolean;
+  status: ReportingStatus;
+  queued: number;
+}
+
 export function listingKey(portal: Portal, portalId: number): string {
   return `${portal}:${portalId}`;
 }

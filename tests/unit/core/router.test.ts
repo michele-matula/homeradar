@@ -192,4 +192,21 @@ describe('handleRequest splitListing', () => {
     expect(await db.splits.count()).toBe(1);
     expect(h.recallsChanged).toHaveBeenCalled();
   });
+  it('ingest accettato segna il giorno di navigazione, trackUsage il pannello e gli export', async () => {
+    const { svc } = await ready();
+    const h = hooks();
+    await handleRequest(svc, { type: 'ingest', observations: [obs()] }, 'v', h);
+    await handleRequest(svc, { type: 'trackUsage', event: { kind: 'panel' } }, 'v', h);
+    await handleRequest(svc, { type: 'trackUsage', event: { kind: 'export', format: 'xlsx' } }, 'v', h);
+    const u = await svc.pilot.usage();
+    expect(u.browsingDays).toHaveLength(1);
+    expect(u.panelDays).toHaveLength(1);
+    expect(u.exports.xlsx).toBe(1);
+  });
+
+  it('ingest scartato (informativa da confermare) non segna il giorno', async () => {
+    const { svc } = setup();
+    await handleRequest(svc, { type: 'ingest', observations: [obs()] }, 'v', hooks());
+    expect((await svc.pilot.usage()).browsingDays).toEqual([]);
+  });
 });

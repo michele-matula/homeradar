@@ -33,6 +33,7 @@ export async function handleRequest(service: LeadService, req: Request, version:
       const hint = req.calibrationHint && enabled[req.calibrationHint.portal] ? req.calibrationHint : undefined;
       const evaluations = await service.ingest(observations, hint);
       await service.bumpCounter('ingested', observations.length);
+      await service.trackUsage({ kind: 'browsing' });
       if (evaluations.length) hooks.leadsChanged();
       return evaluations;
     }
@@ -113,6 +114,9 @@ export async function handleRequest(service: LeadService, req: Request, version:
       if (!(await awaitingOnboarding(service))) state = (await service.getSettings()).enabledPortals[req.portal] ? 'active' : 'off';
       return state;
     }
+    case 'trackUsage':
+      await service.trackUsage(req.event);
+      return null;
     case 'openOnboarding':
       try {
         await hooks.openOnboarding();
