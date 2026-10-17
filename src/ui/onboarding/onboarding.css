@@ -11,3 +11,6 @@
 .onboarding__review { display: flex; gap: 10px; align-items: center; justify-content: space-between; color: var(--muted); }
 .onboarding .legend { list-style: none; padding-left: 0; gap: 8px; }
 .legend li { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+.onboarding__code { display: flex; flex-direction: column; gap: 6px; }
+.onboarding__hint { margin: 0; color: var(--muted); font-size: 12px; }
