@@ -5,8 +5,7 @@ compatibility_date = "2026-10-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "homeradar-pilot"
-# Sostituire con l'ID restituito da `npx wrangler d1 create homeradar-pilot` (vedi docs/pilot-reporting.md).
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "eb5fb463-edd4-4c11-bced-d3f6202d291a"
 migrations_dir = "migrations"
 
 [triggers]
