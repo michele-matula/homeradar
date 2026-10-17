@@ -134,3 +134,12 @@ describe('separazioni nel backup', () => {
     expect(() => parseBackup(json)).toThrow('Backup non valido (separazioni)');
   });
 });
+describe('backup: impostazioni del pilota', () => {
+  it('accetta impostazioni con o senza codice pilota', () => {
+    const base = buildBackup({ listings: [], priceSnapshots: [], leadStates: [], calibration: [] }, 0, '0.1.0');
+    const old = { ...base, settings: { minAgeDays: 100 } };
+    expect(parseBackup(JSON.parse(JSON.stringify(old))).settings).toMatchObject({ minAgeDays: 100, pilotCode: '', reportingEnabled: true });
+    const now = { ...base, settings: { pilotCode: 'rossi-7k2p', reportingEnabled: false } };
+    expect(parseBackup(JSON.parse(JSON.stringify(now))).settings).toMatchObject({ pilotCode: 'ROSSI-7K2P', reportingEnabled: false });
+  });
+});

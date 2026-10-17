@@ -113,6 +113,10 @@ export interface Settings {
   autoBackup: boolean;
   /** Portali su cui l'estensione lavora: su un portale spento non legge né salva nulla. */
   enabledPortals: Record<Portal, boolean>;
+  /** Codice dell'agenzia per l'invio dei report del pilota; vuoto = nessun invio. */
+  pilotCode: string;
+  /** Invio giornaliero delle statistiche d'uso anonime al gestore del pilota. */
+  reportingEnabled: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -121,6 +125,8 @@ export const DEFAULT_SETTINGS: Settings = {
   retentionDays: 90,
   autoBackup: true,
   enabledPortals: { immobiliare: true, idealista: true, subito: true },
+  pilotCode: '',
+  reportingEnabled: true,
 };
 
 export interface CalibrationPoint {
