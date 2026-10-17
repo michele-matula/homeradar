@@ -72,6 +72,11 @@ export function App({ api = defaultApi }: { api?: Api }) {
     return api.onLeadsChanged(() => void refresh());
   }, [api, refresh]);
 
+  useEffect(() => {
+    // Giorno con il pannello aperto, per la misura del pilota. Un errore non deve disturbare l'agente.
+    api.trackUsage({ kind: 'panel' }).catch(() => {});
+  }, [api]);
+
   const checkGate = useCallback(async () => {
     try {
       const s = await api.getOnboardingStatus();
@@ -385,7 +390,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
                   ))}
                 </ul>
               )}
-              <ExportBar leads={visible} />
+              <ExportBar leads={visible} onExported={(format) => void api.trackUsage({ kind: 'export', format }).catch(() => {})} />
             </>
           )}
         </>

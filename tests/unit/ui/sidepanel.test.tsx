@@ -66,6 +66,11 @@ function fakeApi(leads: LeadView[], adapterWarning: Diagnostics['adapterWarning'
     getOnboardingStatus: vi.fn(async () => ({ acceptedVersion: 1, acceptedAt: 0, current: 1 })),
     acceptOnboarding: vi.fn(async () => ({ acceptedVersion: 1, acceptedAt: 0, current: 1 })),
     onOnboardingChanged: vi.fn(() => () => {}),
+    getReportingInfo: vi.fn(async () => ({ configured: true, queued: 0, status: { lastSentAt: null, lastAttemptAt: null, lastError: null, codeRejected: false } })),
+    sendReportNow: vi.fn(),
+    previewReport: vi.fn(),
+    sendFeedback: vi.fn(async () => 'sent' as const),
+    trackUsage: vi.fn(async () => {}),
   };
 }
 
@@ -194,6 +199,17 @@ describe('LeadItem', () => {
 });
 
 describe('App', () => {
+  it("segna l'apertura del pannello e gli export", async () => {
+    const api = fakeApi([lead(1, 'high')]);
+    // jsdom non crea URL blob: il download vero non interessa qui.
+    Object.assign(URL, { createObjectURL: vi.fn(() => 'blob:x'), revokeObjectURL: vi.fn() });
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    render(<App api={api} />);
+    await screen.findByRole('button', { name: /CSV/ });
+    expect(api.trackUsage).toHaveBeenCalledWith({ kind: 'panel' });
+    fireEvent.click(screen.getByRole('button', { name: /CSV/ }));
+    expect(api.trackUsage).toHaveBeenCalledWith({ kind: 'export', format: 'csv' });
+  });
   const titles = () => screen.getAllByText(/^Bilocale \d+$/).map((e) => e.textContent);
   const withPrice = (l: LeadView, currentPrice: number): LeadView => ({ ...l, listing: { ...l.listing, currentPrice } });
   const at = (l: LeadView, listing: Partial<LeadView['listing']>): LeadView => ({ ...l, listing: { ...l.listing, ...listing } });

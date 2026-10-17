@@ -1,7 +1,9 @@
 import { browser } from 'wxt/browser';
 import { LEADS_CHANGED, ONBOARDING_CHANGED, send } from '@/shared/messages';
 import type { BackupFile } from '@/core/backup';
-import type { BackupStatus, Diagnostics, ImportSummary, LeadState, LeadStatus, LeadView, OnboardingStatus, Settings } from '@/shared/types';
+import type { UsageClientEvent } from '@/core/usage';
+import type { UsageReport } from '@/shared/report-schema';
+import type { BackupStatus, Diagnostics, ImportSummary, LeadState, LeadStatus, LeadView, OnboardingStatus, ReportingInfo, Settings } from '@/shared/types';
 
 export interface Api {
   listLeads(): Promise<LeadView[]>;
@@ -18,6 +20,11 @@ export interface Api {
   getBackupStatus(): Promise<BackupStatus>;
   getOnboardingStatus(): Promise<OnboardingStatus>;
   acceptOnboarding(): Promise<OnboardingStatus>;
+  getReportingInfo(): Promise<ReportingInfo>;
+  sendReportNow(): Promise<ReportingInfo>;
+  previewReport(): Promise<UsageReport>;
+  sendFeedback(text: string): Promise<'sent' | 'queued'>;
+  trackUsage(event: UsageClientEvent): Promise<void>;
   onLeadsChanged(cb: () => void): () => void;
   onOnboardingChanged(cb: () => void): () => void;
 }
@@ -46,6 +53,11 @@ export const defaultApi: Api = {
   getBackupStatus: () => send({ type: 'getBackupStatus' }),
   getOnboardingStatus: () => send({ type: 'getOnboardingStatus' }),
   acceptOnboarding: () => send({ type: 'acceptOnboarding' }),
+  getReportingInfo: () => send({ type: 'getReportingInfo' }),
+  sendReportNow: () => send({ type: 'sendReportNow' }),
+  previewReport: () => send({ type: 'previewReport' }),
+  sendFeedback: (text) => send({ type: 'sendFeedback', text }),
+  trackUsage: (event) => send({ type: 'trackUsage', event }),
   onLeadsChanged: (cb) => onBroadcast(LEADS_CHANGED, cb),
   onOnboardingChanged: (cb) => onBroadcast(ONBOARDING_CHANGED, cb),
 };

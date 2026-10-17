@@ -24,6 +24,11 @@ function api(status: BackupStatus = { lastAt: null, lastAutoFailedAt: null, next
     getOnboardingStatus: vi.fn(async () => ({ acceptedVersion: 1, acceptedAt: 0, current: 1 })),
     acceptOnboarding: vi.fn(async () => ({ acceptedVersion: 1, acceptedAt: 0, current: 1 })),
     onOnboardingChanged: vi.fn(() => () => {}),
+    getReportingInfo: vi.fn(async () => ({ configured: true, queued: 0, status: { lastSentAt: null, lastAttemptAt: null, lastError: null, codeRejected: false } })),
+    sendReportNow: vi.fn(),
+    previewReport: vi.fn(),
+    sendFeedback: vi.fn(async () => 'sent' as const),
+    trackUsage: vi.fn(async () => {}),
   } as unknown as Api;
 }
 

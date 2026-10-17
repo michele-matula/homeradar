@@ -3,10 +3,12 @@ import { backupFileName, importSummaryText, NOT_A_BACKUP } from '@/core/backup';
 import { formatDiagnostics } from '@/core/diagnostics';
 import { UNCERTAINTY_DAYS } from '@/core/rules';
 import { formatDateTime } from '@/shared/format';
-import { PORTAL_SITES, PORTALS, type BackupStatus, type Portal, type Settings } from '@/shared/types';
+import { PORTAL_SITES, PORTALS, type BackupStatus, type Portal, type ReportingInfo, type Settings } from '@/shared/types';
 import type { Api } from './api';
 import { downloadBlob } from './download';
+import { FeedbackCard } from './FeedbackCard';
 import { InfoTip } from './InfoTip';
+import { PilotCard } from './PilotCard';
 
 type NumberKey = 'minAgeDays' | 'minDropPercent' | 'retentionDays';
 
@@ -70,9 +72,13 @@ export function SettingsView({ api, onSaved, download = downloadBlob, onOpenGuid
   const [backup, setBackup] = useState<BackupStatus | null>(null);
   /** Lo stato del backup non si è potuto leggere: non si sa se ce n'è uno. */
   const [backupUnknown, setBackupUnknown] = useState(false);
+  const [info, setInfo] = useState<ReportingInfo | null>(null);
   const ids = useId();
   useEffect(() => {
     api.getBackupStatus().then(setBackup, () => setBackupUnknown(true));
+  }, [api]);
+  useEffect(() => {
+    api.getReportingInfo().then(setInfo, () => {});
   }, [api]);
   useEffect(() => {
     api.getSettings().then((s) => {
@@ -108,12 +114,23 @@ export function SettingsView({ api, onSaved, download = downloadBlob, onOpenGuid
     }
   }
 
+  /** Impostazioni salvate subito (interruttori, codice pilota): aggiornano anche i campi, senza toccare quelli in sospeso. */
+  function applySaved(result: Settings) {
+    setSaved(result);
+    setForm((f) => f && {
+      ...f,
+      enabledPortals: result.enabledPortals,
+      autoBackup: result.autoBackup,
+      pilotCode: result.pilotCode,
+      reportingEnabled: result.reportingEnabled,
+    });
+  }
+
   /** Gli interruttori salvano subito, partendo dalle impostazioni salvate e non dai campi in sospeso. */
   async function saveNow(patch: Partial<Settings>, ok: string) {
     try {
       const result = await api.saveSettings({ ...saved!, ...patch });
-      setSaved(result);
-      setForm((f) => f && { ...f, enabledPortals: result.enabledPortals, autoBackup: result.autoBackup });
+      applySaved(result);
       setMessage(ok);
       onSaved();
     } catch (e) {
@@ -290,6 +307,18 @@ export function SettingsView({ api, onSaved, download = downloadBlob, onOpenGuid
           <button type="button" className="btn" onClick={onOpenGuide}>Rivedi informativa</button>
         </div>
       </div>
+      <PilotCard
+        api={api}
+        settings={saved!}
+        info={info}
+        onSettings={(s) => {
+          applySaved(s);
+          onSaved();
+        }}
+        onInfo={setInfo}
+        onMessage={setMessage}
+      />
+      <FeedbackCard api={api} settings={saved!} info={info} onInfo={setInfo} />
       <div className="card">
         <h2 className="card__title">Assistenza</h2>
         <p className="card__text">Se qualcosa non funziona, copia il report e invialo a chi ti supporta.</p>
