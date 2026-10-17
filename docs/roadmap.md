@@ -86,7 +86,9 @@ L'ordine conta: il punto 7 riusa il confronto per caratteristiche del punto 6.
 - contatori anonimi nel report diagnostico: giorni di utilizzo, lead passati a "Contattato", export eseguiti;
 - un modo rapido per l'agente di mandare un feedback.
 
-**Vincoli:** nessun dato degli annunci nel report, come oggi. Nessuna telemetria automatica: è l'agente a decidere cosa inviare. Il canale di feedback (es. email precompilata con il report) va scelto nella specifica.
+**Vincoli:** nessun dato degli annunci nel report, come oggi.
+
+**Decisione del 2026-10-17** (sostituisce "nessuna telemetria automatica"): report giornaliero inviato in automatico a un Cloudflare Worker del gestore del pilota, attivo per tutti, dichiarato nell'informativa e disattivabile; agenzie riconosciute da un codice pilota; feedback inviato dalle impostazioni allo stesso Worker; pagina admin protetta da password. Dettagli in `docs/superpowers/specs/2026-10-17-misura-pilota-design.md`.
 
 ## Fuori da questa roadmap
 
