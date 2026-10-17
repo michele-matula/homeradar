@@ -5,7 +5,16 @@ import { DEFAULT_SETTINGS } from '@/shared/types';
 import { obs, setup } from './helpers';
 
 function hooks() {
-  return { setWarning: vi.fn(), leadsChanged: vi.fn(), onboardingChanged: vi.fn(), recallsChanged: vi.fn(), openOnboarding: vi.fn(async () => {}) };
+  return {
+    setWarning: vi.fn(), leadsChanged: vi.fn(), onboardingChanged: vi.fn(), recallsChanged: vi.fn(), openOnboarding: vi.fn(async () => {}),
+    reporter: {
+      info: vi.fn(async () => ({ configured: true, status: { lastSentAt: null, lastAttemptAt: null, lastError: null, codeRejected: false }, queued: 0 })),
+      preview: vi.fn(),
+      sendReport: vi.fn(async () => ({ configured: true, status: { lastSentAt: null, lastAttemptAt: null, lastError: null, codeRejected: false }, queued: 0 })),
+      sendFeedback: vi.fn(async () => 'sent' as const),
+      flushFeedback: vi.fn(async () => {}),
+    },
+  };
 }
 
 /** Servizio con l'informativa già confermata: i test esistenti lavorano su un'estensione attiva. */
@@ -208,5 +217,25 @@ describe('handleRequest splitListing', () => {
     const { svc } = setup();
     await handleRequest(svc, { type: 'ingest', observations: [obs()] }, 'v', hooks());
     expect((await svc.pilot.usage()).browsingDays).toEqual([]);
+  });
+  it('inoltra le richieste del pilota al reporter', async () => {
+    const { svc } = await ready();
+    const h = hooks();
+    await handleRequest(svc, { type: 'sendReportNow' }, 'v', h);
+    expect(h.reporter.sendReport).toHaveBeenCalledWith('manual');
+    expect(await handleRequest(svc, { type: 'sendFeedback', text: 'ciao' }, 'v', h)).toBe('sent');
+    expect(h.reporter.sendFeedback).toHaveBeenCalledWith('ciao');
+    const d = (await handleRequest(svc, { type: 'getDiagnostics' }, 'v', h)) as { usage: unknown; reporting: unknown };
+    expect(d.usage).toBeDefined();
+    expect(d.reporting).toMatchObject({ configured: true });
+  });
+
+  it('cambiare il codice pilota azzera il rifiuto', async () => {
+    const { svc } = await ready();
+    await svc.pilot.updateReporting((s) => { s.codeRejected = true; s.lastError = 'rejected'; });
+    await handleRequest(svc, { type: 'saveSettings', settings: { ...DEFAULT_SETTINGS } }, 'v', hooks());
+    expect((await svc.pilot.reportingStatus()).codeRejected).toBe(true);
+    await handleRequest(svc, { type: 'saveSettings', settings: { ...DEFAULT_SETTINGS, pilotCode: 'NUOVO-1234' } }, 'v', hooks());
+    expect(await svc.pilot.reportingStatus()).toMatchObject({ codeRejected: false, lastError: null });
   });
 });

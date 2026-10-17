@@ -1,3 +1,5 @@
+import type { UsageStats } from '@/core/usage';
+
 export type Portal = 'immobiliare' | 'idealista' | 'subito';
 export const PORTALS: Portal[] = ['immobiliare', 'idealista', 'subito'];
 export const PORTAL_SITES: Record<Portal, string> = { immobiliare: 'Immobiliare.it', idealista: 'Idealista.it', subito: 'Subito.it' };
@@ -198,6 +200,9 @@ export interface Diagnostics {
   counters: Record<string, number>;
   errors: { at: number; message: string }[];
   adapterWarning: Partial<Record<Portal, boolean>>;
+  /** Aggiunti dal router per il report copiato; assenti nel diagnostico salvato. */
+  usage?: UsageStats;
+  reporting?: ReportingInfo;
 }
 
 export interface ReportingStatus {
