@@ -120,7 +120,7 @@ Gli indici brevi (`result[3]`) e i percorsi dei campi (`price.value`) restano.
 **Momenti:**
 
 - allarme `report` con `periodInMinutes: 1440`, creato all'avvio se manca;
-- all'avvio del worker, se `lastSentAt` manca o ha più di 20 ore;
+- all'avvio del worker, se da più di 20 ore non c'è stato né un invio riuscito né un tentativo (`lastSentAt` e `lastAttemptAt`): Chrome riaccende il worker di continuo, e un tentativo fallito non deve ripetersi a ogni risveglio;
 - pulsante "Invia ora" (messaggio `sendReportNow`), che ignora `codeRejected` e la regola delle 20 ore.
 
 Due invii contemporanei (allarme e avvio) si evitano con un lucchetto in memoria; se il worker si riavvia nel mezzo, il peggio è un doppio invio, innocuo perché idempotente.

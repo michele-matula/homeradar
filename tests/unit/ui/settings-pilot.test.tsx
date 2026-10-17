@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { reportingLine } from '@/ui/sidepanel/PilotCard';
+import { PilotCard, reportingLine } from '@/ui/sidepanel/PilotCard';
 import { SettingsView } from '@/ui/sidepanel/SettingsView';
 import type { Api } from '@/ui/sidepanel/api';
 import { DEFAULT_SETTINGS, type ReportingInfo, type Settings } from '@/shared/types';
@@ -103,5 +103,14 @@ describe('impostazioni: pilota e feedback', () => {
     render(<SettingsView api={api({ pilotCode: 'ROSSI-7K2P' }, info({ configured: false }))} onSaved={vi.fn()} />);
     expect(await screen.findByText('Invio non configurato in questa versione', { selector: '.feedback__hint' })).toBeTruthy();
     expect((screen.getByLabelText('Il tuo messaggio') as HTMLTextAreaElement).disabled).toBe(true);
+  });
+});
+describe('PilotCard', () => {
+  it('il campo segue il codice salvato quando cambia altrove (es. importazione di un backup)', async () => {
+    const props = { api: api(), info: info(), onSettings: vi.fn(), onInfo: vi.fn(), onMessage: vi.fn() };
+    const { rerender } = render(<PilotCard {...props} settings={DEFAULT_SETTINGS} />);
+    expect((screen.getByLabelText('Codice pilota') as HTMLInputElement).value).toBe('');
+    rerender(<PilotCard {...props} settings={{ ...DEFAULT_SETTINGS, pilotCode: 'ROSSI-7K2P' }} />);
+    expect((screen.getByLabelText('Codice pilota') as HTMLInputElement).value).toBe('ROSSI-7K2P');
   });
 });

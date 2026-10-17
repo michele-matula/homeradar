@@ -97,9 +97,16 @@ export function createReporter(d: ReporterDeps): Reporter {
     if (!d.url || !settings.reportingEnabled || !settings.pilotCode || !(await d.onboardingAccepted())) return info();
     const before = await d.status();
     if (trigger !== 'manual' && before.codeRejected) return info();
-    if (trigger === 'startup' && before.lastSentAt != null && d.now() - before.lastSentAt <= REPORT_MIN_GAP_MS) return info();
+    // Chrome riaccende il worker di continuo: all'avvio si riprova solo se da 20 ore non c'è né un invio né un tentativo.
+    const lastTry = Math.max(before.lastSentAt ?? 0, before.lastAttemptAt ?? 0);
+    if (trigger === 'startup' && lastTry > 0 && d.now() - lastTry <= REPORT_MIN_GAP_MS) return info();
     const valid = UsageReportSchema.safeParse(await preview());
     if (!valid.success) {
+      const now = d.now();
+      await d.updateStatus((s) => {
+        s.lastAttemptAt = now;
+        s.lastError = 'invalid';
+      });
       await d.recordError(`Report non valido: ${valid.error.issues.map((i) => i.path.join('.')).join(', ')}`);
       return info();
     }

@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import type { UsageReport } from '@/shared/report-schema';
 import type { ReportingInfo, Settings } from '@/shared/types';
 import type { Api } from './api';
@@ -41,6 +41,8 @@ export function PilotCard({ api, settings, info, onSettings, onInfo, onMessage }
 }) {
   const ids = useId();
   const [code, setCode] = useState(settings.pilotCode);
+  // Il codice salvato può cambiare altrove (importazione di un backup): il campo lo segue.
+  useEffect(() => setCode(settings.pilotCode), [settings.pilotCode]);
   const [preview, setPreview] = useState<UsageReport | null>(null);
   const err = (e: unknown) => onMessage(`Errore: ${e instanceof Error ? e.message : String(e)}`);
   const configured = info?.configured ?? false;

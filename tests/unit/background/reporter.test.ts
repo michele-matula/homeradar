@@ -99,6 +99,25 @@ describe('reporter', () => {
     expect(t.fetchFn).toHaveBeenCalledTimes(1);
   });
 
+  it("all'avvio non ritenta dopo un tentativo fallito da meno di 20 ore", async () => {
+    const t = deps({ responses: [500, 500] });
+    await createReporter(t.d).sendReport('startup');
+    await createReporter(t.d).sendReport('startup');
+    expect(t.fetchFn).toHaveBeenCalledTimes(1);
+    t.setStatus({ lastAttemptAt: NOW - REPORT_MIN_GAP_MS - 1 });
+    await createReporter(t.d).sendReport('startup');
+    expect(t.fetchFn).toHaveBeenCalledTimes(2);
+  });
+
+  it('un report non valido in locale registra il tentativo e non riparte a ogni avvio', async () => {
+    const t = deps({ settings: { pilotCode: 'ab' } });
+    const info = await createReporter(t.d).sendReport('startup');
+    expect(info.status).toMatchObject({ lastAttemptAt: NOW, lastError: 'invalid' });
+    await createReporter(t.d).sendReport('startup');
+    expect(t.d.recordError).toHaveBeenCalledTimes(1);
+    expect(t.fetchFn).not.toHaveBeenCalled();
+  });
+
   it('due invii contemporanei fanno un solo POST', async () => {
     const t = deps();
     const r = createReporter(t.d);
