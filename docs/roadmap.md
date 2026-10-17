@@ -18,7 +18,7 @@ L'ordine conta: il punto 7 riusa il confronto per caratteristiche del punto 6.
 | 5 | Prezzo al m² rispetto alla zona | fatto | [#11](https://github.com/michele-matula/homeradar/pull/11) |
 | 6 | Stesso immobile su più portali | fatto | [#12](https://github.com/michele-matula/homeradar/pull/12) |
 | 7 | Ripubblicazioni | fatto | [#13](https://github.com/michele-matula/homeradar/pull/13) |
-| 8 | Misura del pilota: contatori d'uso e feedback | da fare | |
+| 8 | Misura del pilota: contatori d'uso e feedback | fatto | [#14](https://github.com/michele-matula/homeradar/pull/14) |
 
 ## 1. Backup e ripristino
 
