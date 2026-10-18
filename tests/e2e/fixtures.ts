@@ -12,7 +12,7 @@ export const test = base.extend<{ onboarded: boolean; context: BrowserContext; e
   // Di default l'informativa è confermata: i test sull'onboarding la lasciano da confermare.
   onboarded: [true, { option: true }],
   context: async ({ onboarded }, use) => {
-    const ext = path.resolve('.output/chrome-mv3');
+    const ext = path.resolve('.output-e2e/chrome-mv3');
     const context = await chromium.launchPersistentContext('', {
       channel: 'chromium',
       acceptDownloads: true,

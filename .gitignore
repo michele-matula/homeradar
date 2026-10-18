@@ -4,6 +4,7 @@
 # Dependencies & build output
 node_modules/
 .output/
+.output-e2e/
 .wxt/
 dist/
 coverage/
