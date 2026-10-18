@@ -314,3 +314,15 @@ describe('pageRead per il giro', () => {
     expect(send).not.toHaveBeenCalled();
   });
 });
+
+describe('revisione: pagina di verifica su Idealista', () => {
+  it('una pagina di verifica non chiude la ricerca come completa: manda solo il blocco', async () => {
+    document.body.innerHTML = '<h1>Ops! Al momento non siamo disponibili</h1>';
+    const send = fakeSend();
+    const url = 'https://www.idealista.it/vendita-case/treviglio-bergamo/?ordine=da-privati-asc';
+    const c = createController({ adapter: idealistaAdapter, send, root: document, getUrl: () => url });
+    await c.scan();
+    const reads = send.mock.calls.map(([r]) => r).filter((r) => r.type === 'pageRead');
+    expect(reads).toEqual([{ type: 'pageRead', report: expect.objectContaining({ blocked: true, notFound: false }) }]);
+  });
+});

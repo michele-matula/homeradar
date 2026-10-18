@@ -112,7 +112,7 @@ describe('ricerca', () => {
 
   it('pagina senza card (es. blocco anti-bot): nessun errore', () => {
     document.body.innerHTML = '<p>Ops! Al momento non siamo disponibili</p>';
-    expect(read()).toMatchObject({ observations: [], errors: [], page: { results: 0, lastPage: true } });
+    expect(read()).toEqual({ observations: [], errors: [] });
   });
 
   it('sulla pagina "più recenti" indica l\'ID più alto', () => {
@@ -191,5 +191,12 @@ describe('riassunto della pagina', () => {
       .toEqual({ results: 2, privates: 1, lastPage: false });
     expect(A.readDocument!(document, 'https://www.idealista.it/vendita-case/treviglio-bergamo/lista-2.htm?ordine=da-privati-asc').page)
       .toMatchObject({ lastPage: true });
+  });
+});
+
+describe('revisione: pagina senza elenco', () => {
+  it('nessun riassunto se manca il contenitore dei risultati', () => {
+    document.body.innerHTML = '<main><p>Pagina non trovata</p></main>';
+    expect(A.readDocument!(document, 'https://www.idealista.it/vendita-case/treviglio-bergamo/').page).toBeUndefined();
   });
 });

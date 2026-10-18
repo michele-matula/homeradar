@@ -19,6 +19,11 @@ export interface ControllerDeps {
   onOnboardingNeeded?: () => void;
 }
 
+/** Documento della pagina: root è il documento o un suo nodo. */
+function docOf(root: ParentNode): Document {
+  return (root as Node).ownerDocument ?? (root as Document);
+}
+
 export function createController({ adapter, send, root, getUrl, portalState = async () => 'active', onOnboardingNeeded }: ControllerDeps) {
   const evaluations = new Map<number, Evaluation>();
   /** ID di tutti gli annunci ricevuti, agenzie comprese. */
@@ -65,20 +70,23 @@ export function createController({ adapter, send, root, getUrl, portalState = as
       applyAll();
     }
     // Dopo ingest: il giro passa alla pagina successiva solo quando gli annunci di questa sono salvati.
+    // Una pagina di verifica o inesistente non è una ricerca vuota: al giro va solo il problema.
+    if (await checkProblem(docOf(root))) return;
     if (result.page) {
       await send({ type: 'pageRead', report: { portal: adapter.portal, url: getUrl(), ...result.page, blocked: false, notFound: false } });
     }
   }
 
   /** Pagina di ricerca senza dati perché il portale chiede una verifica o non trova la pagina: lo dice al giro. */
-  async function checkProblem(doc: Document): Promise<void> {
-    if (adapter.pageKind(getUrl()) !== 'search') return;
+  async function checkProblem(doc: Document): Promise<boolean> {
+    if (adapter.pageKind(getUrl()) !== 'search') return false;
     const problem = pageProblem(doc);
-    if (!problem) return;
+    if (!problem) return false;
     await send({
       type: 'pageRead',
       report: { portal: adapter.portal, url: getUrl(), results: 0, privates: 0, lastPage: true, blocked: problem === 'blocked', notFound: problem === 'notFound' },
     });
+    return true;
   }
 
   async function handle(kind: PayloadKind, url: string, payload: unknown): Promise<void> {

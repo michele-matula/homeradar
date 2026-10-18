@@ -10,7 +10,8 @@ export const idealistaAdapter: PortalAdapter = {
     if (kind === 'detail') return parseDetail(root, url);
     if (kind !== 'search') return { observations: [], errors: [] };
     const result = parseSearch(root);
-    result.page = {
+    // Senza l'elenco dei risultati (verifica di DataDome, pagina inesistente) la pagina non chiude la ricerca.
+    if (root.querySelector('.items-container')) result.page = {
       results: result.observations.length,
       privates: result.observations.filter((o) => o.sellerType === 'private').length,
       lastPage: !hasNextPage(root, url),
