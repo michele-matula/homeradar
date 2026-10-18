@@ -282,9 +282,9 @@ Gli annunci visti solo navigando a mano non hanno `sweepScope` e non vengono mai
 
 | Rischio | Mitigazione |
 |---|---|
-| DataDome blocca o mette captcha all'agente | Una scheda, pause casuali, alternanza dei portali, tetti, arresto al primo segnale; prova di ritmo in fase 0; rilascio graduale |
+| DataDome blocca o mette captcha all'agente | Una scheda, pause casuali, alternanza dei portali, tetti, arresto al primo segnale; prova di ritmo come prima attività del piano; rilascio graduale |
 | Contestazione legale dei portali | Avvio solo dal clic dell'agente, dati solo in locale, minimizzazione invariata; parere legale prima del lancio commerciale |
-| Chrome rallenta le finestre ridotte a icona | Verificato in fase 0; timeout generoso; in alternativa finestra normale non in primo piano |
+| Chrome rallenta le finestre ridotte a icona | Misurato nella prova di ritmo; timeout generoso; in alternativa finestra normale non in primo piano |
 | Slug dei comuni sbagliati | Regole dalla fase 0, test con casi difficili, avviso "comune non trovato" nell'esito |
 | Area troppo grande o provincia con molti privati: tetto sempre raggiunto | Esito "completato in parte" chiaro; "non più visto" non scatta per quelle ricerche; tetti rivisti con i dati del pilota |
 | Ricerca per provincia: città dell'annuncio scritta diversamente dal nome ISTAT | Confronto su testo normalizzato; casi visti in fase 0 coincidono ("Cassano d'Adda"); annunci non riconosciuti scartati, mai salvati |
