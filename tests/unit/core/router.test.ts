@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ONBOARDING_VERSION } from '@/core/onboarding';
 import { handleRequest } from '@/core/router';
-import { DEFAULT_SETTINGS } from '@/shared/types';
+import { DEFAULT_SETTINGS, type IngestOptions, type ListingObservation } from '@/shared/types';
 import { obs, setup } from './helpers';
 
 function hooks() {
@@ -13,6 +13,13 @@ function hooks() {
       sendReport: vi.fn(async () => ({ configured: true, status: { lastSentAt: null, lastAttemptAt: null, lastError: null, codeRejected: false }, queued: 0 })),
       sendFeedback: vi.fn(async () => 'sent' as const),
       flushFeedback: vi.fn(async () => {}),
+    },
+    sweep: {
+      intercept: vi.fn(async (): Promise<{ observations: ListingObservation[]; options: IngestOptions } | null> => null),
+      pageRead: vi.fn(async () => {}),
+      start: vi.fn(async () => ({ running: null, last: null })),
+      stop: vi.fn(async () => ({ running: null, last: null })),
+      status: vi.fn(async () => ({ running: null, last: null })),
     },
   };
 }
@@ -237,5 +244,30 @@ describe('handleRequest splitListing', () => {
     expect((await svc.pilot.reportingStatus()).codeRejected).toBe(true);
     await handleRequest(svc, { type: 'saveSettings', settings: { ...DEFAULT_SETTINGS, pilotCode: 'NUOVO-1234' } }, 'v', hooks());
     expect(await svc.pilot.reportingStatus()).toMatchObject({ codeRejected: false, lastError: null });
+  });
+
+  it('ingest dalla scheda del giro: salva solo ciò che il giro accetta, con le sue opzioni', async () => {
+    const { svc, db } = await ready();
+    const h = hooks();
+    const five = obs({ portalId: 5, url: 'https://www.immobiliare.it/annunci/5/' });
+    h.sweep.intercept = vi.fn(async () => ({ observations: [five], options: { sweepScope: 's1' } }));
+    await handleRequest(svc, { type: 'ingest', observations: [obs(), five] }, 'v', h, { tabId: 70 });
+    expect(h.sweep.intercept).toHaveBeenCalledWith(70, expect.any(Array));
+    expect(await db.listings.count()).toBe(1);
+    expect((await db.listings.get('immobiliare:5'))!.sweepScope).toBe('s1');
+  });
+
+  it("pageRead e comandi del giro passano all'orchestratore con la scheda", async () => {
+    const { svc } = await ready();
+    const h = hooks();
+    const report = { portal: 'immobiliare' as const, url: 'x', results: 1, privates: 1, lastPage: true, blocked: false, notFound: false };
+    await handleRequest(svc, { type: 'pageRead', report }, 'v', h, { tabId: 70 });
+    expect(h.sweep.pageRead).toHaveBeenCalledWith(70, report);
+    await handleRequest(svc, { type: 'startSweep' }, 'v', h);
+    await handleRequest(svc, { type: 'stopSweep' }, 'v', h);
+    await handleRequest(svc, { type: 'getSweepStatus' }, 'v', h);
+    expect(h.sweep.start).toHaveBeenCalled();
+    expect(h.sweep.stop).toHaveBeenCalled();
+    expect(h.sweep.status).toHaveBeenCalled();
   });
 });

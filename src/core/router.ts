@@ -2,7 +2,17 @@ import type { Reporter } from '@/background/reporter';
 import { needsOnboarding } from '@/core/onboarding';
 import type { LeadService } from '@/core/service';
 import type { Request } from '@/shared/messages';
-import { PORTALS, type PortalState } from '@/shared/types';
+import { PORTALS, type IngestOptions, type ListingObservation, type PageReport, type PortalState, type SweepStatus } from '@/shared/types';
+
+/** Il giro delle ricerche, visto dal router (orchestratore nel background). */
+export interface SweepHooks {
+  /** Scheda del giro: annunci da salvare e opzioni di ingest; null per le altre schede. */
+  intercept(tabId: number | undefined, observations: ListingObservation[]): Promise<{ observations: ListingObservation[]; options: IngestOptions } | null>;
+  pageRead(tabId: number | undefined, report: PageReport): Promise<void>;
+  start(): Promise<SweepStatus>;
+  stop(): Promise<SweepStatus>;
+  status(): Promise<SweepStatus>;
+}
 
 export interface RouterHooks {
   setWarning(on: boolean): void;
@@ -15,6 +25,8 @@ export interface RouterHooks {
   openOnboarding(): Promise<void>;
   /** Invio dei report e dei feedback del pilota. */
   reporter: Reporter;
+  /** Giro delle ricerche. */
+  sweep: SweepHooks;
 }
 
 /** Finché l'informativa non è confermata non si legge né si salva nulla dai portali. */
@@ -25,7 +37,9 @@ async function awaitingOnboarding(service: LeadService): Promise<boolean> {
 
 const PAYLOAD_COUNTERS = { api: 'apiPayloads', 'next-data': 'nextDataPayloads', dom: 'domScans' } as const;
 
-export async function handleRequest(service: LeadService, req: Request, version: string, hooks: RouterHooks): Promise<unknown> {
+export async function handleRequest(
+  service: LeadService, req: Request, version: string, hooks: RouterHooks, ctx: { tabId?: number } = {},
+): Promise<unknown> {
   switch (req.type) {
     case 'ingest': {
       if (await awaitingOnboarding(service)) return [];
@@ -34,8 +48,12 @@ export async function handleRequest(service: LeadService, req: Request, version:
       const observations = req.observations.filter((o) => enabled[o.portal]);
       if (!observations.length) return [];
       const hint = req.calibrationHint && enabled[req.calibrationHint.portal] ? req.calibrationHint : undefined;
-      const evaluations = await service.ingest(observations, hint);
-      await service.bumpCounter('ingested', observations.length);
+      // Pagine del giro: solo le categorie della ricerca, con la ricerca che le ha lette.
+      const sweep = await hooks.sweep.intercept(ctx.tabId, observations);
+      const toSave = sweep ? sweep.observations : observations;
+      if (!toSave.length) return [];
+      const evaluations = await service.ingest(toSave, hint, sweep?.options);
+      await service.bumpCounter('ingested', toSave.length);
       await service.trackUsage({ kind: 'browsing' });
       if (evaluations.length) hooks.leadsChanged();
       return evaluations;
@@ -97,7 +115,14 @@ export async function handleRequest(service: LeadService, req: Request, version:
       return null;
     }
     case 'pageRead':
+      await hooks.sweep.pageRead(ctx.tabId, req.report);
       return null;
+    case 'startSweep':
+      return hooks.sweep.start();
+    case 'stopSweep':
+      return hooks.sweep.stop();
+    case 'getSweepStatus':
+      return hooks.sweep.status();
     case 'fallbackShown':
       await service.bumpCounter('fallbackShown');
       return null;

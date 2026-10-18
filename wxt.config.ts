@@ -12,7 +12,7 @@ export default defineConfig({
     return {
       name: 'HomeRadar',
       description: 'Evidenzia gli annunci di privati maturi su Immobiliare.it, Idealista.it e Subito.it',
-      permissions: ['sidePanel', 'alarms', 'clipboardWrite', 'downloads', 'offscreen'],
+      permissions: ['sidePanel', 'alarms', 'clipboardWrite', 'downloads', 'offscreen', 'storage'],
       host_permissions: [...PORTAL_HOSTS, ...(url ? [`${new URL(url).origin}/*`] : [])],
       action: { default_title: 'HomeRadar' },
     };
