@@ -54,7 +54,8 @@ export async function handleRequest(
       if (!toSave.length) return [];
       const evaluations = await service.ingest(toSave, hint, sweep?.options);
       await service.bumpCounter('ingested', toSave.length);
-      await service.trackUsage({ kind: 'browsing' });
+      // I giorni di navigazione misurano l'uso a mano: le pagine del giro hanno i loro contatori.
+      if (!sweep) await service.trackUsage({ kind: 'browsing' });
       if (evaluations.length) hooks.leadsChanged();
       return evaluations;
     }

@@ -270,4 +270,12 @@ describe('handleRequest splitListing', () => {
     expect(h.sweep.stop).toHaveBeenCalled();
     expect(h.sweep.status).toHaveBeenCalled();
   });
+
+  it('revisione: le pagine del giro non contano come giorni di navigazione', async () => {
+    const { svc } = await ready();
+    const h = hooks();
+    h.sweep.intercept = vi.fn(async (_t, observations: ListingObservation[]) => ({ observations, options: { sweepScope: 's1' } }));
+    await handleRequest(svc, { type: 'ingest', observations: [obs()] }, 'v', h, { tabId: 70 });
+    expect((await svc.pilot.usage()).browsingDays).toEqual([]);
+  });
 });
