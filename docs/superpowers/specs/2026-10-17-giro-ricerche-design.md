@@ -109,6 +109,8 @@ Ricerche per portale, solo per le categorie scelte dall'agente:
 | Idealista | `vendita-case`, per comune | `vendita-negozi`, `vendita-uffici`, per provincia | `vendita-garage`, per provincia | `vendita-terreni`, per provincia |
 | Subito | una ricerca `immobili` per comune per tutte le categorie | | | |
 
+**Decisione del 2026-10-18 (dopo la prova di ritmo), sostituisce la tabella sopra:** le ricerche per provincia leggono pagine intere di privati di altri comuni. Tutte le ricerche sono **per comune**. Di default la zona ha solo la categoria **Residenziale**; Commerciale, Terreni e Box si attivano nelle impostazioni, con un avviso sulla durata stimata (circa 14 s a ricerca). Immobiliare: `vendita-case` per le case; `vendita-negozi`, `vendita-uffici`, `vendita-capannoni` per il commerciale; `vendita-garage`; `vendita-terreni`. Idealista: `vendita-case`; `vendita-negozi`, `vendita-uffici`; `vendita-garage`; `vendita-terreni`. Subito: una ricerca `immobili` per comune che tiene **tutte** le categorie, senza pagine in più. Non servono più `byProvince` né il filtro per comune prima di `ingest`. Slug di provincia: tabella delle eccezioni (Monza e Brianza = `monza-brianza`, verificato).
+
 URL (verificati in fase 0):
 
 - **Immobiliare:** `https://www.immobiliare.it/vendita-<cat>/<slug-comune>/?criterio=privateFirst`, pagine `&pag=<n>`; per provincia `/<slug-provincia>-provincia/` (es. `bergamo-provincia`).
