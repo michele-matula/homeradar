@@ -6,6 +6,11 @@ export const PORTAL_SITES: Record<Portal, string> = { immobiliare: 'Immobiliare.
 export const PORTAL_TAGS: Record<Portal, string> = { immobiliare: 'Immobiliare', idealista: 'Idealista', subito: 'Subito' };
 export type SellerType = 'private' | 'agency' | 'constructor' | 'unknown';
 export type PageKind = 'search' | 'detail' | 'other';
+
+/** Categoria normalizzata dell'immobile: il confronto con il mercato e lo stesso immobile valgono solo dentro una categoria. */
+export type PropertyCategory = 'residential' | 'commercial' | 'land' | 'garage';
+export const PROPERTY_CATEGORIES: PropertyCategory[] = ['residential', 'commercial', 'land', 'garage'];
+export const CATEGORY_LABELS: Record<PropertyCategory, string> = { residential: 'Residenziale', commercial: 'Commerciale', land: 'Terreni', garage: 'Box' };
 export type ObservationSource = 'search' | 'detail';
 
 export const DAY_MS = 86_400_000;
@@ -39,6 +44,8 @@ export interface ListingObservation {
   city: string | null;
   zone: string | null;
   typology: string | null;
+  /** Categoria riconosciuta dalla tipologia; null se la tipologia non la dice. */
+  category: PropertyCategory | null;
   surfaceM2: number | null;
   rooms: number | null;
   price: number | null;

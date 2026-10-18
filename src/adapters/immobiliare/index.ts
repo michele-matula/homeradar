@@ -1,4 +1,5 @@
 import type { PayloadKind, PortalAdapter } from '@/adapters/types';
+import { categoryFromTypology } from '@/core/category';
 import type {
   ListingObservation, ObservationSource, ParseResult, PriceDrop, SellerType,
 } from '@/shared/types';
@@ -38,6 +39,7 @@ function toObservation(re: RealEstate, url: string, source: ObservationSource): 
     city: loc?.city ?? null,
     zone: loc?.microzone ?? loc?.macrozone ?? null,
     typology: p.typology?.name ?? null,
+    category: categoryFromTypology(p.typology?.name),
     surfaceM2: p.surface ? parseSurface(p.surface) : null,
     rooms: p.rooms ? parseRooms(p.rooms) : null,
     price,

@@ -31,6 +31,13 @@ describe('urls', () => {
 });
 
 describe('parseTitle', () => {
+  it('riconosce i locali senza indirizzo: "Locale a <comune>"', () => {
+    expect(parseTitle("Locale a Cassano d'Adda")).toEqual({ typology: 'Locale', address: null, zone: null, city: "Cassano d'Adda" });
+  });
+  it('preferisce sempre la forma "in": "Villa a schiera in Via X, Comune"', () => {
+    expect(parseTitle('Villa a schiera in Via Roma, 3, Treviglio')).toMatchObject({ typology: 'Villa a schiera', city: 'Treviglio' });
+  });
+
   it('separa tipologia, indirizzo con civico, zona e città', () => {
     expect(parseTitle('Trilocale in Via Rogoredo, 27, Rogoredo - Santa Giulia, Milano')).toEqual({
       typology: 'Trilocale', address: 'Via Rogoredo, 27', zone: 'Rogoredo - Santa Giulia', city: 'Milano',
@@ -61,7 +68,7 @@ describe('ricerca', () => {
       observations: [{
         portal: 'idealista', portalId: 37118651, url: 'https://www.idealista.it/immobile/37118651/',
         title: 'Quadrilocale in Via Esempio, 1, Precotto, Milano', address: 'Via Esempio, 1', city: 'Milano', zone: 'Precotto',
-        typology: 'Quadrilocale', surfaceM2: 101, rooms: 4, price: 245000, sellerType: 'private', portalCreatedAt: null,
+        typology: 'Quadrilocale', category: 'residential', surfaceM2: 101, rooms: 4, price: 245000, sellerType: 'private', portalCreatedAt: null,
         lastDrop: null, source: 'search',
       }],
     });
@@ -128,7 +135,7 @@ describe('scheda', () => {
       observations: [{
         portal: 'idealista', portalId: 37118651, url: DETAIL_URL,
         title: 'Bilocale in Via Esempio, 2, Mercalli - Quadronno, Milano', address: 'Via Esempio, 2', city: 'Milano',
-        zone: 'Mercalli - Quadronno', typology: 'Bilocale', surfaceM2: 52, rooms: 2, price: 445000, sellerType: 'private',
+        zone: 'Mercalli - Quadronno', typology: 'Bilocale', category: 'residential', surfaceM2: 52, rooms: 2, price: 445000, sellerType: 'private',
         portalCreatedAt: null, lastDrop: { fromPrice: 450000, toPrice: 445000, percent: 1.1, date: null }, source: 'detail',
       }],
     });

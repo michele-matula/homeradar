@@ -27,7 +27,7 @@ describe('immobiliareAdapter.parseNextData — ricerca', () => {
         address: 'Via Esempio',
         city: 'Milano',
         zone: 'Precotto',
-        typology: 'Appartamento',
+        typology: 'Appartamento', category: 'residential',
         surfaceM2: 62,
         rooms: 2,
         price: 235000,

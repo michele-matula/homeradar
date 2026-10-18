@@ -1,5 +1,6 @@
 import type { z } from 'zod';
 import type { PayloadKind, PortalAdapter } from '@/adapters/types';
+import { categoryFromTypology } from '@/core/category';
 import type { ListingObservation, ParseResult, SellerType } from '@/shared/types';
 import { ApiAdSchema, NextAdSchema, type CommonAd } from './schemas';
 import { isInterceptedUrl, listingIdFromHref, pageKind } from './urls';
@@ -65,6 +66,7 @@ function toObservation({ ad, typology, features }: Normalized, portalId: number)
     city: ad.geo?.town?.value ?? null,
     zone: ad.geo?.zone?.value ?? null,
     typology,
+    category: categoryFromTypology(typology),
     surfaceM2: intOf(features['/size']),
     rooms: intOf(features['/room']),
     price: intOf(features['/price']),

@@ -8,7 +8,7 @@ describe('parseNextData', () => {
     expect(r.errors).toEqual([]);
     expect(r.observations).toEqual([{
       portal: 'subito', portalId: 664390119, url: 'https://www.subito.it/appartamenti/annuncio-664390119.htm',
-      title: 'Bilocale in Via Esempio 1', address: null, city: 'Milano', zone: 'Città Studi', typology: 'Appartamenti',
+      title: 'Bilocale in Via Esempio 1', address: null, city: 'Milano', zone: 'Città Studi', typology: 'Appartamenti', category: 'residential',
       surfaceM2: 65, rooms: 2, price: 250000, sellerType: 'private', portalCreatedAt: null, lastDrop: null, source: 'search',
     }]);
   });
