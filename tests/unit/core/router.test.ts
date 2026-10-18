@@ -15,7 +15,7 @@ function hooks() {
       flushFeedback: vi.fn(async () => {}),
     },
     sweep: {
-      intercept: vi.fn(async (): Promise<{ observations: ListingObservation[]; options: IngestOptions } | null> => null),
+      intercept: vi.fn(async (_tabId?: number, _observations?: ListingObservation[], _url?: string): Promise<{ observations: ListingObservation[]; options: IngestOptions } | null> => null),
       pageRead: vi.fn(async () => {}),
       start: vi.fn(async () => ({ running: null, last: null })),
       stop: vi.fn(async () => ({ running: null, last: null })),
@@ -274,7 +274,7 @@ describe('handleRequest splitListing', () => {
   it('revisione: le pagine del giro non contano come giorni di navigazione', async () => {
     const { svc } = await ready();
     const h = hooks();
-    h.sweep.intercept = vi.fn(async (_t, observations: ListingObservation[]) => ({ observations, options: { sweepScope: 's1' } }));
+    h.sweep.intercept.mockImplementation(async (_t, observations) => ({ observations: observations!, options: { sweepScope: 's1' } }));
     await handleRequest(svc, { type: 'ingest', observations: [obs()] }, 'v', h, { tabId: 70 });
     expect((await svc.pilot.usage()).browsingDays).toEqual([]);
   });
