@@ -75,9 +75,13 @@ export default defineBackground(() => {
       const h = setInterval(() => void browser.runtime.getPlatformInfo(), 20_000);
       return () => clearInterval(h);
     },
+    // Finestra vuota, poi la prima pagina: così anche la prima è una navigazione della scheda come le altre
+    // (e nei test end-to-end passa dalle pagine finte invece che dal sito vero).
     async openWindow(url) {
-      const w = await browser.windows.create({ url, state: 'minimized', focused: false, type: 'normal' });
-      return { windowId: w!.id!, tabId: w!.tabs![0]!.id! };
+      const w = await browser.windows.create({ url: 'about:blank', state: 'minimized', focused: false, type: 'normal' });
+      const ids = { windowId: w!.id!, tabId: w!.tabs![0]!.id! };
+      await browser.tabs.update(ids.tabId, { url });
+      return ids;
     },
     navigate: async (tabId, url) => {
       await browser.tabs.update(tabId, { url });
