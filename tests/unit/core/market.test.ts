@@ -126,3 +126,16 @@ describe('testi', () => {
     expect(marketSummary(cityCmp)).toBe('Bologna, 12 annunci, 3.100 €/m²');
   });
 });
+
+describe('compareToMarket per categoria', () => {
+  it('confronta solo annunci della stessa categoria', () => {
+    const lead = rec(3300);
+    const all = [...many([3000, 3000, 3000, 3000, 3000, 3000]), ...many([1000, 1000, 1000, 1000, 1000, 1000], { category: 'commercial' }), lead];
+    expect(compareToMarket(all).get(lead.key)!.medianPerM2).toBe(3000);
+  });
+
+  it('nessun confronto per box e terreni', () => {
+    expect(compareToMarket([...many([1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000], { category: 'garage' })]).size).toBe(0);
+    expect(compareToMarket([...many([1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000], { category: 'land' })]).size).toBe(0);
+  });
+});

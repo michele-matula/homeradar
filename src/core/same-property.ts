@@ -68,6 +68,7 @@ function sameTexts(x: Candidate, y: Candidate): boolean {
 
 function compatible(x: Candidate, y: Candidate): boolean {
   return (
+    x.listing.category === y.listing.category &&
     x.listing.portal !== y.listing.portal &&
     close(x.m2, y.m2, SURFACE_TOLERANCE_PERCENT, SURFACE_TOLERANCE_M2) &&
     close(x.price, y.price, PRICE_TOLERANCE_PERCENT) &&
@@ -93,6 +94,7 @@ function isRepost(o: Candidate, n: Candidate): boolean {
   const b = n.listing;
   return (
     a.portal === b.portal &&
+    a.category === b.category &&
     b.portalId > a.portalId &&
     appearedAfter(a, b) &&
     n.price * 100 >= o.price * (100 - REPOST_MAX_DROP_PERCENT) &&

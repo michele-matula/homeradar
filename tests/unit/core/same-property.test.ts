@@ -225,3 +225,9 @@ describe('groupListings: ripubblicazioni', () => {
     expect(groupListings([...list].reverse(), [])).toEqual(groupListings(list, []));
   });
 });
+
+describe('groupListings per categoria', () => {
+  it('non unisce annunci di categorie diverse', () => {
+    expect(keys([rec('immobiliare', 1, { category: 'garage' }), rec('idealista', 2, { category: 'commercial' })], [])).toEqual([]);
+  });
+});
