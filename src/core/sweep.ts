@@ -192,3 +192,18 @@ export function progressOf(s: SweepState, newCount: number): SweepProgress {
     drops: s.drops.length,
   };
 }
+
+/**
+ * La pagina letta è quella chiesta: stesso percorso (senza la barra finale) e gli stessi valori per i parametri dell'URL
+ * chiesto; il portale può aggiungerne altri. Un percorso diverso è un reindirizzamento (comune non riconosciuto).
+ */
+export function samePage(expected: string, actual: string): boolean {
+  try {
+    const e = new URL(expected);
+    const a = new URL(actual);
+    const path = (u: URL) => u.pathname.replace(/\/$/, '');
+    return e.host === a.host && path(e) === path(a) && [...e.searchParams].every(([k, v]) => a.searchParams.get(k) === v);
+  } catch {
+    return false;
+  }
+}

@@ -1,6 +1,6 @@
 import { acceptObservation, searchCategory } from '@/core/searches';
 import {
-  beginStep, createSweep, finishSweep, markSeen, nextStep, onPageRead, onTimeout, PAGE_TIMEOUT_MS, pauseMs, progressOf, skipDisabled, stepUrl,
+  beginStep, createSweep, finishSweep, markSeen, nextStep, onPageRead, onTimeout, PAGE_TIMEOUT_MS, pauseMs, progressOf, samePage, skipDisabled, stepUrl,
   stopSweep, type SweepState,
 } from '@/core/sweep';
 import type { IngestOptions, ListingObservation, PageReport, Portal, SearchSpec, SweepResult, SweepStatus } from '@/shared/types';
@@ -15,6 +15,9 @@ export interface RunnerState {
   tabId: number;
   /** Una pagina è in caricamento e si aspetta il suo pageRead. */
   awaiting: boolean;
+  /** URL della pagina in caricamento e di quella prima: un messaggio di un'altra pagina non vale. */
+  expectedUrl: string;
+  previousUrl: string | null;
 }
 
 export interface SweepRunnerDeps {
@@ -78,10 +81,12 @@ export function createSweepRunner(d: SweepRunnerDeps) {
     if (!st) return;
     st.sweep = beginStep(st.sweep, index);
     st.awaiting = true;
+    st.previousUrl = st.expectedUrl;
+    st.expectedUrl = stepUrl(st.sweep, index);
     await save();
     armTimeout();
     try {
-      await d.navigate(st.tabId, stepUrl(st.sweep, index));
+      await d.navigate(st.tabId, st.expectedUrl);
     } catch {
       // Scheda chiusa o non navigabile: il timeout chiude la ricerca.
     }
@@ -132,8 +137,9 @@ export function createSweepRunner(d: SweepRunnerDeps) {
       let sweep = createSweep(specs, d.now(), d.uuid());
       const index = nextStep(sweep)!;
       sweep = beginStep(sweep, index);
-      const { windowId, tabId } = await d.openWindow(stepUrl(sweep, index));
-      st = { sweep, windowId, tabId, awaiting: true };
+      const expectedUrl = stepUrl(sweep, index);
+      const { windowId, tabId } = await d.openWindow(expectedUrl);
+      st = { sweep, windowId, tabId, awaiting: true, expectedUrl, previousUrl: null };
       stopKeepAlive = d.keepAlive();
       await save();
       armTimeout();
@@ -153,6 +159,12 @@ export function createSweepRunner(d: SweepRunnerDeps) {
     pageRead: (tabId: number | undefined, report: PageReport) => serial(async () => {
       const s = await load();
       if (!s || tabId !== s.tabId || !s.awaiting) return;
+      if (!samePage(s.expectedUrl, report.url)) {
+        // Messaggio in ritardo della pagina precedente: si aspetta ancora quella giusta.
+        if (s.previousUrl && samePage(s.previousUrl, report.url)) return;
+        // Il portale ha reindirizzato altrove (comune non riconosciuto): la ricerca non è stata trovata.
+        report = { ...report, notFound: !report.blocked };
+      }
       clearTimer();
       s.awaiting = false;
       s.sweep = onPageRead(s.sweep, report);
@@ -160,12 +172,12 @@ export function createSweepRunner(d: SweepRunnerDeps) {
       await advance();
     }),
 
-    intercept: (tabId: number | undefined, observations: ListingObservation[]) =>
+    intercept: (tabId: number | undefined, observations: ListingObservation[], url?: string) =>
       serial(async (): Promise<{ observations: ListingObservation[]; options: IngestOptions } | null> => {
         const s = await load();
         if (!s || tabId !== s.tabId) return null;
         // Dalla scheda del giro, fuori da una pagina attesa, non si salva nulla: potrebbe essere di un comune non scelto.
-        if (s.sweep.current == null || !s.awaiting) return { observations: [], options: {} };
+        if (s.sweep.current == null || !s.awaiting || (url != null && !samePage(s.expectedUrl, url))) return { observations: [], options: {} };
         const spec = s.sweep.runs[s.sweep.current]!.spec;
         const accepted = observations.filter((o) => acceptObservation(spec, o));
         s.sweep = markSeen(s.sweep, accepted);

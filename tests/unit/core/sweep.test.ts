@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   beginStep, buildResult, completeScopes, createSweep, finishSweep, MAX_PAGES_PER_PORTAL, MAX_PAGES_PER_SEARCH, markSeen, nextStep,
-  onPageRead, onTimeout, pauseMs, progressOf, skipDisabled, stepUrl, stopSweep, type SweepState,
+  onPageRead, onTimeout, pauseMs, progressOf, samePage, skipDisabled, stepUrl, stopSweep, type SweepState,
 } from '@/core/sweep';
 import type { PageReport, Portal, SearchSpec } from '@/shared/types';
 import { obs } from './helpers';
@@ -153,5 +153,16 @@ describe('revisione: pagine lette con errori', () => {
     s = onPageRead(step(s), report('immobiliare', { results: 25, privates: 3, parseErrors: 1 }));
     expect(s.runs.map((r) => r.outcome)).toEqual(['error', 'error', 'skipped']);
     expect(s.halted.immobiliare).toBe('error');
+  });
+});
+
+describe('revisione: samePage', () => {
+  it('stesso percorso e i parametri chiesti; parametri in più ammessi', () => {
+    expect(samePage(IMM.url, IMM.url)).toBe(true);
+    expect(samePage(`${IMM.url}&pag=2`, `${IMM.url}&pag=2&utm=x`)).toBe(true);
+    expect(samePage(`${IMM.url}&pag=2`, IMM.url)).toBe(false);
+    expect(samePage(IMM.url, 'https://www.immobiliare.it/vendita-case/treviglio?criterio=privateFirst')).toBe(true);
+    expect(samePage(IMM.url, 'https://www.immobiliare.it/vendita-case/bergamo-provincia/?criterio=privateFirst')).toBe(false);
+    expect(samePage(IMM.url, 'non è un url')).toBe(false);
   });
 });

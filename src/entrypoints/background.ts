@@ -187,7 +187,7 @@ export default defineBackground(() => {
   browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     const type = (msg as { type?: unknown } | undefined)?.type;
     if (typeof type !== 'string' || type === LEADS_CHANGED || type === ONBOARDING_CHANGED || type === SWEEP_CHANGED || isOffscreenRequest(msg)) return false;
-    handleRequest(service, msg as Request, version, hooks, { tabId: sender.tab?.id }).then(
+    handleRequest(service, msg as Request, version, hooks, { tabId: sender.tab?.id, url: sender.url }).then(
       (data) => sendResponse({ ok: true, data }),
       (err: unknown) => sendResponse({ ok: false, error: err instanceof Error ? err.message : String(err) }),
     );

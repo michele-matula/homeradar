@@ -7,7 +7,7 @@ import { PORTALS, type IngestOptions, type ListingObservation, type PageReport, 
 /** Il giro delle ricerche, visto dal router (orchestratore nel background). */
 export interface SweepHooks {
   /** Scheda del giro: annunci da salvare e opzioni di ingest; null per le altre schede. */
-  intercept(tabId: number | undefined, observations: ListingObservation[]): Promise<{ observations: ListingObservation[]; options: IngestOptions } | null>;
+  intercept(tabId: number | undefined, observations: ListingObservation[], url?: string): Promise<{ observations: ListingObservation[]; options: IngestOptions } | null>;
   pageRead(tabId: number | undefined, report: PageReport): Promise<void>;
   start(): Promise<SweepStatus>;
   stop(): Promise<SweepStatus>;
@@ -38,7 +38,7 @@ async function awaitingOnboarding(service: LeadService): Promise<boolean> {
 const PAYLOAD_COUNTERS = { api: 'apiPayloads', 'next-data': 'nextDataPayloads', dom: 'domScans' } as const;
 
 export async function handleRequest(
-  service: LeadService, req: Request, version: string, hooks: RouterHooks, ctx: { tabId?: number } = {},
+  service: LeadService, req: Request, version: string, hooks: RouterHooks, ctx: { tabId?: number; url?: string } = {},
 ): Promise<unknown> {
   switch (req.type) {
     case 'ingest': {
@@ -49,7 +49,7 @@ export async function handleRequest(
       if (!observations.length) return [];
       const hint = req.calibrationHint && enabled[req.calibrationHint.portal] ? req.calibrationHint : undefined;
       // Pagine del giro: solo le categorie della ricerca, con la ricerca che le ha lette.
-      const sweep = await hooks.sweep.intercept(ctx.tabId, observations);
+      const sweep = await hooks.sweep.intercept(ctx.tabId, observations, ctx.url);
       const toSave = sweep ? sweep.observations : observations;
       if (!toSave.length) return [];
       const evaluations = await service.ingest(toSave, hint, sweep?.options);

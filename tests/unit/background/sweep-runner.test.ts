@@ -13,7 +13,7 @@ const SUB: SearchSpec = {
   url: 'https://www.subito.it/annunci-lombardia/vendita/immobili/milano/cassano-d-adda/?advt=0',
 };
 const page = (portal: PageReport['portal'], o: Partial<PageReport> = {}): PageReport => ({
-  portal, url: 'x', results: 3, privates: 1, lastPage: true, blocked: false, notFound: false, parseErrors: 0, ...o,
+  portal, url: portal === 'immobiliare' ? IMM.url : SUB.url, results: 3, privates: 1, lastPage: true, blocked: false, notFound: false, parseErrors: 0, ...o,
 });
 
 function harness(o: Partial<SweepRunnerDeps> = {}) {
@@ -124,5 +124,25 @@ describe('sweep runner', () => {
     await restarted.recover();
     expect(c.finished[0]!.status).toBe('interrupted');
     expect(c.deps.closeWindow).toHaveBeenCalledWith(7);
+  });
+
+  it("revisione: un reindirizzamento a un'altra pagina chiude la ricerca come non trovata", async () => {
+    const h = harness();
+    await h.runner.start();
+    await h.runner.pageRead(70, page('immobiliare', { url: 'https://www.immobiliare.it/vendita-negozi/milano-provincia/' }));
+    expect(h.stored()!.sweep.runs[0]!.outcome).toBe('notFound');
+  });
+
+  it('revisione: un messaggio in ritardo della pagina precedente non vale per la successiva', async () => {
+    const h = harness();
+    await h.runner.start();
+    await h.runner.pageRead(70, page('immobiliare'));
+    await h.fire(); // pausa → naviga su Subito
+    await h.runner.pageRead(70, page('immobiliare'));
+    expect(await h.runner.intercept(70, [obs()], IMM.url)).toEqual({ observations: [], options: {} });
+    expect(h.stored()!.awaiting).toBe(true);
+    expect(h.stored()!.sweep.runs[1]!.outcome).toBe('pending');
+    const ok = await h.runner.intercept(70, [obs({ category: 'commercial' })], SUB.url);
+    expect(ok!.observations).toHaveLength(1);
   });
 });

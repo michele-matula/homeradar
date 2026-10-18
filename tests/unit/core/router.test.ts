@@ -251,8 +251,8 @@ describe('handleRequest splitListing', () => {
     const h = hooks();
     const five = obs({ portalId: 5, url: 'https://www.immobiliare.it/annunci/5/' });
     h.sweep.intercept = vi.fn(async () => ({ observations: [five], options: { sweepScope: 's1' } }));
-    await handleRequest(svc, { type: 'ingest', observations: [obs(), five] }, 'v', h, { tabId: 70 });
-    expect(h.sweep.intercept).toHaveBeenCalledWith(70, expect.any(Array));
+    await handleRequest(svc, { type: 'ingest', observations: [obs(), five] }, 'v', h, { tabId: 70, url: 'https://www.immobiliare.it/vendita-case/x/' });
+    expect(h.sweep.intercept).toHaveBeenCalledWith(70, expect.any(Array), 'https://www.immobiliare.it/vendita-case/x/');
     expect(await db.listings.count()).toBe(1);
     expect((await db.listings.get('immobiliare:5'))!.sweepScope).toBe('s1');
   });
