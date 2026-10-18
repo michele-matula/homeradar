@@ -33,6 +33,44 @@ export interface SearchSpec {
   url: string;
 }
 
+export type SweepOutcome = 'completed' | 'partial' | 'stopped' | 'interrupted';
+export type PortalSweepOutcome = 'complete' | 'capped' | 'blocked' | 'error' | 'skipped';
+
+export interface PortalSweepStats {
+  pages: number;
+  privates: number;
+  outcome: PortalSweepOutcome;
+}
+
+/** Esito dell'ultimo giro, in `meta.sweep` (fuori dal backup). */
+export interface SweepResult {
+  startedAt: number;
+  finishedAt: number;
+  outcome: SweepOutcome;
+  portals: Partial<Record<Portal, PortalSweepStats>>;
+  /** Ricerche che il portale non riconosce: "Treviglio · Case (Idealista)". */
+  notFound: string[];
+  newCount: number;
+  drops: number;
+  missing: number;
+}
+
+/** Avanzamento del giro in corso, per il pannello. */
+export interface SweepProgress {
+  startedAt: number;
+  total: number;
+  done: number;
+  current: string | null;
+  portals: Partial<Record<Portal, { pages: number; privates: number }>>;
+  newCount: number;
+  drops: number;
+}
+
+export interface SweepStatus {
+  running: SweepProgress | null;
+  last: SweepResult | null;
+}
+
 /** Zona di lavoro: dove e cosa cerca il giro delle ricerche. */
 export interface SearchArea {
   comuni: ComuneRef[];
