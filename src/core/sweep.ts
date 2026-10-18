@@ -102,6 +102,14 @@ export function onPageRead(s: SweepState, r: PageReport): SweepState {
   if (r.notFound) return set({ outcome: 'notFound' });
   const run = s.runs[index]!;
   const pages = run.pages + 1;
+  // Annunci non letti (il portale ha cambiato struttura?): la ricerca non è completa, come per un timeout.
+  if (r.parseErrors > 0) {
+    const errors = (s.errorsInRow[portal] ?? 0) + 1;
+    const next: SweepState = {
+      ...set({ pages, privates: run.privates + r.privates, outcome: 'error' }), errorsInRow: { ...s.errorsInRow, [portal]: errors },
+    };
+    return errors >= 2 ? halt(next, portal, 'error') : next;
+  }
   const outcome: SearchOutcome = isLastPage(portal, r) ? 'complete' : pages >= MAX_PAGES_PER_SEARCH ? 'capped' : 'pending';
   const next = set({ pages, privates: run.privates + r.privates, outcome });
   return portalPages(next, portal) >= MAX_PAGES_PER_PORTAL ? halt(next, portal, 'capped') : next;

@@ -13,7 +13,7 @@ const IMM = spec('immobiliare', 'immobiliare|comune:016219|case', 'https://www.i
 const IDE = spec('idealista', 'idealista|comune:016219|case', 'https://www.idealista.it/vendita-case/treviglio-bergamo/?ordine=da-privati-asc');
 const SUB = spec('subito', 'subito|comune:016219|immobili', 'https://www.subito.it/annunci-lombardia/vendita/immobili/bergamo/treviglio/?advt=0');
 const report = (portal: Portal, o: Partial<PageReport> = {}): PageReport => ({
-  portal, url: 'x', results: 25, privates: 25, lastPage: false, blocked: false, notFound: false, ...o,
+  portal, url: 'x', results: 25, privates: 25, lastPage: false, blocked: false, notFound: false, parseErrors: 0, ...o,
 });
 /** Avanza: sceglie il passo e lo marca in corso. */
 const step = (s: SweepState) => beginStep(s, nextStep(s)!);
@@ -141,5 +141,17 @@ describe('giro: esito', () => {
     expect(pauseMs('immobiliare', () => 0)).toBe(4000);
     expect(pauseMs('immobiliare', () => 0.999)).toBeLessThan(10_000);
     expect(pauseMs('idealista', () => 0)).toBe(8000);
+  });
+});
+
+describe('revisione: pagine lette con errori', () => {
+  it('una pagina con errori di lettura non chiude la ricerca come completa; due di fila fermano il portale', () => {
+    let s = createSweep([IMM, { ...IMM, key: 'b' }, { ...IMM, key: 'c' }], 0, 'id');
+    s = onPageRead(step(s), report('immobiliare', { results: 0, privates: 0, parseErrors: 25 }));
+    expect(s.runs[0]!.outcome).toBe('error');
+    expect(completeScopes(finishSweep(s, 1))).toEqual([]);
+    s = onPageRead(step(s), report('immobiliare', { results: 25, privates: 3, parseErrors: 1 }));
+    expect(s.runs.map((r) => r.outcome)).toEqual(['error', 'error', 'skipped']);
+    expect(s.halted.immobiliare).toBe('error');
   });
 });

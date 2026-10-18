@@ -19,7 +19,7 @@ describe('LeadService: giro', () => {
     s = beginStep(s, nextStep(s)!);
     await svc.ingest([obs({ portalId: 2, url: 'https://www.immobiliare.it/annunci/2/' })], undefined, { sweepScope: IMM.key });
     s = markSeen(s, [obs({ portalId: 2 })]);
-    s = onPageRead(s, { portal: 'immobiliare', url: IMM.url, results: 2, privates: 1, lastPage: false, blocked: false, notFound: false });
+    s = onPageRead(s, { portal: 'immobiliare', url: IMM.url, results: 2, privates: 1, lastPage: false, blocked: false, notFound: false, parseErrors: 0 });
     advance(1000);
     const result = await svc.finishSweep({ ...s, status: 'completed', finishedAt: now(), drops: ['immobiliare:2'] });
     expect(result).toMatchObject({ outcome: 'completed', newCount: 1, drops: 1, missing: 1 });

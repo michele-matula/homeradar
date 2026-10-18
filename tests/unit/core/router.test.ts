@@ -260,7 +260,7 @@ describe('handleRequest splitListing', () => {
   it("pageRead e comandi del giro passano all'orchestratore con la scheda", async () => {
     const { svc } = await ready();
     const h = hooks();
-    const report = { portal: 'immobiliare' as const, url: 'x', results: 1, privates: 1, lastPage: true, blocked: false, notFound: false };
+    const report = { portal: 'immobiliare' as const, url: 'x', results: 1, privates: 1, lastPage: true, blocked: false, notFound: false, parseErrors: 0 };
     await handleRequest(svc, { type: 'pageRead', report }, 'v', h, { tabId: 70 });
     expect(h.sweep.pageRead).toHaveBeenCalledWith(70, report);
     await handleRequest(svc, { type: 'startSweep' }, 'v', h);

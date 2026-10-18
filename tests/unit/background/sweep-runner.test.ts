@@ -13,7 +13,7 @@ const SUB: SearchSpec = {
   url: 'https://www.subito.it/annunci-lombardia/vendita/immobili/milano/cassano-d-adda/?advt=0',
 };
 const page = (portal: PageReport['portal'], o: Partial<PageReport> = {}): PageReport => ({
-  portal, url: 'x', results: 3, privates: 1, lastPage: true, blocked: false, notFound: false, ...o,
+  portal, url: 'x', results: 3, privates: 1, lastPage: true, blocked: false, notFound: false, parseErrors: 0, ...o,
 });
 
 function harness(o: Partial<SweepRunnerDeps> = {}) {

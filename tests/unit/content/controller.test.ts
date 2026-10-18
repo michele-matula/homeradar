@@ -288,7 +288,7 @@ describe('pageRead per il giro', () => {
     const types = send.mock.calls.map(([r]) => r.type);
     expect(types.indexOf('pageRead')).toBeGreaterThan(types.indexOf('ingest'));
     expect(send.mock.calls.at(-1)![0]).toEqual({
-      type: 'pageRead', report: { portal: 'immobiliare', url: SEARCH_URL, results: 2, privates: 1, lastPage: false, blocked: false, notFound: false },
+      type: 'pageRead', report: { portal: 'immobiliare', url: SEARCH_URL, results: 2, privates: 1, lastPage: false, blocked: false, notFound: false, parseErrors: 0 },
     });
     send.mockClear();
     await c.handle('next-data', SEARCH_URL, searchNextData([]));
@@ -302,7 +302,7 @@ describe('pageRead per il giro', () => {
     const captcha = new DOMParser().parseFromString('<body><iframe src="https://geo.captcha-delivery.com/x"></iframe></body>', 'text/html');
     await c.checkProblem(captcha);
     expect(send).toHaveBeenLastCalledWith({
-      type: 'pageRead', report: { portal: 'immobiliare', url: SEARCH_URL, results: 0, privates: 0, lastPage: true, blocked: true, notFound: false },
+      type: 'pageRead', report: { portal: 'immobiliare', url: SEARCH_URL, results: 0, privates: 0, lastPage: true, blocked: true, notFound: false, parseErrors: 0 },
     });
     const missing = new DOMParser().parseFromString('<body>La pagina che stai cercando non è presente</body>', 'text/html');
     await c.checkProblem(missing);
@@ -324,5 +324,16 @@ describe('revisione: pagina di verifica su Idealista', () => {
     await c.scan();
     const reads = send.mock.calls.map(([r]) => r).filter((r) => r.type === 'pageRead');
     expect(reads).toEqual([{ type: 'pageRead', report: expect.objectContaining({ blocked: true, notFound: false }) }]);
+  });
+});
+
+describe('revisione: errori di lettura nel riassunto', () => {
+  it('conta gli annunci non letti e i venditori non riconosciuti', async () => {
+    const send = fakeSend();
+    const c = createController({ adapter: immobiliareAdapter, send, root: document, getUrl: () => SEARCH_URL });
+    const broken = { realEstate: { id: 'x' } };
+    const unknownSeller = searchResult(realEstate({ id: 3, advertiser: {} }), 3);
+    await c.handle('next-data', SEARCH_URL, searchNextData([searchResult(realEstate()), broken, unknownSeller]));
+    expect(send.mock.calls.at(-1)![0]).toMatchObject({ type: 'pageRead', report: { parseErrors: 2 } });
   });
 });

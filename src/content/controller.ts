@@ -59,7 +59,8 @@ export function createController({ adapter, send, root, getUrl, portalState = as
 
   async function process(result: ParseResult, source: ParseSource): Promise<void> {
     const total = result.errors.length + result.observations.length;
-    const hasUnknownSeller = result.observations.some((o) => o.sellerType === 'unknown');
+    const unknownSellers = result.observations.filter((o) => o.sellerType === 'unknown').length;
+    const hasUnknownSeller = unknownSellers > 0;
     const ok = !hasUnknownSeller && (total === 0 || result.errors.length <= total * 0.2);
     for (const o of result.observations) seen.add(o.portalId);
     await send({ type: 'parseStatus', portal: adapter.portal, ok, errors: result.errors, source });
@@ -73,7 +74,7 @@ export function createController({ adapter, send, root, getUrl, portalState = as
     // Una pagina di verifica o inesistente non è una ricerca vuota: al giro va solo il problema.
     if (await checkProblem(docOf(root))) return;
     if (result.page) {
-      await send({ type: 'pageRead', report: { portal: adapter.portal, url: getUrl(), ...result.page, blocked: false, notFound: false } });
+      await send({ type: 'pageRead', report: { portal: adapter.portal, url: getUrl(), ...result.page, blocked: false, notFound: false, parseErrors: result.errors.length + unknownSellers } });
     }
   }
 
@@ -84,7 +85,7 @@ export function createController({ adapter, send, root, getUrl, portalState = as
     if (!problem) return false;
     await send({
       type: 'pageRead',
-      report: { portal: adapter.portal, url: getUrl(), results: 0, privates: 0, lastPage: true, blocked: problem === 'blocked', notFound: problem === 'notFound' },
+      report: { portal: adapter.portal, url: getUrl(), results: 0, privates: 0, lastPage: true, blocked: problem === 'blocked', notFound: problem === 'notFound', parseErrors: 0 },
     });
     return true;
   }

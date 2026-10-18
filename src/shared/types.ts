@@ -146,6 +146,8 @@ export interface PageReport extends PageInfo {
   blocked: boolean;
   /** Il portale dice che la pagina non esiste (comune o percorso sbagliato). */
   notFound: boolean;
+  /** Annunci non letti o con venditore non riconosciuto: la pagina non può dire che la ricerca è completa. */
+  parseErrors: number;
 }
 
 export interface ParseResult {
