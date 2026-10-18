@@ -111,10 +111,12 @@ export function App({ api = defaultApi }: { api?: Api }) {
   const query: LeadQuery = { text, minPrice: minPrice === 'invalid' ? null : minPrice, maxPrice: maxPrice === 'invalid' ? null : maxPrice };
   // Ricerca e prezzo agiscono prima delle schede, così anche i loro conteggi li seguono.
   const now = Date.now();
-  const applied = applyQuery(leads, query).filter((l) =>
-    (!categories.length || leadCategories(l).some((c) => categories.includes(c)))
-    && (!missingOnly || l.missing != null || l.missingPortals.length > 0)
+  const beforeCategories = applyQuery(leads, query).filter((l) =>
+    (!missingOnly || l.missing != null || l.missingPortals.length > 0)
     && (since == null || [l.listing, ...l.others.map((o) => o.listing)].some((x) => x.firstSeenAt >= since)));
+  // Le categorie si contano prima del loro filtro: così se ne può scegliere più di una.
+  const applied = categories.length ? beforeCategories.filter((l) => leadCategories(l).some((c) => categories.includes(c))) : beforeCategories;
+  const inTab = (list: LeadView[], t: Tab) => (t === 'recall' ? list.filter((l) => l.state.recallAt != null) : groupByStatus(list)[t]);
   const groups = groupByStatus(applied);
   const recalls = applied.filter((l) => l.state.recallAt != null);
   const dueCount = recalls.filter((l) => isDue(l.state.recallAt, now)).length;
@@ -361,7 +363,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
               </div>
               <div className="filters" role="group" aria-label="Filtra per categoria">
                 {PROPERTY_CATEGORIES.map((c) => {
-                  const count = tabLeads(tab).filter((l) => leadCategories(l).includes(c)).length;
+                  const count = inTab(beforeCategories, tab).filter((l) => leadCategories(l).includes(c)).length;
                   const on = categories.includes(c);
                   return (
                     <button

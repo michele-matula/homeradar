@@ -724,3 +724,15 @@ describe('filtri del giro', () => {
     expect(visibleLeads()).toBe(1);
   });
 });
+
+describe('revisione: filtri per categoria multipli', () => {
+  it('con una categoria scelta si può aggiungerne un\'altra', async () => {
+    const box = (id: number): LeadView => { const l = lead(id, 'high'); return { ...l, listing: { ...l.listing, category: 'garage' } }; };
+    render(<App api={fakeApi([lead(1, 'high'), box(2)])} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Residenziale (1)' }));
+    const boxChip = screen.getByRole('button', { name: 'Box (1)' }) as HTMLButtonElement;
+    expect(boxChip.disabled).toBe(false);
+    fireEvent.click(boxChip);
+    expect(document.querySelectorAll('li.lead').length).toBe(2);
+  });
+});
