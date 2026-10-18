@@ -21,6 +21,18 @@ export interface ComuneRef {
   province: string;
 }
 
+/** Una ricerca del giro: URL della pagina 1 e categorie da tenere. Solo dati: si salva in storage.session. */
+export interface SearchSpec {
+  portal: Portal;
+  /** Stabile tra un giro e l'altro: "immobiliare|comune:015059|case", "subito|comune:015059|immobili". */
+  key: string;
+  /** Per il pannello: "Treviglio · Case". */
+  label: string;
+  /** Categorie ammesse; una sola per Immobiliare e Idealista, tutte per Subito. */
+  categories: PropertyCategory[];
+  url: string;
+}
+
 /** Zona di lavoro: dove e cosa cerca il giro delle ricerche. */
 export interface SearchArea {
   comuni: ComuneRef[];

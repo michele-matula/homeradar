@@ -1,5 +1,6 @@
 import { useId, useState } from 'react';
 import { searchComuni, toRef, type ComuneInfo } from '@/core/comuni';
+import { estimateMinutes } from '@/core/searches';
 import { MAX_COMUNI } from '@/core/settings';
 import { CATEGORY_LABELS, PROPERTY_CATEGORIES, type PropertyCategory, type SearchArea } from '@/shared/types';
 import { CloseIcon } from './Icons';
@@ -10,6 +11,7 @@ export function ZoneEditor({ value, onChange }: { value: SearchArea; onChange(ne
   const [query, setQuery] = useState('');
   const chosen = new Set(value.comuni.map((c) => c.istat));
   const full = value.comuni.length >= MAX_COMUNI;
+  const estimate = estimateMinutes(value);
   const suggestions = full ? [] : searchComuni(query).filter((c) => !chosen.has(c.istat));
 
   const add = (c: ComuneInfo) => {
@@ -69,6 +71,9 @@ export function ZoneEditor({ value, onChange }: { value: SearchArea; onChange(ne
           );
         })}
       </fieldset>
+      {estimate.searches > 0 && (
+        <p className="card__text">{`Circa ${estimate.searches} ricerche: il giro dura circa ${estimate.minutes} ${estimate.minutes === 1 ? 'minuto' : 'minuti'}.`}</p>
+      )}
     </div>
   );
 }
