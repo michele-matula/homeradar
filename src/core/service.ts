@@ -5,16 +5,18 @@ import type { HomeRadarDB } from '@/core/db';
 import { warnedPortals } from '@/core/diagnostics';
 import { buildLeadViews, defaultState, isListed, mergeGroupState, type Archive } from '@/core/lead-groups';
 import { leadKeys, sortLeads } from '@/core/leads';
+import { MISSING_SWEEPS, missingUpdates } from '@/core/missing';
 import { ONBOARDING_VERSION } from '@/core/onboarding';
 import { PilotStore } from '@/core/pilot-store';
 import { addDays, startOfLocalDay } from '@/core/recall';
 import { evaluate } from '@/core/rules';
 import { groupListings, splitPair } from '@/core/same-property';
 import { validateSettings } from '@/core/settings';
+import { buildResult, completeScopes, type SweepState } from '@/core/sweep';
 import type { UsageEvent } from '@/core/usage';
 import {
   DAY_MS, listingKey, VISIT_GAP_MS, type BackupStatus, type CalibrationHint, type Diagnostics, type Evaluation, type ImportSummary, type IngestOptions, type LeadState, type LeadStatus, type LeadView,
-  type ListingObservation, type ListingRecord, type ObservedPriceDrop, type OnboardingStatus, type Portal, type PriceDrop, type PriceSnapshot, type Settings,
+  type ListingObservation, type ListingRecord, type ObservedPriceDrop, type OnboardingStatus, type Portal, type PriceDrop, type PriceSnapshot, type Settings, type SweepResult,
 } from '@/shared/types';
 
 export { VISIT_GAP_MS } from '@/shared/types';
@@ -312,6 +314,38 @@ export class LeadService {
     const stale = units.filter((u) => !u.some(keep)).flat();
     await this.deleteListings(stale);
     return stale.length;
+  }
+
+  /** Annunci comparsi per la prima volta da `since` (giro o navigazione). */
+  countNewSince(since: number): Promise<number> {
+    return this.db.listings.filter((l) => l.firstSeenAt >= since).count();
+  }
+
+  /** Aggiorna "non più visto"; restituisce quanti annunci lo sono diventati in questo giro. */
+  async applySweepResult(complete: string[], seen: string[], startedAt: number): Promise<number> {
+    return this.db.transaction('rw', this.db.listings, async () => {
+      const updates = missingUpdates(await this.db.listings.toArray(), new Set(complete), new Set(seen), startedAt);
+      await this.db.listings.bulkPut(updates);
+      return updates.filter((l) => l.missedSweeps === MISSING_SWEEPS).length;
+    });
+  }
+
+  /** Chiude un giro finito, fermato o interrotto: "non più visto", esito in `meta.sweep`, contatori per il report. */
+  async finishSweep(s: SweepState): Promise<SweepResult> {
+    const missing = await this.applySweepResult(completeScopes(s), s.seen, s.startedAt);
+    const result = buildResult(s, { newCount: await this.countNewSince(s.startedAt), missing });
+    await this.db.meta.put({ key: 'sweep', value: result });
+    await this.bumpCounter(`sweep_${result.outcome}`);
+    await this.bumpCounter('sweepMinutes', Math.round((result.finishedAt - result.startedAt) / 60_000));
+    for (const [p, stats] of Object.entries(result.portals)) {
+      await this.bumpCounter(`sweepPages_${p}`, stats.pages);
+      if (stats.outcome === 'blocked') await this.bumpCounter(`sweepBlocked_${p}`);
+    }
+    return result;
+  }
+
+  async lastSweep(): Promise<SweepResult | null> {
+    return ((await this.db.meta.get('sweep'))?.value as SweepResult | undefined) ?? null;
   }
 
   listingCount(): Promise<number> {
