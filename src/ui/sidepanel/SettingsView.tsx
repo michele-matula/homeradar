@@ -40,11 +40,11 @@ const FIELD_HELP: Record<NumberKey, ReactNode> = {
 
 const PORTAL_HELP: Record<Portal, string> = {
   immobiliare:
-    "Legge i risultati delle ricerche che apri su Immobiliare.it, anche le pagine successive. L'età dell'annuncio è quella indicata dal portale.",
+    "Legge i risultati delle ricerche che apri su Immobiliare.it, anche le pagine successive. L'età dell'annuncio è quella indicata dal portale. Con «Cerca» legge anche le ricerche della tua zona.",
   idealista:
-    "Legge gli annunci delle ricerche che apri su Idealista.it. Il portale non mostra la data di pubblicazione: l'età è stimata (indicata con «~»). Ordinare ogni tanto per «più recenti» rende la stima più precisa.",
+    "Legge gli annunci delle ricerche che apri su Idealista.it. Il portale non mostra la data di pubblicazione: l'età è stimata (indicata con «~»). Ordinare ogni tanto per «più recenti» rende la stima più precisa. Con «Cerca» legge anche le ricerche della tua zona.",
   subito:
-    "Legge i risultati delle ricerche nella categoria Immobili di Subito.it. La data mostrata da Subito è quella dell'ultimo rinnovo, non della pubblicazione: l'età è stimata (indicata con «~»).",
+    "Legge i risultati delle ricerche nella categoria Immobili di Subito.it. La data mostrata da Subito è quella dell'ultimo rinnovo, non della pubblicazione: l'età è stimata (indicata con «~»). Con «Cerca» legge anche le ricerche della tua zona.",
 };
 
 /** `File.text()` manca in alcuni ambienti (jsdom): in quel caso si passa da FileReader. */

@@ -188,3 +188,19 @@ Con il Worker in locale (`docs/pilot-reporting.md`, "Prova in locale") e un'este
     - [ ] Nel manifest ci sono solo i tre portali tra gli `host_permissions`; la scheda Pilota dice "Invio non configurato in questa versione".
 
 Se il sito è cambiato: ricattura le fixture (Immobiliare: piano MVP, Task 4; Idealista: piano 2026-10-13, Task 8; Subito: piano 2026-10-13-subito-adapter, Task 5), aggiorna schemi o selettori, riesegui `npm test`.
+
+## Giro delle ricerche
+
+Navigazione vera, con calma: un giro piccolo, una volta per rilascio.
+
+67. Da un'installazione con l'informativa confermata alla versione precedente, apri il pannello.
+    - [ ] "Cosa è cambiato" cita «Cerca» e la zona di lavoro; dopo la conferma la scheda di benvenuto mostra "La tua zona".
+68. Impostazioni → La tua zona: aggiungi 2-3 comuni piccoli (uno con apostrofo, es. "Cassano d'Adda").
+    - [ ] Suggerimenti con la sigla della provincia; la stima "Circa N ricerche" cambia attivando le categorie.
+69. Torna ai lead e premi **Cerca**.
+    - [ ] Una finestra ridotta a icona compare nella barra delle applicazioni; la scheda Ricerca mostra pagine e privati per portale.
+    - [ ] A fine giro la finestra si chiude e compare "Giro completato" con nuovi, ribassi e non più visti; "Vedi i nuovi" apre i Nuovi filtrati.
+70. Premi di nuovo **Cerca** e chiudi a mano la finestra del giro dopo qualche pagina.
+    - [ ] "Giro interrotto"; i lead letti restano.
+71. Filtri del pannello.
+    - [ ] I lead nuovi hanno la categoria giusta (filtro Residenziale/Commerciale/Terreni/Box); nessun annuncio di agenzia.

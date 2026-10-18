@@ -72,7 +72,7 @@ describe('informativa', () => {
   });
 
   it("la versione 5 annuncia l'invio dei report del pilota", () => {
-    expect(ONBOARDING_VERSION).toBe(5);
+    expect(ONBOARDING_VERSION).toBeGreaterThanOrEqual(5);
     expect(ONBOARDING_CHANGES[5]!.join(' ')).toMatch(/statistiche d'uso anonime/);
   });
 
@@ -80,5 +80,12 @@ describe('informativa', () => {
     expect(ONBOARDING_CHANGES[4]).toEqual([
       "HomeRadar ora riconosce un annuncio tolto e ripubblicato sullo stesso portale: il lead tiene età, storico prezzi, stato e note dell'annuncio precedente, che resta salvato finché rivedi la ripubblicazione.",
     ]);
+  });
+});
+
+describe('v6', () => {
+  it('il giro delle ricerche richiede una nuova conferma', () => {
+    expect(ONBOARDING_VERSION).toBe(6);
+    expect(changesSince(5).join(' ')).toContain('«Cerca»');
   });
 });
