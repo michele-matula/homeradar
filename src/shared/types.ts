@@ -306,6 +306,10 @@ export interface LeadView {
   others: LeadSource[];
   /** Vero se il lead contiene almeno un annuncio sostituito da una ripubblicazione. */
   reposted: boolean;
+  /** Non più visto nei giri: data del primo giro mancato; null se almeno un annuncio principale c'è ancora. */
+  missing: number | null;
+  /** Portali da cui l'immobile è sparito mentre resta visibile su un altro. */
+  missingPortals: Portal[];
 }
 
 export interface Diagnostics {

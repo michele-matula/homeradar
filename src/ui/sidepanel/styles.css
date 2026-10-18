@@ -210,6 +210,7 @@ button, input, select { font: inherit; color: inherit; }
 .pill--medium { background: var(--medium-soft); color: var(--medium); border-color: var(--medium-border); }
 .pill--verify { background: var(--verify-soft); color: var(--verify); border-color: var(--verify-border); }
 .pill--multi { background: var(--surface-muted); color: var(--text, inherit); border-color: var(--border); }
+.pill--missing { background: var(--medium-soft); color: #7a3a05; border-color: var(--medium-border); }
 .sources { margin: -4px 0 10px; }
 .sources__list { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 4px; }
 .sources__item { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }

@@ -129,3 +129,20 @@ describe('buildLeadViews: ripubblicazioni', () => {
     expect(views.every((v) => !v.reposted && v.others.every((o) => !o.previous))).toBe(true);
   });
 });
+
+describe('non più visto', () => {
+  it('lead "non più visto" solo se lo sono tutti i suoi annunci principali', () => {
+    const [v] = buildLeadViews(archive([rec('immobiliare', 1, { missedSweeps: 3, missingSince: 100 })]), DEFAULT_SETTINGS, NOW);
+    expect(v!).toMatchObject({ missing: 100, missingPortals: [] });
+    const [w] = buildLeadViews(archive([rec('immobiliare', 1, { missedSweeps: 2, missingSince: 100 })]), DEFAULT_SETTINGS, NOW);
+    expect(w!).toMatchObject({ missing: null, missingPortals: [] });
+  });
+
+  it('gruppo misto: il principale è quello ancora visto, il portale sparito è segnalato', () => {
+    const a = rec('immobiliare', 1, { missedSweeps: 3, missingSince: 100 });
+    const b = rec('idealista', 2);
+    const [v] = buildLeadViews(archive([a, b]), DEFAULT_SETTINGS, NOW);
+    expect(v!.listing.key).toBe('idealista:2');
+    expect(v!).toMatchObject({ missing: null, missingPortals: ['immobiliare'] });
+  });
+});

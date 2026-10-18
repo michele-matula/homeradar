@@ -1,5 +1,5 @@
 import { recallStatus, type RecallKind } from '@/core/recall';
-import { LEAD_STATUSES, type LeadStatus, type LeadView, type Portal, type Priority } from '@/shared/types';
+import { LEAD_STATUSES, PROPERTY_CATEGORIES, type LeadStatus, type LeadView, type Portal, type Priority, type PropertyCategory } from '@/shared/types';
 
 export const PRIORITY_LABELS: Record<Priority, string> = { high: 'Alta', medium: 'Media', verify: 'Da verificare', none: '' };
 /**
@@ -20,6 +20,12 @@ export function leadKeys(l: LeadView): string[] {
 /** Portali distinti del lead, quello del principale per primo. */
 export function leadPortals(l: LeadView): Portal[] {
   return [...new Set([l.listing.portal, ...l.others.map((o) => o.listing.portal)])];
+}
+
+/** Categorie delle fonti del lead, nell'ordine standard. */
+export function leadCategories(view: LeadView): PropertyCategory[] {
+  const set = new Set([view.listing, ...view.others.map((o) => o.listing)].map((l) => l.category));
+  return PROPERTY_CATEGORIES.filter((c) => set.has(c));
 }
 
 export const PRIORITY_ORDER: Record<Priority, number> = { high: 0, medium: 1, verify: 2, none: 3 };

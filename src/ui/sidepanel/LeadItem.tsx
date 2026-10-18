@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { leadPortals, priorityLabel, STATUS_LABELS } from '@/core/leads';
 import { aboveMarketText, isAboveMarket, marketExplanation } from '@/core/market';
 import { addDays, formatRecallDate, fromDateInput, RECALL_SHORTCUTS, recallLabel, recallStatus, startOfLocalDay, toDateInput } from '@/core/recall';
-import { formatDayMonth, formatEuro } from '@/shared/format';
+import { formatDate, formatDayMonth, formatEuro } from '@/shared/format';
 import { LEAD_STATUSES, PORTAL_TAGS, type LeadStatus, type LeadView } from '@/shared/types';
 import { ExternalIcon, TrashIcon } from './Icons';
 import { InfoTip } from './InfoTip';
@@ -50,6 +50,10 @@ export function LeadItem({ lead, now, onChange, onDelete, onSplit }: Props) {
           ))}
           {portals.length > 1 && <span className="pill pill--multi">{`Su ${portals.length} portali`}</span>}
           {lead.reposted && <span className="pill pill--multi">Ripubblicato</span>}
+          {lead.missing != null && <span className="pill pill--missing">{`Non più visto dal ${formatDate(lead.missing)}`}</span>}
+          {lead.missingPortals.map((p) => (
+            <span key={`gone-${p}`} className="pill pill--missing">{`Non più su ${PORTAL_TAGS[p]}`}</span>
+          ))}
         </div>
         <Sparkline prices={prices.map((p) => p.price)} />
       </div>

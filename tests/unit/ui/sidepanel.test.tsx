@@ -31,7 +31,7 @@ function lead(id: number, priority: Priority, status: LeadStatus = 'new'): LeadV
     ],
     market: null,
     others: [],
-    reposted: false,
+    reposted: false, missing: null, missingPortals: [],
   };
 }
 
@@ -99,6 +99,15 @@ describe('LeadItem', () => {
     const fromIdealista = { ...l, listing: { ...l.listing, key: 'idealista:1', portal: 'idealista' as const } };
     render(<ul><LeadItem lead={fromIdealista} now={Date.now()} onChange={() => {}} onDelete={() => {}} /></ul>);
     expect(screen.getByText('Idealista').className).toBe('portal-tag');
+  });
+
+  it('mostra "non più visto" e i portali da cui è sparito', () => {
+    const l = { ...lead(1, 'high'), missing: Date.UTC(2026, 9, 15, 12) };
+    const { unmount } = render(<ul><LeadItem lead={l} now={Date.now()} onChange={() => {}} onDelete={() => {}} /></ul>);
+    expect(screen.getByText('Non più visto dal 15/10/2026')).toBeTruthy();
+    unmount();
+    render(<ul><LeadItem lead={{ ...lead(2, 'high'), missingPortals: ['idealista'] }} now={Date.now()} onChange={() => {}} onDelete={() => {}} /></ul>);
+    expect(screen.getByText('Non più su Idealista')).toBeTruthy();
   });
 
   it('mostra "sopra mercato" con la spiegazione solo da +10%', () => {
