@@ -10,6 +10,13 @@ afterEach(cleanup);
 const status = { lastSentAt: null, lastAttemptAt: null, lastError: null, codeRejected: false };
 const info = (p: Partial<ReportingInfo> = {}, s: Partial<ReportingInfo['status']> = {}): ReportingInfo => ({ configured: true, queued: 0, ...p, status: { ...status, ...s } });
 
+/** Il campo si attiva quando arrivano le informazioni sull'invio: modificarlo prima è una corsa. */
+async function enabledCodeField(): Promise<HTMLInputElement> {
+  const field = (await screen.findByLabelText('Codice pilota')) as HTMLInputElement;
+  await waitFor(() => expect(field.disabled).toBe(false));
+  return field;
+}
+
 function api(settings: Partial<Settings> = {}, ri: ReportingInfo = info()): Api {
   let saved = { ...DEFAULT_SETTINGS, ...settings };
   return {
@@ -49,7 +56,7 @@ describe('impostazioni: pilota e feedback', () => {
   it("salva il codice, invia ora e mostra l'anteprima", async () => {
     const a = api();
     render(<SettingsView api={a} onSaved={vi.fn()} />);
-    fireEvent.change(await screen.findByLabelText('Codice pilota'), { target: { value: 'rossi-7k2p' } });
+    fireEvent.change(await enabledCodeField(), { target: { value: 'rossi-7k2p' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salva codice' }));
     await waitFor(() => expect(a.saveSettings).toHaveBeenCalledWith(expect.objectContaining({ pilotCode: 'rossi-7k2p' })));
     expect(await screen.findByDisplayValue('ROSSI-7K2P')).toBeTruthy();
@@ -71,7 +78,7 @@ describe('impostazioni: pilota e feedback', () => {
   it('il salvataggio generale non sovrascrive il codice salvato dalla scheda Pilota', async () => {
     const a = api();
     render(<SettingsView api={a} onSaved={vi.fn()} />);
-    fireEvent.change(await screen.findByLabelText('Codice pilota'), { target: { value: 'ROSSI-7K2P' } });
+    fireEvent.change(await enabledCodeField(), { target: { value: 'ROSSI-7K2P' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salva codice' }));
     await screen.findByText('Codice pilota salvato');
     fireEvent.click(screen.getByRole('button', { name: 'Salva' }));
