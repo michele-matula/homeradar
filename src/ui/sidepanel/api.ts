@@ -1,9 +1,9 @@
 import { browser } from 'wxt/browser';
-import { LEADS_CHANGED, ONBOARDING_CHANGED, send } from '@/shared/messages';
+import { LEADS_CHANGED, ONBOARDING_CHANGED, send, SWEEP_CHANGED } from '@/shared/messages';
 import type { BackupFile } from '@/core/backup';
 import type { UsageClientEvent } from '@/core/usage';
 import type { UsageReport } from '@/shared/report-schema';
-import type { BackupStatus, Diagnostics, ImportSummary, LeadState, LeadStatus, LeadView, OnboardingStatus, ReportingInfo, Settings } from '@/shared/types';
+import type { BackupStatus, Diagnostics, ImportSummary, LeadState, LeadStatus, LeadView, OnboardingStatus, ReportingInfo, Settings, SweepStatus } from '@/shared/types';
 
 export interface Api {
   listLeads(): Promise<LeadView[]>;
@@ -27,6 +27,10 @@ export interface Api {
   trackUsage(event: UsageClientEvent): Promise<void>;
   onLeadsChanged(cb: () => void): () => void;
   onOnboardingChanged(cb: () => void): () => void;
+  startSweep(): Promise<SweepStatus>;
+  stopSweep(): Promise<SweepStatus>;
+  getSweepStatus(): Promise<SweepStatus>;
+  onSweepChanged(cb: () => void): () => void;
 }
 
 /** Ascolta un messaggio diffuso dal background a tutte le pagine dell'estensione. */
@@ -60,4 +64,8 @@ export const defaultApi: Api = {
   trackUsage: (event) => send({ type: 'trackUsage', event }),
   onLeadsChanged: (cb) => onBroadcast(LEADS_CHANGED, cb),
   onOnboardingChanged: (cb) => onBroadcast(ONBOARDING_CHANGED, cb),
+  startSweep: () => send({ type: 'startSweep' }),
+  stopSweep: () => send({ type: 'stopSweep' }),
+  getSweepStatus: () => send({ type: 'getSweepStatus' }),
+  onSweepChanged: (cb) => onBroadcast(SWEEP_CHANGED, cb),
 };

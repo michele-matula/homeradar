@@ -66,6 +66,10 @@ function fakeApi(leads: LeadView[], adapterWarning: Diagnostics['adapterWarning'
     getOnboardingStatus: vi.fn(async () => ({ acceptedVersion: 1, acceptedAt: 0, current: 1 })),
     acceptOnboarding: vi.fn(async () => ({ acceptedVersion: 1, acceptedAt: 0, current: 1 })),
     onOnboardingChanged: vi.fn(() => () => {}),
+    startSweep: vi.fn(async () => ({ running: null, last: null })),
+    stopSweep: vi.fn(async () => ({ running: null, last: null })),
+    getSweepStatus: vi.fn(async () => ({ running: null, last: null })),
+    onSweepChanged: vi.fn(() => () => {}),
     getReportingInfo: vi.fn(async () => ({ configured: true, queued: 0, status: { lastSentAt: null, lastAttemptAt: null, lastError: null, codeRejected: false } })),
     sendReportNow: vi.fn(),
     previewReport: vi.fn(),
@@ -432,7 +436,7 @@ describe('App', () => {
   it('mostra il banner quando l\'adattatore segnala un problema', async () => {
     render(<App api={fakeApi([], { immobiliare: true })} />);
     expect(await screen.findByText('Immobiliare.it potrebbe essere cambiato: alcuni dati non sono stati letti.')).toBeTruthy();
-    expect(screen.getByText('Nessun lead in questa scheda. Naviga su Immobiliare.it, Idealista.it o Subito.it per raccoglierne.')).toBeTruthy();
+    expect(screen.getByText('Nessun lead in questa scheda. Premi «Cerca» o naviga su Immobiliare.it, Idealista.it o Subito.it per raccoglierne.')).toBeTruthy();
     expect(screen.queryByText(/Elimina tutti/)).toBeNull();
   });
 
@@ -700,5 +704,23 @@ describe('eliminazione di massa con lead uniti', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Elimina tutti (2)' }));
     fireEvent.click(screen.getByRole('button', { name: 'Conferma: elimina 3 annunci' }));
     expect(api.deleteListings).toHaveBeenCalledWith(['immobiliare:1', 'idealista:1001', 'immobiliare:2']);
+  });
+});
+
+describe('filtri del giro', () => {
+  const box = (id: number): LeadView => { const l = lead(id, 'high'); return { ...l, listing: { ...l.listing, category: 'garage' } }; };
+  const visibleLeads = () => document.querySelectorAll('li.lead').length;
+
+  it('filtra per categoria', async () => {
+    render(<App api={fakeApi([lead(1, 'high'), box(2)])} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Box (1)' }));
+    expect(visibleLeads()).toBe(1);
+    expect(screen.getByText('Bilocale 2')).toBeTruthy();
+  });
+
+  it('filtra i non più visti', async () => {
+    render(<App api={fakeApi([lead(1, 'high'), { ...lead(2, 'high'), missing: 5 }])} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Non più visti (1)' }));
+    expect(visibleLeads()).toBe(1);
   });
 });
