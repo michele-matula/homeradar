@@ -11,6 +11,15 @@ export type PageKind = 'search' | 'detail' | 'other';
 export type PropertyCategory = 'residential' | 'commercial' | 'land' | 'garage';
 export const PROPERTY_CATEGORIES: PropertyCategory[] = ['residential', 'commercial', 'land', 'garage'];
 export const CATEGORY_LABELS: Record<PropertyCategory, string> = { residential: 'Residenziale', commercial: 'Commerciale', land: 'Terreni', garage: 'Box' };
+
+/** Comune della zona di lavoro, come salvato nelle impostazioni. */
+export interface ComuneRef {
+  /** Codice ISTAT, 6 cifre. */
+  istat: string;
+  name: string;
+  /** Sigla della provincia, "BG". */
+  province: string;
+}
 export type ObservationSource = 'search' | 'detail';
 
 export const DAY_MS = 86_400_000;
