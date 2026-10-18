@@ -1,107 +1,68 @@
 # Giro delle ricerche — Fase 0: verifica sul campo
 
-Scheda da compilare a mano. Riferimento: `2026-10-17-giro-ricerche-design.md` §3.
+Riferimento: `2026-10-17-giro-ricerche-design.md` §3.
 
-## Regole
+Verifica fatta il 2026-10-17 con Claude in Chrome nel Chrome dell'utente, a ritmo lento (6-18 s tra i caricamenti): 10 pagine su Immobiliare, 2 su Idealista, 3 su Subito. **Nessuna verifica di DataDome comparsa.** Comuni: Treviglio (BG), Cassano d'Adda (MI), Bergamo (BG, città grande), Cantù (CO, accento).
 
-- Naviga **a mano**, in Chrome normale, con calma (almeno 5-10 secondi tra una pagina e l'altra). Niente strumenti di automazione: DataDome.
-- Puoi tenere HomeRadar acceso: legge come sempre.
-- Se compare una verifica ("non sei un robot", "Al momento non siamo disponibili"): **salva la pagina** (punto D) prima di risolverla, annota dopo quante pagine e quanto tempo è comparsa, poi fermati con quel portale per oggi.
-- Gli URL vanno copiati **interi** dalla barra degli indirizzi.
+## Immobiliare.it
 
-## A. Comuni scelti
+- **URL:** `https://www.immobiliare.it/vendita-<categoria>/<slug-comune>/?criterio=privateFirst&pag=<n>` (pagina 1 senza `pag`).
+  - `?criterio=privateFirst` è l'ordinamento "privati prima" e vale per tutte le categorie. `/da-privati/` è solo un alias per le case: su `/vendita-terreni/<comune>/da-privati/` risponde "pagina non presente".
+  - Il cambio di categoria dai filtri del sito è navigazione SPA (dati via XHR); il caricamento diretto dell'URL ha `__NEXT_DATA__` con `count`, `maxPages`, `currentPage`, `results[25]`.
+- **Slug del comune:** minuscole, accenti tolti, apostrofo e spazi diventano `-`: `treviglio`, `cassano-d-adda`, `cantu`, `bergamo`. Senza provincia. Omonimi: non verificato.
+- **Categorie** (radio "Tipologia" nei filtri): Case - Appartamenti (`vendita-case`), Nuove costruzioni, Garage - Posti auto (`vendita-garage`), Palazzi - Edifici, Uffici - Coworking (`vendita-uffici`), Negozi - Locali commerciali (`vendita-negozi`), Magazzini - Depositi, Capannoni (`vendita-capannoni`), Terreni (`vendita-terreni`). Verificati per caricamento: case, garage, negozi, uffici, capannoni, terreni. Magazzini e palazzi: percorso non verificato.
+- **Tipologie viste** (`typology.name`): garage → "Garage - Box", "Posto auto"; negozi → "Negozi - Locali commerciali", "Negozio", "Laboratorio"; uffici → "Ufficio - Studio", "Ufficio"; capannoni → "Capannone"; terreni → "Terreno edificabile", "Terreno agricolo", "Terreno residenziale", "Terreno non edificabile".
+- **Ordinamento:** privati rigorosamente prima, poi solo agenzie, in tutti i casi visti.
 
-Scegli 3-4 comuni della zona di un agente del pilota, se possibile con:
-- un comune grande (molti annunci);
-- un comune piccolo (pochi o zero annunci);
-- un comune con apostrofo o accento (es. "Sant'Angelo Lodigiano", "Cantù");
-- se c'è nella zona, un comune con lo stesso nome di un altro in un'altra provincia (es. "Peglio", che esiste sia in provincia di Como sia di Pesaro e Urbino).
-
-| # | Comune | Provincia | Regione |
-|---|---|---|---|
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
-
-## B. URL per portale, comune e categoria
-
-Per ogni portale: cerca il comune 1, imposta la categoria, imposta l'ordinamento "privati prima" (Immobiliare: "Da privati"; Idealista: "Privati prima") o il filtro privati (Subito: "Privati"), poi copia l'URL della **pagina 1** e della **pagina 2**. Per i comuni 2-4 basta l'URL della pagina 1 della categoria Residenziale.
-
-Categorie: **Residenziale** (case, appartamenti, ville) · **Commerciale** (negozi, uffici, capannoni, laboratori) · **Terreni** · **Box** (box, garage, posti auto). Se un portale divide una categoria in più ricerche (es. "Uffici" e "Negozi" separati), annota tutte le ricerche.
-
-### Immobiliare.it
-
-| Comune | Categoria | URL pagina 1 | URL pagina 2 |
-|---|---|---|---|
-| 1 | Residenziale | | |
-| 1 | Commerciale | | |
-| 1 | Terreni | | |
-| 1 | Box | | |
-| 2 | Residenziale | | — |
-| 3 | Residenziale | | — |
-| 4 | Residenziale | | — |
-
-### Idealista.it
-
-| Comune | Categoria | URL pagina 1 | URL pagina 2 |
-|---|---|---|---|
-| 1 | Residenziale | | |
-| 1 | Commerciale | | |
-| 1 | Terreni | | |
-| 1 | Box | | |
-| 2 | Residenziale | | — |
-| 3 | Residenziale | | — |
-| 4 | Residenziale | | — |
-
-### Subito.it
-
-Prima prova se esiste il filtro "Privati" e se compare nell'URL. Prova anche la categoria generica "Immobili" in vendita (tutte le categorie insieme), se il sito la offre.
-
-- Filtro privati nell'URL? (sì/no, parametro): 
-- Categoria "Immobili" generica in vendita? (sì/no, URL): 
-
-| Comune | Categoria | URL pagina 1 | URL pagina 2 |
-|---|---|---|---|
-| 1 | Residenziale | | |
-| 1 | Commerciale | | |
-| 1 | Terreni | | |
-| 1 | Box | | |
-| 2 | Residenziale | | — |
-| 3 | Residenziale | | — |
-| 4 | Residenziale | | — |
-
-## C. Quante pagine
-
-Per il comune 1, categoria Residenziale e Commerciale: scorri le pagine finché finiscono i privati (Immobiliare, Idealista: compaiono solo agenzie) o finiscono le pagine (Subito con filtro). Il pannello di HomeRadar aiuta a contare i privati.
-
-| Portale | Categoria | Annunci totali (dal sito) | Pagine con privati | Privati circa |
+| Comune | Categoria | Annunci | Pagine | Privati |
 |---|---|---|---|---|
-| Immobiliare | Residenziale | | | |
-| Immobiliare | Commerciale | | | |
-| Idealista | Residenziale | | | |
-| Idealista | Commerciale | | | |
-| Subito | Residenziale | | | |
-| Subito | Commerciale | | | |
+| Treviglio | case | 441 | 18 | 11 (tutti in pag. 1) |
+| Treviglio | garage | 51 | 3 | 9 |
+| Treviglio | negozi | 82 | 4 | 5 |
+| Treviglio | uffici | 37 | 2 | 0 |
+| Treviglio | capannoni | 30 | 2 | 2 |
+| Cassano d'Adda | case | 271 | 11 | 7 |
+| Cantù | terreni | 45 | 2 | 2 |
+| Bergamo | case | 1855 | 75 | 51-75 (pag. 1-2 tutte private, pag. 4 solo agenzie) |
 
-Annota anche: i privati sono **davvero tutti prima** delle agenzie, o se ne trovano sparsi dopo la prima pagina di sole agenzie?
+## Idealista.it
 
-- Immobiliare: 
-- Idealista: 
+- **URL:** `https://www.idealista.it/vendita-<categoria>/<slug-comune>-<slug-provincia>/?ordine=da-privati-asc`, pagine successive `…/lista-<n>.htm?ordine=da-privati-asc`.
+- **Slug:** `treviglio-bergamo`, `cassano-d-adda-milano` (apostrofo → `-`, provincia per nome intero). Province con nome composto (es. Monza e della Brianza): non verificato.
+- **Categorie** (link in pagina): `vendita-case`, `vendita-nuove_costruzioni`, `vendita-uffici`, `vendita-negozi` ("Locali o capannoni"), `vendita-garage`, `vendita-terreni`, `vendita-cantine`, `vendita-edifici`.
+- **30 annunci per pagina**, privati prima.
 
-## D. Pagine da salvare
+| Comune | Categoria | Annunci | Privati |
+|---|---|---|---|
+| Treviglio | case | 366 | 7 (pag. 1) |
+| Cassano d'Adda | negozi | 62 | 1 (pag. 1) |
 
-Con Ctrl+S → "Pagina web, solo HTML", in `fixtures-raw/giro/` (cartella ignorata da git; le ripulisce lo sviluppatore):
+- Il titolo della card non è sempre "<tipologia> in <indirizzo>": sui locali compare anche "Locale a Cassano d'Adda". Da verificare il parser di `parse.ts` sulle card non residenziali.
 
-- `immobiliare-commerciale.html`, `immobiliare-box.html`, `immobiliare-terreni.html` (pagina 1 di ciascuna, comune 1)
-- `idealista-commerciale.html`, `idealista-box.html`, `idealista-terreni.html`
-- `subito-commerciale.html`, `subito-box.html`, `subito-terreni.html`
-- `immobiliare-ultima-privati.html`, `idealista-ultima-privati.html`: la prima pagina con solo agenzie (serve per la condizione di fine)
-- `<portale>-verifica.html`: la pagina di verifica di DataDome, se compare
-- `<portale>-comune-inesistente.html`: cosa mostra il portale per un comune scritto male nell'URL (es. cambia una lettera dello slug nell'URL del comune 2 e premi Invio)
+## Subito.it
 
-## E. Note libere
+- **URL:** `https://www.subito.it/annunci-<regione>/vendita/immobili/<slug-provincia>/<slug-comune>/?advt=0&o=<n>`.
+  - La categoria generica **`immobili`** comprende tutte le categorie: **una sola ricerca per comune**. La categoria del singolo annuncio è nel payload.
+  - **`advt=0` = solo privati** (filtro "Inserzionista" del sito): con il filtro Treviglio passa da 171 a 20 annunci, tutti privati, compresi i `boostedItems`.
+- **Slug:** `bergamo/treviglio`, `milano/cassano-d-adda`. In `__NEXT_DATA__` `search.geo.town` ha `id` = `istat` = codice ISTAT del comune (`015059`) e `friendlyName` = slug; `geo.city` ha la sigla ISTAT della provincia (`015`) e lo slug (`milano`).
+- **Categorie viste** (`category.id:label`): `7` Appartamenti, `29` Ville singole e a schiera, `31` Garage e box, `30` Terreni e rustici, Uffici e Locali commerciali (id non annotato).
 
-Reindirizzamenti strani, comuni non trovati, annunci "in asta", pagine lente, qualsiasi cosa sembri utile:
+| Comune | Annunci (tutti) | Privati (`advt=0`) | Pagine |
+|---|---|---|---|
+| Treviglio | 171 | 20 | 1 |
+| Cassano d'Adda | — | 5 | 1 |
 
-- 
+## Conseguenze sul design
+
+1. **Condizione di fine su Immobiliare e Idealista:** basta la **prima pagina che contiene un'agenzia** (l'ordinamento mette i privati rigorosamente prima). Nei comuni medi quasi tutto si chiude in **una pagina**.
+2. **Subito:** una sola ricerca per comune per tutte le categorie; filtro `advt=0`; fine a `totalPages`.
+3. **Numero di caricamenti per comune:** Immobiliare 6 (case, garage, negozi, uffici, capannoni, terreni), Idealista 5 (case, uffici, negozi, garage, terreni), Subito 1. Per 10 comuni medi circa 60 + 50 + 10 = **120 caricamenti**, più le pagine extra delle città grandi.
+4. Con 120 caricamenti alternati e pause di 4-10 s, il giro dura circa 15-20 minuti, ai limiti di quanto concordato; su Idealista sarebbe un caricamento ogni 15-20 s per un quarto d'ora. Da qui la proposta: le categorie **non residenziali** (pochi privati) si cercano **per provincia** su Immobiliare e Idealista, tenendo solo gli annunci dei comuni scelti; la categoria **case** per comune. Per 10 comuni in una provincia si scende a circa 10 + 5 pagine per portale per le categorie non residenziali.
+
+## Ancora da verificare
+
+- Prova di ritmo in finestra ridotta a icona (build di prova).
+- Pagina di verifica di DataDome (non comparsa): forma da catturare quando capita.
+- Slug degli omonimi e delle province con nome composto.
+- URL per provincia su Idealista e categorie magazzini/palazzi su Immobiliare.
+- Fixture delle pagine non residenziali (Ctrl+S, `fixtures-raw/giro/`) per verificare schemi e parser.
