@@ -9,6 +9,7 @@ import { downloadBlob } from './download';
 import { FeedbackCard } from './FeedbackCard';
 import { InfoTip } from './InfoTip';
 import { PilotCard } from './PilotCard';
+import { ZoneEditor } from './ZoneEditor';
 
 type NumberKey = 'minAgeDays' | 'minDropPercent' | 'retentionDays';
 
@@ -123,6 +124,7 @@ export function SettingsView({ api, onSaved, download = downloadBlob, onOpenGuid
       autoBackup: result.autoBackup,
       pilotCode: result.pilotCode,
       reportingEnabled: result.reportingEnabled,
+      searchArea: result.searchArea,
     });
   }
 
@@ -215,6 +217,16 @@ export function SettingsView({ api, onSaved, download = downloadBlob, onOpenGuid
   return (
     <section className="settings">
       {message && <p className={message.startsWith('Errore') ? 'banner banner--error' : 'banner banner--ok'}>{message}</p>}
+      <div className="card">
+        <div className="settings__row">
+          <h2 className="card__title">La tua zona</h2>
+          <InfoTip label="La tua zona">
+            I comuni e le categorie che «Cerca» visita sui portali attivi, una ricerca per comune e categoria. Su Subito una
+            sola ricerca per comune porta tutte le categorie. Ogni modifica è salvata subito.
+          </InfoTip>
+        </div>
+        <ZoneEditor value={form.searchArea} onChange={(searchArea) => void saveNow({ searchArea }, 'Zona salvata')} />
+      </div>
       <div className="card">
         <div className="settings__row">
           <h2 className="card__title">Regole dei lead</h2>

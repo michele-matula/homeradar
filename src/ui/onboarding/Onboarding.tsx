@@ -5,6 +5,7 @@ import { formatDate, formatPercent } from '@/shared/format';
 import type { OnboardingStatus, Priority, Settings } from '@/shared/types';
 import type { Api } from '@/ui/sidepanel/api';
 import './onboarding.css';
+import { ZoneStep } from './ZoneStep';
 
 type OnboardingApi = Pick<Api, 'getOnboardingStatus' | 'acceptOnboarding' | 'getSettings' | 'saveSettings'>;
 
@@ -87,9 +88,13 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
       <div className="onboarding">
         <section className="card">
           <h2 className="onboarding__title">HomeRadar è attivo</h2>
-          <p>Apri una ricerca su Immobiliare.it, Idealista.it o Subito.it: i badge compaiono sugli annunci dei privati.</p>
+          <p>
+            Apri una ricerca su Immobiliare.it, Idealista.it o Subito.it, oppure scegli qui sotto la tua zona e premi «Cerca» nel
+            pannello: i lead dei privati si aggiornano da soli.
+          </p>
           <p>Suggerimento: fissa l'icona di HomeRadar nella barra di Chrome (icona del puzzle, poi la puntina) per aprire il pannello con un clic.</p>
         </section>
+        <ZoneStep api={api} initial={data.settings} />
       </div>
     );
   }

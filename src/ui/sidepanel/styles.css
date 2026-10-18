@@ -293,3 +293,14 @@ button, input, select { font: inherit; color: inherit; }
 .pilot__preview { max-height: 240px; overflow: auto; margin: 8px 0 0; padding: 8px; border-radius: 6px; background: var(--surface-muted); font-size: 11px; white-space: pre-wrap; word-break: break-word; }
 .feedback__text { width: 100%; box-sizing: border-box; resize: vertical; font: inherit; }
 .feedback__count { margin-right: auto; color: var(--muted); font-size: 12px; }
+
+/* Zona di lavoro: campo con suggerimenti, comuni scelti, categorie. */
+.zone { display: grid; gap: 8px; }
+.zone__label { font-size: 12px; font-weight: 600; color: var(--muted); }
+.zone__suggestions, .zone__chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.zone__suggestions { flex-direction: column; gap: 2px; }
+.zone__suggestion { width: 100%; text-align: left; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); cursor: pointer; }
+.zone__suggestion:hover { border-color: var(--brand); background: var(--brand-soft); }
+.zone__chip { display: inline-flex; align-items: center; gap: 4px; }
+.zone__categories { border: 0; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.zone__category { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; }
