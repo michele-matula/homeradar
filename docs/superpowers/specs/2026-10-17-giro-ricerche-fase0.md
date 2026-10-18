@@ -66,3 +66,13 @@ Verifica fatta il 2026-10-17 con Claude in Chrome nel Chrome dell'utente, a ritm
 - Slug degli omonimi e delle province con nome composto.
 - URL per provincia su Idealista e categorie magazzini/palazzi su Immobiliare.
 - Fixture delle pagine non residenziali (Ctrl+S, `fixtures-raw/giro/`) per verificare schemi e parser.
+
+## Prova di ritmo (2026-10-18)
+
+Estensione di prova (`scripts/ritmo/`) nel Chrome dell'utente, finestra ridotta a icona, 41 pagine in 9 min 30 s (circa 14 s a pagina: caricamento 4-10 s, in media 5,7 s, più la pausa). **Nessuna verifica di DataDome** su nessun portale; nessun rallentamento evidente della finestra ridotta a icona.
+
+- **Case per comune** (10 comuni della Bassa Bergamasca): sempre **una pagina** per comune e portale. Immobiliare 1-11 privati, Idealista 0-7, Subito (tutte le categorie) 0-20. Su Idealista e Immobiliare la prima pagina contiene sempre agenzie: la ricerca finisce lì.
+- **Ricerche per provincia** (Bergamo, categorie non residenziali): la **prima pagina è tutta di privati** su quasi tutte (Immobiliare negozi 25/25 su 81 pagine totali, garage 25/25, terreni 25/25; Idealista locali 30/30, garage 30/30, terreni 30/30; uffici 25/25 e 23/30; capannoni 24/25). I privati di una provincia occupano quindi più pagine: il numero non è misurato, ma con il tetto di 10 pagine per ricerca è probabile che queste ricerche restino incomplete e che il giro legga soprattutto annunci di comuni non scelti, poi scartati.
+- **Slug di provincia composta**: Monza e Brianza è `monza-brianza` su entrambi i portali (`/vendita-case/monza-monza-brianza/` su Idealista, `/vendita-case/monza-brianza-provincia/` su Immobiliare), non il nome ISTAT "Monza e della Brianza".
+- `vendita-*/bergamo-provincia/` esiste anche su Idealista.
+- Subito Calvenzano: 0 privati, pagina valida (non "non trovata").
