@@ -279,3 +279,38 @@ describe('createController DOM: errori e card caricate dopo', () => {
     expect(statuses[1]).toMatchObject({ ok: true, errors: [] });
   });
 });
+
+describe('pageRead per il giro', () => {
+  it('dopo ingest invia il riassunto della pagina, anche senza annunci', async () => {
+    const send = fakeSend();
+    const c = createController({ adapter: immobiliareAdapter, send, root: document, getUrl: () => SEARCH_URL });
+    await c.handle('next-data', SEARCH_URL, searchNextData([searchResult(realEstate()), searchResult(realEstate({ id: 2, advertiser: agencyAdvertiser }), 2)]));
+    const types = send.mock.calls.map(([r]) => r.type);
+    expect(types.indexOf('pageRead')).toBeGreaterThan(types.indexOf('ingest'));
+    expect(send.mock.calls.at(-1)![0]).toEqual({
+      type: 'pageRead', report: { portal: 'immobiliare', url: SEARCH_URL, results: 2, privates: 1, lastPage: false, blocked: false, notFound: false },
+    });
+    send.mockClear();
+    await c.handle('next-data', SEARCH_URL, searchNextData([]));
+    expect(send.mock.calls.at(-1)![0]).toMatchObject({ type: 'pageRead', report: { results: 0, lastPage: true } });
+  });
+
+  it('checkProblem segnala la verifica e la pagina inesistente solo sulle pagine di ricerca', async () => {
+    const send = fakeSend();
+    let url = SEARCH_URL;
+    const c = createController({ adapter: immobiliareAdapter, send, root: document, getUrl: () => url });
+    const captcha = new DOMParser().parseFromString('<body><iframe src="https://geo.captcha-delivery.com/x"></iframe></body>', 'text/html');
+    await c.checkProblem(captcha);
+    expect(send).toHaveBeenLastCalledWith({
+      type: 'pageRead', report: { portal: 'immobiliare', url: SEARCH_URL, results: 0, privates: 0, lastPage: true, blocked: true, notFound: false },
+    });
+    const missing = new DOMParser().parseFromString('<body>La pagina che stai cercando non è presente</body>', 'text/html');
+    await c.checkProblem(missing);
+    expect(send.mock.calls.at(-1)![0]).toMatchObject({ report: { blocked: false, notFound: true } });
+    send.mockClear();
+    url = DETAIL_URL;
+    await c.checkProblem(captcha);
+    await c.checkProblem(new DOMParser().parseFromString('<body><ul></ul></body>', 'text/html'));
+    expect(send).not.toHaveBeenCalled();
+  });
+});

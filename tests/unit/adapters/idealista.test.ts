@@ -63,7 +63,7 @@ describe('parseTitle', () => {
 describe('ricerca', () => {
   it('legge un privato con tutti i campi', () => {
     document.body.innerHTML = searchBody([card()]);
-    expect(read()).toEqual({
+    expect(read()).toMatchObject({
       errors: [],
       observations: [{
         portal: 'idealista', portalId: 37118651, url: 'https://www.idealista.it/immobile/37118651/',
@@ -112,7 +112,7 @@ describe('ricerca', () => {
 
   it('pagina senza card (es. blocco anti-bot): nessun errore', () => {
     document.body.innerHTML = '<p>Ops! Al momento non siamo disponibili</p>';
-    expect(read()).toEqual({ observations: [], errors: [] });
+    expect(read()).toMatchObject({ observations: [], errors: [], page: { results: 0, lastPage: true } });
   });
 
   it('sulla pagina "più recenti" indica l\'ID più alto', () => {
@@ -180,5 +180,16 @@ describe('card in pagina', () => {
     expect(A.badgeHost(c).className).toBe('item-multimedia');
     expect(A.cardFor(document, 99)).toBeNull();
     expect(A.cardIds(document)).toEqual([1, 2]);
+  });
+});
+
+describe('riassunto della pagina', () => {
+  const pagination = '<div class="pagination"><ul><li><a href="/vendita-case/treviglio-bergamo/lista-2.htm?ordine=da-privati-asc">2</a></li></ul></div>';
+  it('ultima pagina se manca il link alla successiva', () => {
+    document.body.innerHTML = searchBody([card({ id: 1 }), card({ id: 2, professional: 'true' })]) + pagination;
+    expect(A.readDocument!(document, 'https://www.idealista.it/vendita-case/treviglio-bergamo/?ordine=da-privati-asc').page)
+      .toEqual({ results: 2, privates: 1, lastPage: false });
+    expect(A.readDocument!(document, 'https://www.idealista.it/vendita-case/treviglio-bergamo/lista-2.htm?ordine=da-privati-asc').page)
+      .toMatchObject({ lastPage: true });
   });
 });

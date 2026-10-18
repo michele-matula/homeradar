@@ -96,6 +96,8 @@ export async function handleRequest(service: LeadService, req: Request, version:
       if (warning.changed) hooks.leadsChanged();
       return null;
     }
+    case 'pageRead':
+      return null;
     case 'fallbackShown':
       await service.bumpCounter('fallbackShown');
       return null;

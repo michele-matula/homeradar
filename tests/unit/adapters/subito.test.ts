@@ -143,3 +143,12 @@ describe('card nel DOM', () => {
     expect(A.cardFor(document, 99)).toBeNull();
   });
 });
+
+describe('riassunto della pagina', () => {
+  it('ultima pagina dal numero di pagine e dal parametro o', () => {
+    const json = nextData([nextAd(1), nextAd(2)], { totalPages: 3 });
+    expect(A.parseNextData(json, SEARCH_URL, NOW).page).toEqual({ results: 2, privates: 2, lastPage: false });
+    expect(A.parseNextData(json, `${SEARCH_URL}?o=3`, NOW).page).toMatchObject({ lastPage: true });
+    expect(A.parseNextData(nextData([]), SEARCH_URL, NOW).page).toMatchObject({ results: 0, lastPage: true });
+  });
+});

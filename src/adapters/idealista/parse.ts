@@ -111,3 +111,10 @@ export function parseDetail(root: ParentNode, url: string): ParseResult {
   const title = fullTitle.replace(' in vendita in ', ' in ');
   return { observations: [observation(id, title, price, features, sellerType, parseDrop(info, price), 'detail')], errors: [] };
 }
+
+/** C'è un link alla pagina successiva (".../lista-N.htm") nella paginazione. */
+export function hasNextPage(root: ParentNode, url: string): boolean {
+  const m = /\/lista-(\d+)\.htm/.exec(new URL(url, 'https://www.idealista.it').pathname);
+  const next = `/lista-${(m ? Number(m[1]) : 1) + 1}.htm`;
+  return [...root.querySelectorAll('.pagination a[href]')].some((a) => (a.getAttribute('href') ?? '').includes(next));
+}

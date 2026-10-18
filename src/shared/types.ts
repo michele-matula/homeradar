@@ -92,11 +92,31 @@ export interface IngestOptions {
   onDrop?: (listingKey: string) => void;
 }
 
+/** Riassunto di una pagina di ricerca, per la condizione di fine del giro. */
+export interface PageInfo {
+  /** Annunci letti in pagina, agenzie comprese. */
+  results: number;
+  privates: number;
+  lastPage: boolean;
+}
+
+/** Pagina di ricerca letta da un content script, mandata al giro con `pageRead`. */
+export interface PageReport extends PageInfo {
+  portal: Portal;
+  url: string;
+  /** Verifica di DataDome ("non sei un robot"). */
+  blocked: boolean;
+  /** Il portale dice che la pagina non esiste (comune o percorso sbagliato). */
+  notFound: boolean;
+}
+
 export interface ParseResult {
   observations: ListingObservation[];
   errors: string[];
   /** Pagine "più recenti": ID più alto in pagina, candidato punto di calibrazione. */
   newestId?: number;
+  /** Pagine di ricerca: riassunto per il giro delle ricerche. */
+  page?: PageInfo;
 }
 
 export interface ListingRecord {

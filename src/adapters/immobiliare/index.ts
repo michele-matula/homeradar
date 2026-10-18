@@ -66,6 +66,14 @@ export function parseSearchData(data: unknown, source: ObservationSource = 'sear
     if (re.contract !== 'sale') return; // solo vendita: gli affitti vengono ignorati
     out.observations.push(toObservation(re, parsed.data.seo?.url ?? listingUrl(re.id), source));
   });
+  const d = obj(data);
+  const current = typeof d?.currentPage === 'number' ? d.currentPage : null;
+  const max = typeof d?.maxPages === 'number' ? d.maxPages : null;
+  out.page = {
+    results: out.observations.length,
+    privates: out.observations.filter((o) => o.sellerType === 'private').length,
+    lastPage: results.length === 0 || (current != null && max != null && current >= max),
+  };
   return out;
 }
 

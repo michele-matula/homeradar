@@ -104,7 +104,15 @@ function parseNextData(json: unknown, url: string, now = Date.now()): ParseResul
   const items = obj(obj(obj(obj(obj(json)?.props)?.pageProps)?.initialState)?.items);
   if (!Array.isArray(items?.originalList)) return { observations: [], errors: ['next: ads not found'] };
   // Gli annunci in evidenza hanno card in pagina come gli altri: servono anche a hasUnseenListings.
-  return parseAds([...items.originalList, ...listOf(items.galleryList), ...listOf(items.boostedItems)], 'next', now);
+  const result = parseAds([...items.originalList, ...listOf(items.galleryList), ...listOf(items.boostedItems)], 'next', now);
+  const total = typeof items.totalPages === 'number' ? items.totalPages : null;
+  const page = Number(new URL(url, 'https://www.subito.it').searchParams.get('o') ?? '1') || 1;
+  result.page = {
+    results: result.observations.length,
+    privates: result.observations.filter((o) => o.sellerType === 'private').length,
+    lastPage: items.originalList.length === 0 || (total != null && page >= total),
+  };
+  return result;
 }
 
 function parseApi(url: string, json: unknown, now = Date.now()): ParseResult {
