@@ -3,6 +3,9 @@ import type { BrowserContext, Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 import { buildSearchHtml } from './fixture-page';
 
+/** Solo dentro panel.evaluate: la pagina del pannello è dell'estensione. */
+declare const chrome: { runtime: { sendMessage(msg: unknown): Promise<{ data: Record<string, unknown> }> } };
+
 const base = JSON.parse(readFileSync('tests/fixtures/immobiliare/search-privati.json', 'utf8'));
 const agency = {
   realEstate: {
