@@ -20,6 +20,12 @@ export interface ComuneRef {
   /** Sigla della provincia, "BG". */
   province: string;
 }
+
+/** Zona di lavoro: dove e cosa cerca il giro delle ricerche. */
+export interface SearchArea {
+  comuni: ComuneRef[];
+  categories: PropertyCategory[];
+}
 export type ObservationSource = 'search' | 'detail';
 
 export const DAY_MS = 86_400_000;
@@ -152,6 +158,8 @@ export interface Settings {
   pilotCode: string;
   /** Invio giornaliero delle statistiche d'uso anonime al gestore del pilota. */
   reportingEnabled: boolean;
+  /** Comuni e categorie del giro delle ricerche; senza comuni «Cerca» resta spento. */
+  searchArea: SearchArea;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -162,6 +170,8 @@ export const DEFAULT_SETTINGS: Settings = {
   enabledPortals: { immobiliare: true, idealista: true, subito: true },
   pilotCode: '',
   reportingEnabled: true,
+  // Di default solo le case: le altre categorie allungano il giro (una ricerca in più per comune e categoria).
+  searchArea: { comuni: [], categories: ['residential'] },
 };
 
 export interface CalibrationPoint {

@@ -97,6 +97,11 @@ const SettingsSchema = z.object({
   minAgeDays: num.optional(), minDropPercent: num.optional(), retentionDays: num.optional(), autoBackup: z.boolean().optional(),
   enabledPortals: z.object({ immobiliare: z.boolean().optional(), idealista: z.boolean().optional(), subito: z.boolean().optional() }).optional(),
   pilotCode: z.string().optional(), reportingEnabled: z.boolean().optional(),
+  // La validazione vera la fa validateSettings, come per gli altri campi.
+  searchArea: z.object({
+    comuni: z.array(z.object({ istat: z.string(), name: z.string(), province: z.string() })),
+    categories: z.array(z.string()),
+  }).optional(),
 });
 
 const VersionSchema = z.object({ format: z.literal(BACKUP_FORMAT), formatVersion: int.min(1) });
