@@ -8,7 +8,7 @@ function rec(portal: Portal, id: number, o: Partial<ListingRecord> = {}): Listin
   return {
     key: `${portal}:${id}`, portal, portalId: id, url: '', title: `${portal} ${id}`, address: null,
     city: 'Milano', zone: 'Navigli', typology: null, surfaceM2: 80, rooms: 3, currentPrice: 300000,
-    portalCreatedAt: null, estimatedCreatedAt: NOW - 200 * DAY_MS, lastDrop: null, firstSeenAt: 0, lastSeenAt: 0, seenCount: 1, ...o,
+    portalCreatedAt: null, estimatedCreatedAt: NOW - 200 * DAY_MS, lastDrop: null, firstSeenAt: 0, lastSeenAt: 0, seenCount: 1, category: 'residential', sweepScope: null, missedSweeps: 0, missingSince: null, ...o,
   };
 }
 const state = (listingKey: string, o: Partial<LeadState> = {}): LeadState => ({

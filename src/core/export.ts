@@ -3,10 +3,10 @@ import { leadPortals, priorityLabel, STATUS_LABELS } from '@/core/leads';
 import { isAboveMarket, marketSummary } from '@/core/market';
 import { formatLocalDate } from '@/core/recall';
 import { formatDate } from '@/shared/format';
-import { PORTAL_SITES, type LeadView } from '@/shared/types';
+import { CATEGORY_LABELS, PORTAL_SITES, type LeadView } from '@/shared/types';
 
 export const EXPORT_COLUMNS = [
-  'Priorità', 'Stato', 'Richiamo', 'Portale', 'Titolo', 'Indirizzo', 'Città/Zona', 'Tipologia', 'm²', 'Locali', 'Prezzo attuale',
+  'Priorità', 'Stato', 'Richiamo', 'Portale', 'Titolo', 'Indirizzo', 'Città/Zona', 'Tipologia', 'Categoria', 'm²', 'Locali', 'Prezzo attuale',
   'Prezzo massimo noto', 'Calo %', 'Sopra mercato %', 'Confronto mercato', 'Data ultimo ribasso', 'Online da (giorni)', 'Età stimata', 'Ripubblicato', 'Prima visita',
   'Ultima visita', 'Note', 'URL', 'Altri URL',
 ] as const;
@@ -25,6 +25,7 @@ export function toExportRows(leads: LeadView[]): ExportRow[] {
     'Indirizzo': l.address ?? '',
     'Città/Zona': [l.city, l.zone].filter(Boolean).join(' / '),
     'Tipologia': l.typology ?? '',
+    'Categoria': CATEGORY_LABELS[l.category],
     'm²': l.surfaceM2 ?? '',
     'Locali': l.rooms ?? '',
     'Prezzo attuale': l.currentPrice ?? '',

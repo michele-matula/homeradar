@@ -13,7 +13,7 @@ import { groupListings, splitPair } from '@/core/same-property';
 import { validateSettings } from '@/core/settings';
 import type { UsageEvent } from '@/core/usage';
 import {
-  DAY_MS, listingKey, VISIT_GAP_MS, type BackupStatus, type CalibrationHint, type Diagnostics, type Evaluation, type ImportSummary, type LeadState, type LeadStatus, type LeadView,
+  DAY_MS, listingKey, VISIT_GAP_MS, type BackupStatus, type CalibrationHint, type Diagnostics, type Evaluation, type ImportSummary, type IngestOptions, type LeadState, type LeadStatus, type LeadView,
   type ListingObservation, type ListingRecord, type ObservedPriceDrop, type OnboardingStatus, type Portal, type PriceDrop, type PriceSnapshot, type Settings,
 } from '@/shared/types';
 
@@ -83,7 +83,7 @@ export class LeadService {
     return validateSettings((rec?.value ?? {}) as Partial<Settings>);
   }
 
-  async ingest(observations: ListingObservation[], hint?: CalibrationHint): Promise<Evaluation[]> {
+  async ingest(observations: ListingObservation[], hint?: CalibrationHint, opts: IngestOptions = {}): Promise<Evaluation[]> {
     const now = this.clock();
     const settings = await this.getSettings();
     const { listings, priceSnapshots, leadStates, calibration } = this.db;
@@ -109,6 +109,9 @@ export class LeadService {
         const key = listingKey(o.portal, o.portalId);
         const prev = await listings.get(key);
         const drop = resolveDrop(o.lastDrop, prev?.lastDrop ?? null, now);
+        const priceDropped = prev?.currentPrice != null && o.price != null && o.price < prev.currentPrice;
+        const newDeclared = drop != null && (prev?.lastDrop == null || prev.lastDrop.fromPrice !== drop.fromPrice || prev.lastDrop.toPrice !== drop.toPrice);
+        if (prev && (priceDropped || newDeclared)) opts.onDrop?.(key);
         const record: ListingRecord = {
           key,
           portal: o.portal,
@@ -119,6 +122,7 @@ export class LeadService {
           city: o.city ?? prev?.city ?? null,
           zone: o.zone ?? prev?.zone ?? null,
           typology: o.typology ?? prev?.typology ?? null,
+          category: o.category ?? opts.searchCategory ?? prev?.category ?? 'residential',
           surfaceM2: o.surfaceM2 ?? prev?.surfaceM2 ?? null,
           rooms: o.rooms ?? prev?.rooms ?? null,
           currentPrice: o.price ?? prev?.currentPrice ?? null,
@@ -128,6 +132,10 @@ export class LeadService {
           firstSeenAt: prev?.firstSeenAt ?? now,
           lastSeenAt: now,
           seenCount: !prev ? 1 : now - prev.lastSeenAt >= VISIT_GAP_MS ? prev.seenCount + 1 : prev.seenCount,
+          sweepScope: opts.sweepScope ?? prev?.sweepScope ?? null,
+          // Visto adesso: non è più "non più visto", qualunque sia la strada da cui arriva.
+          missedSweeps: 0,
+          missingSince: null,
         };
         // Se la visita precedente è recente, lastSeenAt non avanza: altrimenti visite ravvicinate
         // spezzerebbero all'infinito la finestra di VISIT_GAP_MS.

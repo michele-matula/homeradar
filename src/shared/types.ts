@@ -55,6 +55,16 @@ export interface ListingObservation {
   source: ObservationSource;
 }
 
+/** Opzioni di `ingest` per le pagine lette dal giro delle ricerche. */
+export interface IngestOptions {
+  /** Ricerca del giro che ha letto la pagina. */
+  sweepScope?: string;
+  /** Categoria della ricerca, usata se la tipologia non dice la categoria. */
+  searchCategory?: PropertyCategory | null;
+  /** Chiamata per un annuncio già salvato il cui prezzo è sceso o che ha un ribasso nuovo dichiarato dal portale. */
+  onDrop?: (listingKey: string) => void;
+}
+
 export interface ParseResult {
   observations: ListingObservation[];
   errors: string[];
@@ -72,6 +82,7 @@ export interface ListingRecord {
   city: string | null;
   zone: string | null;
   typology: string | null;
+  category: PropertyCategory;
   surfaceM2: number | null;
   rooms: number | null;
   currentPrice: number | null;
@@ -81,6 +92,12 @@ export interface ListingRecord {
   firstSeenAt: number;
   lastSeenAt: number;
   seenCount: number;
+  /** `key` dell'ultima ricerca del giro in cui l'annuncio è stato visto; null se visto solo navigando a mano. */
+  sweepScope: string | null;
+  /** Giri consecutivi in cui la sua ricerca è stata completa e l'annuncio non c'era. */
+  missedSweeps: number;
+  /** Inizio del primo di quei giri; null se l'annuncio è stato visto nell'ultimo giro. */
+  missingSince: number | null;
 }
 
 export type SnapshotSource = 'observed' | 'declared';

@@ -143,3 +143,14 @@ describe('backup: impostazioni del pilota', () => {
     expect(parseBackup(JSON.parse(JSON.stringify(now))).settings).toMatchObject({ pilotCode: 'ROSSI-7K2P', reportingEnabled: false });
   });
 });
+
+describe('backup: campi del giro', () => {
+  it('importa i backup precedenti al giro: categoria dalla tipologia e campi del giro vuoti', () => {
+    const file = buildBackup({ listings: [listing({ typology: 'Garage - Box' })], priceSnapshots: [], leadStates: [], calibration: [] }, NOW, '0.1.0');
+    const raw = JSON.parse(JSON.stringify(file));
+    for (const l of raw.listings) {
+      delete l.category; delete l.sweepScope; delete l.missedSweeps; delete l.missingSince;
+    }
+    expect(parseBackup(raw).listings[0]).toMatchObject({ category: 'garage', sweepScope: null, missedSweeps: 0, missingSince: null });
+  });
+});

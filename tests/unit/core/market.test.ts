@@ -10,7 +10,7 @@ function rec(perM2: number | null, o: Partial<ListingRecord> = {}): ListingRecor
     key: `immobiliare:${id}`, portal: 'immobiliare', portalId: id, url: '', title: '', address: null,
     city: 'Milano', zone: 'Navigli', typology: null, surfaceM2: 100, rooms: null,
     currentPrice: perM2 == null ? null : perM2 * 100, portalCreatedAt: null, estimatedCreatedAt: null,
-    lastDrop: null, firstSeenAt: 0, lastSeenAt: 0, seenCount: 1, ...o,
+    lastDrop: null, firstSeenAt: 0, lastSeenAt: 0, seenCount: 1, category: 'residential', sweepScope: null, missedSweeps: 0, missingSince: null, ...o,
   };
 }
 const many = (values: number[], o: Partial<ListingRecord> = {}) => values.map((v) => rec(v, o));

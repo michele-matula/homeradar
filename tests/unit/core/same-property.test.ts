@@ -6,7 +6,7 @@ function rec(portal: Portal, id: number, o: Partial<ListingRecord> = {}): Listin
   return {
     key: `${portal}:${id}`, portal, portalId: id, url: '', title: '', address: null,
     city: 'Milano', zone: null, typology: null, surfaceM2: 80, rooms: 3, currentPrice: 300000,
-    portalCreatedAt: null, estimatedCreatedAt: null, lastDrop: null, firstSeenAt: 0, lastSeenAt: 0, seenCount: 1, ...o,
+    portalCreatedAt: null, estimatedCreatedAt: null, lastDrop: null, firstSeenAt: 0, lastSeenAt: 0, seenCount: 1, category: 'residential', sweepScope: null, missedSweeps: 0, missingSince: null, ...o,
   };
 }
 
