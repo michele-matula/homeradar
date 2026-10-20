@@ -1,0 +1,2173 @@
+{
+ "count": 815,
+ "currentPage": 2,
+ "results": [
+  {
+   "realEstate": {
+    "visibility": "premium",
+    "dataType": "list-real-estate",
+    "id": 129579162,
+    "uuid": "367039ee-4ae6-57eb-b0ab-eff1f542fbd5",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": true
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 205000,
+     "formattedValue": "€ 205.000",
+     "priceRange": "200.001 - 300.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "1",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "1",
+       "value": "1°, con ascensore",
+       "floorOnlyValue": "1",
+       "ga4FloorValue": "1"
+      },
+      "ga4Condition": "Buono / Abitabile",
+      "price": {
+       "visible": true,
+       "value": 205000,
+       "formattedValue": "€ 205.000",
+       "priceRange": "200.001 - 300.000 &euro;"
+      },
+      "rooms": "2",
+      "elevator": true,
+      "surface": "75 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "typologyGA4Translation": "Appartamento",
+      "seaDistanceValue": "800 m",
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "2",
+      "location": {
+       "address": "Via Esempio 1",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Irno, Fratte, Ogliara",
+       "microzone": "Irno - Brignano",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/1/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Bilocale via Esempio 1, Irno - Brignano, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/129579162/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 129516296,
+    "uuid": "bddb6442-6907-594d-abe6-715de73eace3",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 298000,
+     "formattedValue": "€ 298.000",
+     "priceRange": "200.001 - 300.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "1",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "6",
+       "value": "6°, con ascensore",
+       "floorOnlyValue": "6",
+       "ga4FloorValue": "6"
+      },
+      "ga4Condition": "Ottimo / Ristrutturato",
+      "price": {
+       "visible": true,
+       "value": 298000,
+       "formattedValue": "€ 298.000",
+       "priceRange": "200.001 - 300.000 &euro;"
+      },
+      "rooms": "3",
+      "elevator": true,
+      "surface": "68 m²",
+      "typology": {
+       "id": 15,
+       "name": "Attico"
+      },
+      "typologyGA4Translation": "Attico - Mansarda",
+      "seaDistanceValue": "500 m",
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "1",
+      "location": {
+       "address": "Via Esempio 2",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Centro Storico, Teatro Verdi, Centro",
+       "microzone": "Centro Storico - Teatro Verdi",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/2/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Attico via Esempio 2, Centro Storico - Teatro Verdi, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 15,
+     "name": "Attico"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/129516296/"
+   }
+  },
+  {
+   "realEstate": {
+    "visibility": "premium",
+    "dataType": "list-real-estate",
+    "id": 129464528,
+    "uuid": "d6e1628d-d4da-51be-9af9-309cca7938ac",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 596000,
+     "formattedValue": "€ 596.000",
+     "priceRange": "oltre 500.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "2",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "7",
+       "value": "7°, con ascensore",
+       "floorOnlyValue": "7",
+       "ga4FloorValue": "7"
+      },
+      "ga4Condition": "Buono / Abitabile",
+      "price": {
+       "visible": true,
+       "value": 596000,
+       "formattedValue": "€ 596.000",
+       "priceRange": "oltre 500.000 &euro;"
+      },
+      "rooms": "4",
+      "elevator": true,
+      "surface": "164 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "typologyGA4Translation": "Appartamento",
+      "seaDistanceValue": "500 m",
+      "views": [
+       {
+        "id": 1,
+        "name": "mare"
+       },
+       {
+        "id": 10,
+        "name": "db_feature.view.id_10"
+       }
+      ],
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "4",
+      "location": {
+       "address": "Via Esempio 3",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Centro Storico, Teatro Verdi, Centro",
+       "microzone": "Centro",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/3/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Quadrilocale via Esempio 3, Centro, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/129464528/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 129276398,
+    "uuid": "43841dcb-3f0d-5f66-a9ef-3baae7fe3de8",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 287500,
+     "formattedValue": "€ 287.500",
+     "priceRange": "200.001 - 300.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "2",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "1",
+       "value": "1°, con ascensore",
+       "floorOnlyValue": "1",
+       "ga4FloorValue": "1"
+      },
+      "ga4Condition": "Ottimo / Ristrutturato",
+      "price": {
+       "visible": true,
+       "value": 287500,
+       "formattedValue": "€ 287.500",
+       "priceRange": "200.001 - 300.000 &euro;"
+      },
+      "rooms": "2",
+      "elevator": true,
+      "surface": "79 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "typologyGA4Translation": "Appartamento",
+      "seaDistanceValue": "800 m",
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "2",
+      "location": {
+       "address": "Via Esempio 4",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Irno, Fratte, Ogliara",
+       "microzone": "Irno - Brignano",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/4/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Bilocale via Esempio 4, Irno - Brignano, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/129276398/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 129237660,
+    "uuid": "64281c96-867c-5699-ad07-e114a268e522",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": true,
+    "price": {
+     "visible": true,
+     "value": 800000,
+     "formattedValue": "€ 800.000",
+     "priceRange": "oltre 500.000 &euro;"
+    },
+    "properties": [
+     {
+      "isMain": true,
+      "floor": {
+       "abbreviation": "2",
+       "value": "2°, con ascensore",
+       "floorOnlyValue": "2",
+       "ga4FloorValue": "2"
+      },
+      "ga4Condition": "Da ristrutturare",
+      "price": {
+       "visible": true,
+       "value": 800000,
+       "formattedValue": "€ 800.000",
+       "priceRange": "oltre 500.000 &euro;"
+      },
+      "elevator": true,
+      "surface": "200 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "typologyGA4Translation": "Appartamento",
+      "seaDistanceValue": "500 m",
+      "ga4Heating": "Assente",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "0",
+      "location": {
+       "address": "Via Esempio 5",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Centro Storico, Teatro Verdi, Centro",
+       "microzone": "Centro",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/5/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Appartamento via Esempio 5, Centro, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/129237660/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 128513192,
+    "uuid": "87075016-7b02-5596-bdde-29cec0d16dc4",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 180000,
+     "formattedValue": "€ 180.000",
+     "priceRange": "150.001 - 200.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "1",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "1",
+       "value": "1°, con ascensore",
+       "floorOnlyValue": "1",
+       "ga4FloorValue": "1"
+      },
+      "ga4Condition": "Buono / Abitabile",
+      "price": {
+       "visible": true,
+       "value": 180000,
+       "formattedValue": "€ 180.000",
+       "priceRange": "150.001 - 200.000 &euro;"
+      },
+      "rooms": "3",
+      "elevator": true,
+      "surface": "91 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "typologyGA4Translation": "Appartamento",
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "1",
+      "location": {
+       "address": "Via Esempio 6",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Carmine, Carmine Alto",
+       "microzone": "Carmine Alto",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/6/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Trilocale via Esempio 6, Carmine Alto, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/128513192/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 127699582,
+    "uuid": "63646454-36ba-5e1b-9f64-43619479d699",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 350000,
+     "formattedValue": "€ 350.000",
+     "priceRange": "300.001 - 500.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "3",
+      "isMain": true,
+      "floor": {
+       "abbreviation": null,
+       "value": "Piano terra",
+       "floorOnlyValue": "piano terra",
+       "ga4FloorValue": "piano terra"
+      },
+      "ga4Condition": "Ottimo / Ristrutturato",
+      "price": {
+       "visible": true,
+       "value": 350000,
+       "formattedValue": "€ 350.000",
+       "priceRange": "300.001 - 500.000 &euro;"
+      },
+      "rooms": "3",
+      "surface": "120 m²",
+      "typology": {
+       "id": 21,
+       "name": "Terratetto unifamiliare"
+      },
+      "typologyGA4Translation": "Casa indipendente",
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "2",
+      "location": {
+       "address": "Via Esempio 7",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Carmine, Carmine Alto",
+       "microzone": "Carmine",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/7/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Terratetto via Esempio 7, Carmine, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 21,
+     "name": "Terratetto unifamiliare"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/127699582/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 127477788,
+    "uuid": "215f4071-2cfa-5344-ba57-b55931049d48",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": true,
+    "price": {
+     "visible": true,
+     "value": 1600000,
+     "formattedValue": "€ 1.600.000",
+     "priceRange": "oltre 500.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "3+",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "4 - 5",
+       "value": "2 piani: da 4° a 5°, con ascensore",
+       "floorOnlyValue": "da 4 a 5",
+       "ga4FloorValue": "da 4 a 5"
+      },
+      "ga4Condition": "Ottimo / Ristrutturato",
+      "price": {
+       "visible": true,
+       "value": 1600000,
+       "formattedValue": "€ 1.600.000",
+       "priceRange": "oltre 500.000 &euro;"
+      },
+      "rooms": "5",
+      "elevator": true,
+      "surface": "351 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "typologyGA4Translation": "Appartamento",
+      "seaDistanceValue": "500 m",
+      "views": [
+       {
+        "id": 1,
+        "name": "mare"
+       },
+       {
+        "id": 5,
+        "name": "panoramica"
+       }
+      ],
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "4",
+      "location": {
+       "address": "Via Esempio 8",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Centro Storico, Teatro Verdi, Centro",
+       "microzone": "Centro Storico - Teatro Verdi",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/8/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Appartamento via Esempio 8, Centro Storico - Teatro Verdi, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/127477788/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 127234453,
+    "uuid": "8fd5ae23-517e-595c-91d6-19c38c2fb22a",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 220000,
+     "formattedValue": "€ 220.000",
+     "priceRange": "200.001 - 300.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "1",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "2",
+       "value": "2°, con ascensore",
+       "floorOnlyValue": "2",
+       "ga4FloorValue": "2"
+      },
+      "ga4Condition": "Da ristrutturare",
+      "price": {
+       "visible": true,
+       "value": 220000,
+       "formattedValue": "€ 220.000",
+       "priceRange": "200.001 - 300.000 &euro;"
+      },
+      "rooms": "3",
+      "elevator": true,
+      "surface": "80 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "typologyGA4Translation": "Appartamento",
+      "seaDistanceValue": "800 m",
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "2",
+      "location": {
+       "address": "Via Esempio 9",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Pastena, Pastena Alta, Mercatello, Mariconda",
+       "microzone": "Pastena - Pastena Alta",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/9/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Trilocale via Esempio 9, Pastena - Pastena Alta, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/127234453/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 126874569,
+    "uuid": "cc4d1fc7-cfba-57c3-86ea-4a9e14548b3e",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 160000,
+     "formattedValue": "€ 160.000",
+     "priceRange": "150.001 - 200.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "1",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "S",
+       "value": "Seminterrato",
+       "floorOnlyValue": "seminterrato",
+       "ga4FloorValue": "seminterrato"
+      },
+      "ga4Condition": "Buono / Abitabile",
+      "price": {
+       "visible": true,
+       "value": 160000,
+       "formattedValue": "€ 160.000",
+       "priceRange": "150.001 - 200.000 &euro;"
+      },
+      "rooms": "4",
+      "surface": "83 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "typologyGA4Translation": "Appartamento",
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "3",
+      "location": {
+       "address": "Via Esempio 10",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Irno, Fratte, Ogliara",
+       "microzone": "Irno - Brignano",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/10/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Quadrilocale via Esempio 10, Irno - Brignano, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/126874569/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 126804459,
+    "uuid": "5a6fe92b-5b82-5e00-bd0f-8dcab6c23f54",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 280000,
+     "formattedValue": "€ 280.000",
+     "priceRange": "200.001 - 300.000 &euro;"
+    },
+    "properties": [
+     {
+      "isMain": true,
+      "floor": {
+       "abbreviation": "3",
+       "value": "3°",
+       "floorOnlyValue": "3",
+       "ga4FloorValue": "3"
+      },
+      "price": {
+       "visible": true,
+       "value": 280000,
+       "formattedValue": "€ 280.000",
+       "priceRange": "200.001 - 300.000 &euro;"
+      },
+      "surface": "117 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "typologyGA4Translation": "Appartamento",
+      "seaDistanceValue": "1.000 m",
+      "ga4Heating": "Assente",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "0",
+      "location": {
+       "address": "Via Esempio 11",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Carmine, Carmine Alto",
+       "microzone": "Carmine",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/11/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Appartamento via Esempio 11, Carmine, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/126804459/"
+   }
+  },
+  {
+   "realEstate": {
+    "visibility": "premium",
+    "dataType": "list-real-estate",
+    "id": 126654951,
+    "uuid": "97ab09bd-70b1-5216-80db-b7e6861c0878",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 85000,
+     "formattedValue": "€ 85.000",
+     "priceRange": "fino a 100.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "1",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "T, 1",
+       "value": "2 piani: Piano terra, 1°",
+       "floorOnlyValue": "piano terra, 1",
+       "ga4FloorValue": "piano terra, 1"
+      },
+      "ga4Condition": "Buono / Abitabile",
+      "price": {
+       "visible": true,
+       "value": 85000,
+       "formattedValue": "€ 85.000",
+       "priceRange": "fino a 100.000 &euro;"
+      },
+      "rooms": "2",
+      "surface": "50 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "ga4Garage": "1 posto auto",
+      "typologyGA4Translation": "Appartamento",
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "1",
+      "location": {
+       "address": "Via Esempio 12",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Arbostella, Arechi, Zona Industriale, San Leonardo",
+       "microzone": "Zona Industriale - San Leonardo",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/12/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Bilocale via Esempio 12, Zona Industriale - San Leonardo, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/126654951/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 126424293,
+    "uuid": "c9bd9f5e-18b5-5f17-addf-887de8ffa49c",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 380000,
+     "formattedValue": "€ 380.000",
+     "priceRange": "300.001 - 500.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "2",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "2",
+       "value": "2°, con ascensore",
+       "floorOnlyValue": "2",
+       "ga4FloorValue": "2"
+      },
+      "ga4Condition": "Ottimo / Ristrutturato",
+      "price": {
+       "visible": true,
+       "value": 380000,
+       "formattedValue": "€ 380.000",
+       "priceRange": "300.001 - 500.000 &euro;"
+      },
+      "rooms": "3",
+      "elevator": true,
+      "surface": "123 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "ga4Garage": "1 posto auto",
+      "typologyGA4Translation": "Appartamento",
+      "views": [
+       {
+        "id": 1,
+        "name": "mare"
+       },
+       {
+        "id": 5,
+        "name": "panoramica"
+       }
+      ],
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "2",
+      "location": {
+       "address": "Via Esempio 13",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Irno, Fratte, Ogliara",
+       "microzone": "Irno - Brignano",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/13/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Trilocale via Esempio 13, Irno - Brignano, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/126424293/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 126222579,
+    "uuid": "2ca1ec31-2397-575e-be95-cc3832c65dc0",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 135000,
+     "formattedValue": "€ 135.000",
+     "priceRange": "100.001 - 150.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "1",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "5",
+       "value": "5°, con ascensore",
+       "floorOnlyValue": "5",
+       "ga4FloorValue": "5"
+      },
+      "ga4Condition": "Nuovo / In costruzione",
+      "price": {
+       "visible": true,
+       "value": 135000,
+       "formattedValue": "€ 135.000",
+       "priceRange": "100.001 - 150.000 &euro;"
+      },
+      "rooms": "2",
+      "elevator": true,
+      "surface": "40 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "typologyGA4Translation": "Appartamento",
+      "seaDistanceValue": "1.000 m",
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "1",
+      "location": {
+       "address": "Via Esempio 14",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Pastena, Pastena Alta, Mercatello, Mariconda",
+       "microzone": "Mercatello - Mariconda",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/14/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Bilocale via Esempio 14, Mercatello - Mariconda, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/126222579/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 125907877,
+    "uuid": "f2c6ff60-ae2d-52c7-8e3f-63ea3500803a",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": true,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 225000,
+     "formattedValue": "€ 225.000",
+     "priceRange": "200.001 - 300.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "1",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "3",
+       "value": "3°, con ascensore",
+       "floorOnlyValue": "3",
+       "ga4FloorValue": "3"
+      },
+      "ga4Condition": "Ottimo / Ristrutturato",
+      "price": {
+       "visible": true,
+       "value": 225000,
+       "formattedValue": "€ 225.000",
+       "priceRange": "200.001 - 300.000 &euro;"
+      },
+      "rooms": "2",
+      "elevator": true,
+      "surface": "68 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "typologyGA4Translation": "Appartamento",
+      "seaDistanceValue": "500 m",
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "1",
+      "location": {
+       "address": "Via Esempio 15",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Torrione, Torrione Alto, Sala Abbagnano",
+       "microzone": "Torrione",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/15/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Bilocale via Esempio 15, Torrione, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/125907877/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 125435709,
+    "uuid": "4e9ca250-3074-5b23-950b-57d1dd4b8dc1",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 369000,
+     "formattedValue": "€ 369.000",
+     "priceRange": "300.001 - 500.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "1",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "1",
+       "value": "1°, con ascensore",
+       "floorOnlyValue": "1",
+       "ga4FloorValue": "1"
+      },
+      "ga4Condition": "Ottimo / Ristrutturato",
+      "price": {
+       "visible": true,
+       "value": 369000,
+       "formattedValue": "€ 369.000",
+       "priceRange": "300.001 - 500.000 &euro;"
+      },
+      "rooms": "4",
+      "elevator": true,
+      "surface": "92 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "typologyGA4Translation": "Appartamento",
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "3",
+      "location": {
+       "address": "Via Esempio 16",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Carmine, Carmine Alto",
+       "microzone": "Carmine",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/16/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Quadrilocale via Esempio 16, Carmine, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/125435709/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 125374175,
+    "uuid": "b40571f8-3826-550b-b890-11f7b8343a9b",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 130000,
+     "formattedValue": "€ 130.000",
+     "priceRange": "100.001 - 150.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "1",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "R",
+       "value": "Piano rialzato",
+       "floorOnlyValue": "piano rialzato",
+       "ga4FloorValue": "piano rialzato"
+      },
+      "ga4Condition": "Buono / Abitabile",
+      "price": {
+       "visible": true,
+       "value": 130000,
+       "formattedValue": "€ 130.000",
+       "priceRange": "100.001 - 150.000 &euro;"
+      },
+      "rooms": "1",
+      "surface": "90 m²",
+      "typology": {
+       "id": 17,
+       "name": "Loft"
+      },
+      "typologyGA4Translation": "Loft",
+      "seaDistanceValue": "800 m",
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "0",
+      "location": {
+       "address": "Via Esempio 17",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Centro Storico, Teatro Verdi, Centro",
+       "microzone": "Centro",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/17/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Loft via Esempio 17, Centro, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 17,
+     "name": "Loft"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/125374175/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 125273413,
+    "uuid": "c267efa8-e384-5811-a96a-2ce765aa9406",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 500000,
+     "formattedValue": "€ 500.000",
+     "priceRange": "300.001 - 500.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "1",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "3",
+       "value": "3°",
+       "floorOnlyValue": "3",
+       "ga4FloorValue": "3"
+      },
+      "ga4Condition": "Da ristrutturare",
+      "price": {
+       "visible": true,
+       "value": 500000,
+       "formattedValue": "€ 500.000",
+       "priceRange": "300.001 - 500.000 &euro;"
+      },
+      "rooms": "4",
+      "surface": "110 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "typologyGA4Translation": "Appartamento",
+      "seaDistanceValue": "500 m",
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "3",
+      "location": {
+       "address": "Via Esempio 18",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Centro Storico, Teatro Verdi, Centro",
+       "microzone": "Centro Storico - Teatro Verdi",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/18/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Quadrilocale via Esempio 18, Centro Storico - Teatro Verdi, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/125273413/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 125119803,
+    "uuid": "7f422c35-4242-58a1-a400-be517c695aa1",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 525000,
+     "formattedValue": "€ 525.000",
+     "priceRange": "oltre 500.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "2",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "5",
+       "value": "5°, con ascensore",
+       "floorOnlyValue": "5",
+       "ga4FloorValue": "5"
+      },
+      "ga4Condition": "Buono / Abitabile",
+      "price": {
+       "visible": true,
+       "value": 525000,
+       "formattedValue": "€ 525.000",
+       "priceRange": "oltre 500.000 &euro;"
+      },
+      "rooms": "3",
+      "elevator": true,
+      "surface": "131 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "typologyGA4Translation": "Appartamento",
+      "seaDistanceValue": "500 m",
+      "views": [
+       {
+        "id": 5,
+        "name": "panoramica"
+       }
+      ],
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "3",
+      "location": {
+       "address": "Via Esempio 19",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Centro Storico, Teatro Verdi, Centro",
+       "microzone": "Centro",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/19/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Trilocale via Esempio 19, Centro, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/125119803/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 124664277,
+    "uuid": "36d34d4b-d5c8-55e0-aed8-8d5e015e62ca",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 265000,
+     "formattedValue": "€ 265.000",
+     "priceRange": "200.001 - 300.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "1",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "1",
+       "value": "1°, con ascensore",
+       "floorOnlyValue": "1",
+       "ga4FloorValue": "1"
+      },
+      "ga4Condition": "Ottimo / Ristrutturato",
+      "price": {
+       "visible": true,
+       "value": 265000,
+       "formattedValue": "€ 265.000",
+       "priceRange": "200.001 - 300.000 &euro;"
+      },
+      "rooms": "2",
+      "elevator": true,
+      "surface": "55 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "ga4Garage": "1 posto auto",
+      "typologyGA4Translation": "Appartamento",
+      "seaDistanceValue": "500 m",
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "1",
+      "location": {
+       "address": "Via Esempio 20",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Arbostella, Arechi, Zona Industriale, San Leonardo",
+       "microzone": "Arbostella - Arechi",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/20/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Bilocale via Esempio 20, Arbostella - Arechi, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/124664277/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 120453068,
+    "uuid": "7eaab351-51c8-5a6e-aa50-e9455f08b745",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 450000,
+     "formattedValue": "€ 450.000",
+     "priceRange": "300.001 - 500.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "2",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "",
+       "value": "2 piani: Piano terra, 1°",
+       "floorOnlyValue": "piano terra, 1",
+       "ga4FloorValue": "piano terra, 1"
+      },
+      "ga4Condition": "Ottimo / Ristrutturato",
+      "price": {
+       "visible": true,
+       "value": 450000,
+       "formattedValue": "€ 450.000",
+       "priceRange": "300.001 - 500.000 &euro;"
+      },
+      "rooms": "4",
+      "surface": "98 m²",
+      "typology": {
+       "id": 26,
+       "name": "Villa a schiera"
+      },
+      "typologyGA4Translation": "Villetta a schiera",
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "3",
+      "location": {
+       "address": "Via Esempio 21",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Pastena, Pastena Alta, Mercatello, Mariconda",
+       "microzone": "Pastena - Pastena Alta",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      }
+     }
+    ],
+    "title": "Villa via Esempio 21, Pastena - Pastena Alta, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 26,
+     "name": "Villa a schiera"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/120453068/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 120152082,
+    "uuid": "b2a10002-07e1-58cb-925e-549a2f7124fa",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 279000,
+     "formattedValue": "€ 279.000",
+     "priceRange": "200.001 - 300.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "2",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "2",
+       "value": "2°, con ascensore",
+       "floorOnlyValue": "2",
+       "ga4FloorValue": "2"
+      },
+      "ga4Condition": "Da ristrutturare",
+      "price": {
+       "visible": true,
+       "value": 279000,
+       "formattedValue": "€ 279.000",
+       "priceRange": "200.001 - 300.000 &euro;"
+      },
+      "rooms": "4",
+      "elevator": true,
+      "surface": "130 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "typologyGA4Translation": "Appartamento",
+      "seaDistanceValue": "1.000 m",
+      "views": [
+       {
+        "id": 1,
+        "name": "mare"
+       },
+       {
+        "id": 5,
+        "name": "panoramica"
+       }
+      ],
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "3",
+      "location": {
+       "address": "Via Esempio 22",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Carmine, Carmine Alto",
+       "microzone": "Carmine Alto",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/22/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Quadrilocale via Esempio 22, Carmine Alto, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/120152082/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 117268509,
+    "uuid": "6eda180a-6b66-5d6d-9de2-85c1d10bfce1",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": true,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 400000,
+     "formattedValue": "€ 400.000",
+     "priceRange": "300.001 - 500.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "2",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "2",
+       "value": "2°",
+       "floorOnlyValue": "2",
+       "ga4FloorValue": "2"
+      },
+      "ga4Condition": "Buono / Abitabile",
+      "price": {
+       "visible": true,
+       "value": 400000,
+       "formattedValue": "€ 400.000",
+       "priceRange": "300.001 - 500.000 &euro;"
+      },
+      "rooms": "3",
+      "surface": "100 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "ga4Garage": "1 in box privato/box in garage, 1 posto auto",
+      "typologyGA4Translation": "Appartamento",
+      "seaDistanceValue": "500 m",
+      "views": [
+       {
+        "id": 5,
+        "name": "panoramica"
+       }
+      ],
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "2",
+      "location": {
+       "address": "Via Esempio 23",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Pastena, Pastena Alta, Mercatello, Mariconda",
+       "microzone": "Pastena - Pastena Alta",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/23/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Trilocale via Esempio 23, Pastena - Pastena Alta, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/117268509/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 115550577,
+    "uuid": "a4ff8ae1-be3e-5df3-a4b2-217f3e05349f",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": false,
+    "price": {
+     "visible": true,
+     "value": 340000,
+     "formattedValue": "€ 340.000",
+     "priceRange": "300.001 - 500.000 &euro;"
+    },
+    "properties": [
+     {
+      "isMain": true,
+      "floor": {
+       "abbreviation": "1",
+       "value": "1°",
+       "floorOnlyValue": "1",
+       "ga4FloorValue": "1"
+      },
+      "ga4Condition": "Buono / Abitabile",
+      "price": {
+       "visible": true,
+       "value": 340000,
+       "formattedValue": "€ 340.000",
+       "priceRange": "300.001 - 500.000 &euro;"
+      },
+      "surface": "70 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "typologyGA4Translation": "Appartamento",
+      "views": [
+       {
+        "id": 1,
+        "name": "mare"
+       }
+      ],
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "0",
+      "location": {
+       "address": "Via Esempio 24",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Torrione, Torrione Alto, Sala Abbagnano",
+       "microzone": "Torrione Alto - Sala Abbagnano",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/24/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Appartamento via Esempio 24, Torrione Alto - Sala Abbagnano, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/115550577/"
+   }
+  },
+  {
+   "realEstate": {
+    "dataType": "list-real-estate",
+    "id": 114856371,
+    "uuid": "e226ea20-4450-5484-afd3-8d913265c87a",
+    "advertiser": {
+     "supervisor": {
+      "type": "user"
+     },
+     "hasCallNumbers": false
+    },
+    "contract": "sale",
+    "isNew": false,
+    "luxury": true,
+    "price": {
+     "visible": true,
+     "value": 800000,
+     "formattedValue": "€ 800.000",
+     "priceRange": "oltre 500.000 &euro;"
+    },
+    "properties": [
+     {
+      "bathrooms": "2",
+      "isMain": true,
+      "floor": {
+       "abbreviation": "4",
+       "value": "4°, con ascensore",
+       "floorOnlyValue": "4",
+       "ga4FloorValue": "4"
+      },
+      "ga4Condition": "Buono / Abitabile",
+      "price": {
+       "visible": true,
+       "value": 800000,
+       "formattedValue": "€ 800.000",
+       "priceRange": "oltre 500.000 &euro;"
+      },
+      "rooms": "5+",
+      "elevator": true,
+      "surface": "200 m²",
+      "typology": {
+       "id": 14,
+       "name": "Appartamento"
+      },
+      "typologyGA4Translation": "Appartamento",
+      "seaDistanceValue": "500 m",
+      "views": [
+       {
+        "id": 10,
+        "name": "db_feature.view.id_10"
+       }
+      ],
+      "ga4Heating": "Autonomo",
+      "category": {
+       "id": 1,
+       "name": "Residenziale"
+      },
+      "bedRoomsNumber": "4",
+      "location": {
+       "address": "Via Esempio 25",
+       "region": "Campania",
+       "province": "Salerno",
+       "macrozone": "Centro Storico, Teatro Verdi, Centro",
+       "microzone": "Centro",
+       "city": "Salerno",
+       "nation": {
+        "id": "IT",
+        "name": "Italia"
+       }
+      },
+      "photo": {
+       "urls": {
+        "small": "https://pwm.im-cdn.it/image/25/xxs-c.jpg"
+       }
+      }
+     }
+    ],
+    "title": "Appartamento via Esempio 25, Centro, Salerno",
+    "type": "ad",
+    "typology": {
+     "id": 14,
+     "name": "Appartamento"
+    },
+    "hasMainProperty": false,
+    "isProjectLike": false,
+    "isMosaic": false
+   },
+   "seo": {
+    "url": "https://www.immobiliare.it/annunci/114856371/"
+   }
+  }
+ ]
+}

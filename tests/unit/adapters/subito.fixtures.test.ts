@@ -10,7 +10,7 @@ const API = 'https://hades.subito.it/v1/search/items?c=7&r=4&t=s&start=30';
 describe.each(['search-appartamenti.json', 'api-page2.json', 'search-altra-categoria.json'])('fixture %s', (name) => {
   it('non contiene dati personali', () => {
     const text = read(name);
-    for (const k of ['"name"', '"phone"', '"user_id"', '"userId"', '"shop_name"', '"body"', '"images"']) expect(text).not.toContain(k);
+    for (const k of ['"name"', '"phone"', '"user_id"', '"userId"', '"shop_name"', '"body"']) expect(text).not.toContain(k);
     expect(text).not.toMatch(PHONE);
   });
 

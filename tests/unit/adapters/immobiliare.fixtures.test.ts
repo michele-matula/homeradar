@@ -5,7 +5,7 @@ import { immobiliareAdapter as A } from '@/adapters/immobiliare';
 const read = (name: string) => readFileSync(`tests/fixtures/immobiliare/${name}`, 'utf8');
 const PHONE = /\b3\d{2}[ .]?\d{3}[ .]?\d{3,4}\b/;
 
-describe.each(['search-privati.json', 'api-listings.json', 'detail-private.json'])('fixture %s', (name) => {
+describe.each(['search-privati.json', 'api-listings.json', 'detail-private.json', 'search-salerno.json', 'api-salerno.json'])('fixture %s', (name) => {
   it('non contiene dati personali', () => {
     const text = read(name);
     expect(text).not.toContain('"phones"');

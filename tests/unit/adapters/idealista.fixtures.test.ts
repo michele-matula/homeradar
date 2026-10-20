@@ -8,7 +8,7 @@ const PHONE = /\b3\d{2}[ .]?\d{3}[ .]?\d{3,4}\b/;
 const SEARCH = 'https://www.idealista.it/vendita-case/milano-milano/?ordine=da-privati-asc';
 const DETAIL = 'https://www.idealista.it/immobile/25975303/';
 
-describe.each(['search-privati.html', 'detail-private.html', 'detail-agency.html'])('fixture %s', (name) => {
+describe.each(['search-privati.html', 'detail-private.html', 'detail-agency.html', 'search-salerno.html'])('fixture %s', (name) => {
   it('non contiene dati personali né script', () => {
     const text = read(name);
     expect(text).not.toMatch(PHONE);

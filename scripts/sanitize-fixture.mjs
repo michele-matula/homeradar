@@ -18,6 +18,8 @@ if (kind.startsWith('subito-')) {
   const FEATURES = new Set(['/price', '/size', '/room', '/floor', '/bathrooms']);
   const geoOf = (g) => g && Object.fromEntries(['region', 'city', 'town', 'zone'].filter((k) => g[k]).map((k) => [k, { id: g[k].id, value: g[k].value }]));
   const urlOf = (u, id) => `https://www.subito.it/${new URL(u).pathname.split('/')[1]}/annuncio-${id}.htm`;
+  // Solo la prima immagine, come URL finto sullo stesso server: l'adattatore la usa come copertina.
+  const fakeImage = (n) => `https://images.sbito.it/api/v1/sbt-ads-images-pro/images/00/00000000-0000-0000-0000-${String(n).padStart(12, '0')}`;
   const ad = (x, n, api) => {
     const id = /:list:(\d+)$/.exec(x.urn)?.[1];
     const c = x.category ?? {};
@@ -32,6 +34,7 @@ if (kind.startsWith('subito-')) {
       geo: geoOf(x.geo),
       urls: { default: urlOf(x.urls.default, id) },
     };
+    if (x.images?.length) out.images = [api ? { cdn_base_url: fakeImage(n) } : { cdnBaseUrl: fakeImage(n) }];
     if (api) {
       out.dates = { display: x.dates?.display };
       out.features = (x.features ?? []).filter((f) => FEATURES.has(f.uri)).map((f) => ({ uri: f.uri, values: f.values.map((v) => ({ key: v.key })) }));
@@ -103,7 +106,12 @@ if (kind.startsWith('idealista-')) {
         link.setAttribute('title', t);
         link.textContent = t;
       }
-      return scrubNode(c).outerHTML;
+      // La copertina resta come URL finto sullo stesso server (lo scrub toglie tutte le img).
+      const hasCover = /^https:\/\//.test(c.querySelector('picture.item-multimedia img')?.getAttribute('src') ?? '');
+      const clean = scrubNode(c);
+      const pic = clean.querySelector('picture.item-multimedia');
+      if (hasCover && pic) pic.innerHTML = `<img src="https://img4.idealista.it/blur/480_360_mq/0/id.pro.it.image.master/00/00/00/${i + 1}.jpg">`;
+      return clean.outerHTML;
     });
     body = `<main id="main-content"><section class="items-container items-list">\n${cards.join('\n')}\n</section></main>`;
     title = 'Fixture Idealista — ricerca';
@@ -130,6 +138,8 @@ const DROP = new Set([
   'phones', 'phone', 'displayName', 'label', 'agencyUrl', 'imageUrls', 'image', 'imageGender', 'imageType',
   'description', 'defaultDescription', 'caption', 'multimedia', 'photo', 'photos',
   'featureList', 'features', 'ga4features', 'mainFeatures', 'primaryFeatures', 'costs', 'cadastrals', 'energy',
+  // Riconducono al venditore o alla casa: immagine del telefono, testo del link con via e civico, posizione esatta.
+  'phoneUrl', 'anchor', 'latitude', 'longitude', 'marker', 'idGeoHash',
 ]);
 
 function scrub(v) {
@@ -150,18 +160,27 @@ function anonymize(re, n) {
   const properties = re.properties?.map((p, i) => (i === 0 && p.location ? { ...p, location: { ...p.location, address: `Via Esempio ${n}` } } : p));
   return { ...re, title: `${typology} via Esempio ${n}, ${zone}, ${city}`, ...(properties ? { properties } : {}) };
 }
-const anonymizeResults = (results) => results.map((r, i) => ({ ...r, realEstate: anonymize(r.realEstate, i + 1) }));
+// La copertina resta come URL finto sullo stesso server, numerato per annuncio: l'adattatore la legge.
+const withCover = (re, original, n) => {
+  if (!original?.properties?.[0]?.photo?.urls?.small || !re.properties?.[0]) return re;
+  const [first, ...rest] = re.properties;
+  return { ...re, properties: [{ ...first, photo: { urls: { small: `https://pwm.im-cdn.it/image/${n}/xxs-c.jpg` } } }, ...rest] };
+};
+const anonymizeResults = (results) => results.map((r, i) => {
+  const s = scrub(r);
+  return { ...s, realEstate: withCover(anonymize(s.realEstate, i + 1), r.realEstate, i + 1) };
+});
 
 const raw = JSON.parse(readFileSync(input, 'utf8'));
 let out;
 if (kind === 'search') {
   const q = raw.props.pageProps.dehydratedState.queries.find((x) => Array.isArray(x?.state?.data?.results));
   const d = q.state.data;
-  out = { props: { pageProps: { dehydratedState: { queries: [{ state: { data: { count: d.count, currentPage: d.currentPage, results: anonymizeResults(scrub(d.results)) } } }] } } } };
+  out = { props: { pageProps: { dehydratedState: { queries: [{ state: { data: { count: d.count, currentPage: d.currentPage, results: anonymizeResults(d.results) } } }] } } } };
 } else if (kind === 'detail') {
   out = { props: { pageProps: { detailData: { realEstate: anonymize(scrub(raw.props.pageProps.detailData.realEstate), 1) } } } };
 } else {
-  out = { count: raw.count, currentPage: raw.currentPage, results: anonymizeResults(scrub(raw.results)) };
+  out = { count: raw.count, currentPage: raw.currentPage, results: anonymizeResults(raw.results) };
 }
 
 const text = JSON.stringify(out, null, 1);
