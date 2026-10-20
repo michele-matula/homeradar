@@ -70,13 +70,13 @@ Su tutti e tre: nessun cookie, nessuna intestazione DataDome, risposta identica 
 
 ### 5.3 Annuncio salvato
 
-- `ListingRecord.coverUrl: string | null`. Campo non indicizzato: nessuna `version()` nuova dello schema Dexie. I record esistenti non lo hanno: chi lo legge tratta `undefined` come `null`.
-- In `LeadService.ingest`: `coverUrl: o.coverUrl ?? prev?.coverUrl ?? null` (una lettura senza foto non cancella la copertina nota, come per gli altri campi).
+- `ListingRecord.coverUrl?: string`: presente solo se nota, mai `null`. Così un record senza copertina ha la stessa forma prima e dopo la funzione, e l'unione dei backup non vede differenze finte tra "assente" e `null`. Campo non indicizzato: nessuna `version()` nuova dello schema Dexie.
+- In `LeadService.ingest`: copertina = `o.coverUrl ?? prev?.coverUrl`; il campo si scrive solo se c'è (una lettura senza foto non cancella la copertina nota, come per gli altri campi).
 
 ### 5.4 Backup (`src/core/backup.ts`)
 
-- `ListingSchema`: `coverUrl: z.string().nullable().optional()`, poi nel `transform` `coverUrl: coverOrNull(l.portal, l.coverUrl)`: un URL di un server non ammesso diventa `null`, non fa fallire l'importazione.
-- Unione: `coverUrl: newer.coverUrl ?? older.coverUrl ?? null`, dove `older` è l'altro dei due record.
+- `ListingSchema`: `coverUrl: z.string().nullable().optional()`, poi nel `transform` il campo resta solo se `coverOrNull(l.portal, l.coverUrl)` non è `null`: un URL di un server non ammesso sparisce, non fa fallire l'importazione.
+- Unione: copertina = `newer.coverUrl ?? older.coverUrl`, dove `older` è l'altro dei due record; il campo si scrive solo se c'è.
 - Aggiunta compatibile: `BACKUP_FORMAT_VERSION` resta 1. I backup vecchi si importano con copertina `null`.
 
 ### 5.5 Gruppi (`src/core/lead-groups.ts`)
@@ -87,7 +87,7 @@ Su tutti e tre: nessun cookie, nessuna intestazione DataDome, risposta identica 
 
 - `src/ui/sidepanel/Cover.tsx` (nuovo): riceve `covers` e `href`. Stato interno: indice della foto in prova. `<img loading="lazy" referrerPolicy="no-referrer" decoding="async" alt="">` dentro un link all'annuncio (`target="_blank" rel="noreferrer"`, `aria-label="Apri l'annuncio"`); `onError` passa alla successiva; finite le foto, o con lista vuota, riquadro neutro con `HouseIcon` (nuova in `Icons.tsx`). Quando `covers` cambia si riparte dalla prima.
 - `LeadItem.tsx`: `lead__head` e `lead__meta` vanno in una riga con la miniatura a sinistra (`lead__body`); il resto del lead non cambia.
-- `styles.css`: miniatura 96×72, `object-fit: cover`, bordo arrotondato come le altre card, colore di fondo neutro anche in tema scuro. A larghezze molto strette del pannello (sotto 300 px) la miniatura scende a 72×54.
+- `styles.css`: miniatura 96×72, `object-fit: cover`, bordo arrotondato come le altre card, fondo `var(--surface-muted)` (il pannello non ha un tema scuro). A larghezze molto strette del pannello (sotto 300 px) la miniatura scende a 72×54.
 - Il pannello è una pagina dell'estensione: la CSP predefinita di MV3 non limita `img-src`, non servono permessi nuovi.
 
 ### 5.7 Fixture e sanitizer
@@ -96,7 +96,8 @@ Su tutti e tre: nessun cookie, nessuna intestazione DataDome, risposta identica 
   - Immobiliare: tiene `photo: { urls: { small: 'https://pwm.im-cdn.it/image/<n>/xxs-c.jpg' } }` solo sulla proprietà, senza `caption` né `multimedia`; `n` è il numero progressivo dell'annuncio nella fixture.
   - Idealista: lascia nella card un solo `<picture class="item-multimedia"><img src="https://img4.idealista.it/blur/480_360_mq/0/id.pro.it.image.master/00/00/00/<n>.jpg"></picture>`; le card senza foto restano `item-multimedia_no-pictures`.
   - Subito: `images: [{ cdnBaseUrl | cdn_base_url: 'https://images.sbito.it/api/v1/sbt-ads-images-pro/images/00/00000000-0000-0000-0000-<n con 12 cifre>' }]`, solo la prima immagine, con la grafia della sorgente.
-- Le fixture si ricatturano sulla zona del pilota (Salerno) con la procedura di `docs/smoke-test.md` e passano dal sanitizer. Nessuna modifica a mano.
+- Le catture grezze esistenti di Immobiliare e Idealista non contengono le foto. Si aggiungono fixture nuove della zona del pilota (Salerno): ricerca e risposta XHR di Immobiliare, ricerca di Idealista. Passano dal sanitizer, nessuna modifica a mano. Le fixture di Milano restano come sono (copertina `null`). Quelle di Subito si rigenerano dalle catture grezze esistenti, che hanno già le immagini.
+- Idealista si cattura dal DOM mostrato (`document.documentElement.outerHTML` dalla console), non con Ctrl+S «solo HTML», e si controlla con Ctrl+U che l'`img` delle card sia già nell'HTML del server: il content script legge ogni card una volta sola, quindi una foto aggiunta dopo da JavaScript non verrebbe letta.
 
 ### 5.8 Vincolo, informativa e documenti
 
