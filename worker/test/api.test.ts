@@ -10,7 +10,7 @@ const report = (p: Record<string, unknown> = {}) => ({
     browsingDays: ['2026-10-17'], panelDays: [], statusChanges: { contacted: 1 }, recallsSet: 0, notesWritten: 0,
     exports: { xlsx: 0, csv: 0 }, firstActiveDay: '2026-10-17', lastActiveDay: '2026-10-17',
   },
-  leads: { total: 3, byPortal: { immobiliare: 3, idealista: 0, subito: 0 }, byPriority: { high: 1, medium: 1, verify: 0, none: 1 }, newLast7Days: 2 },
+  leads: { total: 3, byPortal: { immobiliare: 3, idealista: 0, subito: 0, casadaprivato: 0 }, byPriority: { high: 1, medium: 1, verify: 0, none: 1 }, newLast7Days: 2 },
   technical: { counters: { ingested: 10 }, adapterWarning: [], errors: [] },
   ...p,
 });
@@ -34,6 +34,16 @@ describe('/report', () => {
     expect((await post('/report', report({ version: '0.2.0' }))).status).toBe(204);
     const rows = await env.DB.prepare('SELECT version, code FROM reports').all();
     expect(rows.results).toEqual([{ version: '0.2.0', code: 'ROSSI-7K2P' }]);
+  });
+
+  it('accetta byPortal senza casadaprivato e quattro avvisi', async () => {
+    const r = report();
+    const body = {
+      ...r,
+      leads: { ...(r.leads as object), byPortal: { immobiliare: 3, idealista: 0, subito: 0 } },
+      technical: { counters: {}, adapterWarning: ['immobiliare', 'idealista', 'subito', 'casadaprivato'], errors: [] },
+    };
+    expect((await post('/report', body)).status).toBe(204);
   });
 
   it('scarta i campi non dichiarati', async () => {

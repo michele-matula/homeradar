@@ -19,6 +19,7 @@ L'ordine conta: il punto 7 riusa il confronto per caratteristiche del punto 6.
 | 6 | Stesso immobile su più portali | fatto | [#12](https://github.com/michele-matula/homeradar/pull/12) |
 | 7 | Ripubblicazioni | fatto | [#13](https://github.com/michele-matula/homeradar/pull/13) |
 | 8 | Misura del pilota: contatori d'uso e feedback | fatto | [#14](https://github.com/michele-matula/homeradar/pull/14) |
+| 9 | Quarto portale: CasaDaPrivato.it | da fare | |
 
 ## 1. Backup e ripristino
 
@@ -89,6 +90,18 @@ L'ordine conta: il punto 7 riusa il confronto per caratteristiche del punto 6.
 **Vincoli:** nessun dato degli annunci nel report, come oggi.
 
 **Decisione del 2026-10-17** (sostituisce "nessuna telemetria automatica"): report giornaliero inviato in automatico a un Cloudflare Worker del gestore del pilota, attivo per tutti, dichiarato nell'informativa e disattivabile; agenzie riconosciute da un codice pilota; feedback inviato dalle impostazioni allo stesso Worker; pagina admin protetta da password. Dettagli in `docs/superpowers/specs/2026-10-17-misura-pilota-design.md`.
+
+## 9. Quarto portale: CasaDaPrivato.it
+
+**Problema:** in provincia di Salerno una parte dei privati pubblica solo su CasaDaPrivato.it. Confronto del 2026-10-20 su Salerno, Battipaglia e Cava de' Tirreni (tutte le pagine dei privati di ogni portale, solo case, stesso immobile se prezzo e m² sono entro il 5%): 44 dei 73 annunci con prezzo (circa il 60%) non sono su Immobiliare, Idealista o Subito. Altri 28 sono a trattativa riservata e non si possono confrontare. In provincia gli annunci sono 648.
+
+**Cosa fare:** adattatore come quello di Idealista, sul DOM della pagina di ricerca (HTML già pronto, nessun dato JSON); ricerche per comune nel giro; badge sulle card; categoria dal percorso del link dell'annuncio; età stimata dall'ID, perché la data mostrata è quella di rinnovo.
+
+**Vincoli:** come per gli altri portali: si legge solo la pagina che l'agente apre o che il giro naviga, mai la scheda dell'annuncio, mai nomi o telefoni (anche nelle descrizioni). Fixture dal sanitizer. Il nuovo portale va aggiunto all'informativa, alzando `ONBOARDING_VERSION`.
+
+**Da decidere nella specifica:** calibrazione iniziale dell'età dall'ID; annunci senza prezzo; slug dei comuni (il sito usa il trattino basso: `salerno-cava_de_tirreni`).
+
+Sono stati scartati altri siti: Casa.it (stessi privati di Idealista, dello stesso gruppo), TrovaCasa (copia i privati di Immobiliare), Bakeca (pochissimi privati), Facebook Marketplace (serve il login, i termini vietano la raccolta automatica e mostra i nomi dei venditori).
 
 ## Fuori da questa roadmap
 

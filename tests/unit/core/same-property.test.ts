@@ -231,3 +231,9 @@ describe('groupListings per categoria', () => {
     expect(keys([rec('immobiliare', 1, { category: 'garage' }), rec('idealista', 2, { category: 'commercial' })], [])).toEqual([]);
   });
 });
+
+describe('soglia sul prezzo', () => {
+  it('prezzi sotto 10.000 € non uniscono annunci', () => {
+    expect(keys([rec('immobiliare', 1, { surfaceM2: 95, rooms: 4, currentPrice: 400 }), rec('idealista', 2, { surfaceM2: 95, rooms: 4, currentPrice: 400 })], [])).toEqual([]);
+  });
+});

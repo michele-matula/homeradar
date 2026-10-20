@@ -125,10 +125,10 @@ describe('LeadService impostazioni', () => {
 
   it('salva i portali attivi senza toccare gli altri', async () => {
     const { svc } = setup();
-    expect((await svc.getSettings()).enabledPortals).toEqual({ immobiliare: true, idealista: true, subito: true });
+    expect((await svc.getSettings()).enabledPortals).toEqual({ immobiliare: true, idealista: true, subito: true, casadaprivato: true });
     await svc.saveSettings({ enabledPortals: { subito: false } as never });
     await svc.saveSettings({ enabledPortals: { idealista: false } as never });
-    expect((await svc.getSettings()).enabledPortals).toEqual({ immobiliare: true, idealista: false, subito: false });
+    expect((await svc.getSettings()).enabledPortals).toEqual({ immobiliare: true, idealista: false, subito: false, casadaprivato: true });
   });
 });
 

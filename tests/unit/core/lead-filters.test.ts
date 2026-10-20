@@ -112,6 +112,11 @@ describe('applyQuery, isEmptyQuery, describeQuery', () => {
     expect(keys(applyQuery(leads, { text: 'navile', minPrice: null, maxPrice: null }))).toEqual(['a', 'b', 'd']);
     expect(keys(applyQuery(leads, { text: 'navile', minPrice: null, maxPrice: 250000 }))).toEqual(['a']);
   });
+  it('solo trattativa riservata: i lead senza prezzo', () => {
+    expect(keys(applyQuery(leads, { ...EMPTY_QUERY, reservedOnly: true }))).toEqual(['d']);
+    expect(isEmptyQuery({ ...EMPTY_QUERY, reservedOnly: true })).toBe(false);
+    expect(describeQuery({ ...EMPTY_QUERY, reservedOnly: true })).toEqual(['trattativa riservata']);
+  });
   it('una query di soli spazi è vuota', () => {
     expect(isEmptyQuery(EMPTY_QUERY)).toBe(true);
     expect(isEmptyQuery({ text: '  ', minPrice: null, maxPrice: null })).toBe(true);

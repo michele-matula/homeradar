@@ -1,9 +1,9 @@
-// Uso: node scripts/sanitize-fixture.mjs <search|detail|api|idealista-search|idealista-detail|subito-search|subito-api> <input> <output>
+// Uso: node scripts/sanitize-fixture.mjs <search|detail|api|idealista-search|idealista-detail|subito-search|subito-api|casadaprivato-search> <input> <output>
 // Tiene solo la parte di JSON (Immobiliare, Subito) o di HTML (Idealista) che serve all'adattatore
 // ed elimina dati personali e testi lunghi.
 import { readFileSync, writeFileSync } from 'node:fs';
 
-const KINDS = ['search', 'detail', 'api', 'idealista-search', 'idealista-detail', 'subito-search', 'subito-api'];
+const KINDS = ['search', 'detail', 'api', 'idealista-search', 'idealista-detail', 'subito-search', 'subito-api', 'casadaprivato-search'];
 const [kind, input, output] = process.argv.slice(2);
 if (!KINDS.includes(kind) || !input || !output) {
   console.error(`Uso: node scripts/sanitize-fixture.mjs <${KINDS.join('|')}> <input> <output>`);
@@ -62,6 +62,74 @@ if (kind.startsWith('subito-')) {
   const suspicious = text.match(PHONE);
   if (suspicious) console.warn(`ATTENZIONE: possibili numeri di telefono, controlla prima del commit: ${suspicious.join(', ')}`);
   writeFileSync(output, `${text}\n`);
+  console.log(`OK: ${output}`);
+  process.exit(0);
+}
+
+if (kind === 'casadaprivato-search') {
+  // Lista dei campi ammessi: l'HTML si ricostruisce da pochi campi, non si ripulisce quello vero.
+  // Descrizioni, sottotitoli liberi, vie vere, alt, preferiti e tutto il resto del sito restano fuori.
+  const { JSDOM } = await import('jsdom');
+  const { document } = new JSDOM(readFileSync(input, 'utf8')).window;
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const text = (e) => (e?.textContent ?? '').replace(/\s+/g, ' ').trim();
+  // Titolo "{tipologia} da Privato a {comune}[, {indirizzo o frazione}]": l'indirizzo diventa "Via Esempio N".
+  // Il comune si accetta solo se è quello della pagina (h1 "… a {comune}") o è fatto di sole lettere, spazi,
+  // apostrofi e trattini (max 40 caratteri, niente cifre): senza virgola, il titolo potrebbe portare un indirizzo.
+  const h1City = /.* a (.+)$/.exec(text(document.querySelector('h1.page-title')))?.[1]?.trim() ?? 'Salerno';
+  const anonymizeTitle = (title, n) => {
+    const m = /^(.+?) da Privato a ([^,]+)(,.*)?$/.exec(title.trim());
+    if (!m) return `Immobile da Privato a ${h1City}${title.includes(',') ? `, Via Esempio ${n}` : ''}`;
+    const typology = /^[\p{L} \/']+$/u.test(m[1].trim()) ? m[1].trim() : 'Immobile';
+    const city = m[2].trim();
+    const cityOk = city === h1City || (/^[\p{L} '-]+$/u.test(city) && city.length <= 40);
+    return `${typology} da Privato a ${cityOk ? city : h1City}${m[3] ? `, Via Esempio ${n}` : ''}`;
+  };
+  // Il sottotitolo è testo libero del privato: resta solo la forma "{parola} in vendita".
+  const subtitleOf = (s) => (/^[\p{L}]+ in vendita$/u.test(s) && s.length <= 40 ? s : 'Immobile in vendita');
+  const cardHtml = (item, n) => {
+    const href = item.querySelector('h3 a')?.getAttribute('href') ?? item.querySelector('div.image a')?.getAttribute('href') ?? '';
+    const m = /^\/([a-z-]+)\/.*?(\d+)$/.exec(href);
+    if (!m) throw new Error(`Link annuncio non riconosciuto: ${href}`);
+    const link = `/${m[1]}/annuncio-${m[2]}`;
+    const hasCover = (item.querySelector('img.lazyload')?.getAttribute('data-src') ?? '') !== '';
+    const cover = hasCover ? `https://static.casadaprivato.it/images/properties/mediumthumbs/${m[2]}/${n.toString(16).padStart(32, '0')}.jpg` : '';
+    const priceEl = item.querySelector('div.price span');
+    const priceText = esc(text(priceEl));
+    const price = priceEl?.querySelector('small') ? `<small>${priceText}</small>` : priceText;
+    const lis = [...item.querySelectorAll('ul.amenities > li')].map(text)
+      .filter((t) => /^\d+\+? (locali|locale|mq|bagni|bagno)$/.test(t)).map((t) => `<li>${t}</li>`);
+    return `<div class="item col-md-12"><div class="image"><a href="${link}"></a><img class="lazyload" src="/images/no-thumb.svg" data-src="${cover}"></div><div class="price"><span>${price}</span></div><div class="info"><h3><a href="${link}">${esc(anonymizeTitle(text(item.querySelector('h3 a')), n))}</a></h3><small class="subtitle">${esc(subtitleOf(text(item.querySelector('small.subtitle'))))}</small><ul class="amenities">${lis.join('')}</ul></div></div>`;
+  };
+  const listing = document.querySelector('#property-listing');
+  const parts = [];
+  if (listing) {
+    const h1 = document.querySelector('h1.page-title');
+    if (h1) parts.push(`<h1 class="page-title">${esc(text(h1))}</h1>`);
+    const counter = document.querySelector('h2');
+    if (counter) parts.push(`<h2>${esc(text(counter))}</h2>`);
+    let n = 0;
+    const rows = [];
+    for (const el of listing.querySelectorAll('h2.similar-properties, div.item')) {
+      if (el.matches('h2')) rows.push(`<h2 class="similar-properties section-title">${esc(text(el))}</h2>`);
+      else if (el.querySelector('div.price')) rows.push(cardHtml(el, ++n));
+    }
+    parts.push(`<div id="property-listing"><div class="row">\n${rows.join('\n')}\n</div></div>`);
+    const pages = [...new Set([...document.querySelectorAll('a[href*="/pagina-"]')]
+      .map((a) => /\/annunci-vendita\/[a-z0-9\/-]+\/pagina-\d+$/.exec(a.getAttribute('href').replace(/^https?:\/\/[^/]+/, ''))?.[0]).filter(Boolean))];
+    if (pages.length) parts.push(`<ul class="pagination">${pages.map((p) => `<li><a href="${p}">${p.split('-').pop()}</a></li>`).join('')}</ul>`);
+  } else {
+    const h1 = document.querySelector('h1');
+    if (h1) parts.push(`<h1>${esc(text(h1))}</h1>`);
+    const h3 = document.querySelector('.err h3');
+    if (h3) parts.push(`<h3>${esc(text(h3))}</h3>`);
+    const p = [...document.querySelectorAll('p')].find((x) => /La pagina che stai cercando/.test(x.textContent));
+    if (p) parts.push(`<p>${esc(text(p))}</p>`);
+  }
+  const out = `<!doctype html>\n<html lang="it"><head><meta charset="utf-8"><title>Fixture CasaDaPrivato — ricerca</title></head><body>\n${parts.join('\n')}\n</body></html>\n`;
+  const suspicious = out.match(PHONE);
+  if (suspicious) console.warn(`ATTENZIONE: possibili numeri di telefono, controlla prima del commit: ${suspicious.join(', ')}`);
+  writeFileSync(output, out);
   console.log(`OK: ${output}`);
   process.exit(0);
 }

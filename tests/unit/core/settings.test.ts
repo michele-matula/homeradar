@@ -13,7 +13,10 @@ describe('validateSettings', () => {
     expect(() => validateSettings({ minDropPercent: -1 })).toThrow('Ribasso minimo non valido');
     expect(() => validateSettings({ minDropPercent: 101 })).toThrow('Ribasso minimo non valido');
     expect(() => validateSettings({ retentionDays: 3 })).toThrow('Conservazione non valida');
-    expect(() => validateSettings({ enabledPortals: { immobiliare: true, idealista: 'no' as unknown as boolean, subito: true } })).toThrow('Portali attivi non validi');
+    expect(() => validateSettings({ enabledPortals: { immobiliare: true, idealista: 'no' as unknown as boolean, subito: true, casadaprivato: true } })).toThrow('Portali attivi non validi');
+  });
+  it('un portale assente dalle impostazioni salvate resta acceso', () => {
+    expect(validateSettings({ enabledPortals: { immobiliare: true, idealista: true, subito: false } as never }).enabledPortals.casadaprivato).toBe(true);
   });
   it('attiva il backup automatico di default, anche per impostazioni salvate prima', () => {
     expect(DEFAULT_SETTINGS.autoBackup).toBe(true);
@@ -25,7 +28,7 @@ describe('validateSettings', () => {
   });
   it('completa i portali attivi uno per uno e scarta chiavi sconosciute', () => {
     const s = validateSettings({ enabledPortals: { subito: false, altro: true } as unknown as Settings['enabledPortals'] });
-    expect(s.enabledPortals).toEqual({ immobiliare: true, idealista: true, subito: false });
+    expect(s.enabledPortals).toEqual({ immobiliare: true, idealista: true, subito: false, casadaprivato: true });
   });
   it('normalizza il codice pilota e rifiuta quelli non validi', () => {
     expect(validateSettings({ pilotCode: ' rossi-7k2p ' }).pilotCode).toBe('ROSSI-7K2P');

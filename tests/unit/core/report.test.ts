@@ -25,7 +25,7 @@ function lead(portal: Portal, priority: Priority, firstSeenAt: number, others: n
 function input(p: Partial<ReportInput> = {}): ReportInput {
   return {
     installId: '7f3c2a8e-1b2d-4c5e-8f90-123456789abc', pilotCode: 'ROSSI-7K2P', version: '0.1.0',
-    settings: { ...DEFAULT_SETTINGS, enabledPortals: { immobiliare: true, idealista: false, subito: true } },
+    settings: { ...DEFAULT_SETTINGS, enabledPortals: { immobiliare: true, idealista: false, subito: true, casadaprivato: false } },
     usage: { ...EMPTY_USAGE, browsingDays: ['2026-10-15', '2026-10-17'], panelDays: ['2026-10-16'] },
     diagnostics: { version: '0.1.0', counters: { ingested: 12 }, errors: [], adapterWarning: { idealista: true } },
     leads: [], now: NOW, timezoneOffset: -120, ...p,
@@ -53,6 +53,20 @@ describe('sanitizeError', () => {
   });
 });
 
+describe('schema del report', () => {
+  const base = () => buildReport(input());
+  it('accetta byPortal senza casadaprivato (estensioni precedenti)', () => {
+    const r = base();
+    const byPortal = { immobiliare: 3, idealista: 0, subito: 0 };
+    expect(UsageReportSchema.safeParse({ ...r, leads: { ...r.leads, byPortal } }).success).toBe(true);
+  });
+  it('accetta quattro avvisi adapter', () => {
+    const r = base();
+    const adapterWarning = ['immobiliare', 'idealista', 'subito', 'casadaprivato'];
+    expect(UsageReportSchema.safeParse({ ...r, technical: { ...r.technical, adapterWarning } }).success).toBe(true);
+  });
+});
+
 describe('buildReport', () => {
   it('produce un report valido con giorni, portali attivi e avvisi', () => {
     const r = buildReport(input());
@@ -75,7 +89,7 @@ describe('buildReport', () => {
     const r = buildReport(input({ leads }));
     expect(r.leads).toEqual({
       total: 3,
-      byPortal: { immobiliare: 1, idealista: 0, subito: 2 },
+      byPortal: { immobiliare: 1, idealista: 0, subito: 2, casadaprivato: 0 },
       byPriority: { high: 1, medium: 1, verify: 0, none: 1 },
       newLast7Days: 1,
     });

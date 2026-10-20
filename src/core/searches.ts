@@ -1,3 +1,4 @@
+import * as casadaprivato from '@/adapters/casadaprivato/search-urls';
 import * as idealista from '@/adapters/idealista/search-urls';
 import * as immobiliare from '@/adapters/immobiliare/search-urls';
 import * as subito from '@/adapters/subito/search-urls';
@@ -5,7 +6,7 @@ import { comuneInfo, type ComuneInfo } from '@/core/comuni';
 import { PORTALS, type ListingObservation, type Portal, type PropertyCategory, type SearchArea, type SearchSpec } from '@/shared/types';
 
 const BUILDERS: Record<Portal, { searches(c: ComuneInfo[], k: PropertyCategory[]): SearchSpec[]; pageUrl(first: string, page: number): string }> = {
-  immobiliare, idealista, subito,
+  immobiliare, idealista, subito, casadaprivato,
 };
 
 /** Tempo medio di una ricerca nel giro (prova di ritmo del 2026-10-18: caricamento più pausa). */
@@ -20,7 +21,7 @@ export function searchesFor(area: SearchArea, enabled: Record<Portal, boolean>):
 
 /** Stima per la zona, con tutti i portali: una pagina per ricerca, come nei comuni medi. */
 export function estimateMinutes(area: SearchArea): { searches: number; minutes: number } {
-  const searches = searchesFor(area, { immobiliare: true, idealista: true, subito: true }).length;
+  const searches = searchesFor(area, Object.fromEntries(PORTALS.map((p) => [p, true])) as Record<Portal, boolean>).length;
   return { searches, minutes: Math.max(1, Math.round((searches * SECONDS_PER_SEARCH) / 60)) };
 }
 

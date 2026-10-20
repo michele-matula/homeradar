@@ -73,6 +73,22 @@ Naviga a mano, senza automazione: Idealista usa DataDome.
 25. Impostazioni → "Copia report diagnostico".
     - [ ] Nessun avviso adattatore per Subito.it.
 
+## CasaDaPrivato.it
+
+Nota: i numeri progressivi dei punti sono quelli storici; i punti qui sotto hanno la sigla CDP.
+
+CDP1. Apri `https://www.casadaprivato.it/annunci-vendita/immobili/salerno-salerno` (e una pagina 2 con `/pagina-2`).
+    - [ ] Badge su ogni annuncio della ricerca; nessun badge sugli annunci dei comuni vicini (sezione "annunci simili").
+CDP2. Un annuncio a «Trattativa Riservata».
+    - [ ] Nel pannello compare senza prezzo, con "Trattativa riservata"; il filtro "Solo trattativa riservata" lo mostra.
+CDP3. Pannello ed export.
+    - [ ] Lead con etichetta "CasaDaPrivato" ed età con "~"; miniatura della foto; colonna "Portale" con "CasaDaPrivato.it"; nessun nome o telefono del venditore.
+CDP4. Impostazioni → "Copia report diagnostico".
+    - [ ] Nessun avviso adattatore per CasaDaPrivato.it.
+CDP5. Prima di ogni rilascio: aggiorna la calibrazione dell'età (`DEFAULT_CALIBRATION.casadaprivato` in `src/core/age.ts`), a mano, dal `Last-Modified` delle copertine su `static.casadaprivato.it` di annunci recenti: CasaDaPrivato non impara i punti dalla pagina.
+CDP6. Giro reale con i quattro portali su Salerno, Battipaglia e Cava de' Tirreni.
+    - [ ] Il giro tocca anche CasaDaPrivato.it (una sola ricerca per comune, tutte le categorie, si tengono solo quelle scelte); nessuna verifica anti-bot; "Giro completato".
+
 ## Backup
 
 26. Installa la build su un profilo Chrome nuovo e accetta i permessi.
@@ -188,9 +204,9 @@ Con il Worker in locale (`docs/pilot-reporting.md`, "Prova in locale") e un'este
 65. "Copia report diagnostico".
     - [ ] Ci sono le righe "Uso:" e "Invio:".
 66. Build senza `.env` (`npm run build`).
-    - [ ] Nel manifest ci sono solo i tre portali tra gli `host_permissions`; la scheda Pilota dice "Invio non configurato in questa versione".
+    - [ ] Nel manifest ci sono solo i quattro portali tra gli `host_permissions`; la scheda Pilota dice "Invio non configurato in questa versione".
 
-Se il sito è cambiato: ricattura le fixture (Immobiliare: piano MVP, Task 4; Idealista: piano 2026-10-13, Task 8; Subito: piano 2026-10-13-subito-adapter, Task 5), aggiorna schemi o selettori, riesegui `npm test`.
+Se il sito è cambiato: ricattura le fixture (Immobiliare: piano MVP, Task 4; Idealista: piano 2026-10-13, Task 8; Subito: piano 2026-10-13-subito-adapter, Task 5; CasaDaPrivato: piano 2026-10-20-casadaprivato, Task 2, con il sanitizer di tipo `casadaprivato-search`), aggiorna schemi o selettori, riesegui `npm test`.
 
 ## Giro delle ricerche
 

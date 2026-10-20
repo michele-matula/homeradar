@@ -55,6 +55,21 @@ export const DEFAULT_CALIBRATION: Record<Portal, IdDate[]> = {
     { portalId: 663_604_784, createdAt: Date.UTC(2026, 9, 7) },
     { portalId: 664_395_700, createdAt: Date.UTC(2026, 9, 13) },
   ],
+  // `Last-Modified` della copertina su `static.casadaprivato.it`, letta il 2026-10-20 su annunci della provincia di
+  // Salerno: caricamento della foto, quindi limite superiore della creazione; inviluppo inferiore. Gli ID fino a
+  // ~152 000 hanno foto del 12–13 marzo 2018 (trasloco del sito): l'estrapolazione li porta prima del 2018.
+  // Nessuna data sul sito: niente apprendimento, aggiornare a mano prima di un rilascio.
+  casadaprivato: [
+    { portalId: 214_000, createdAt: Date.UTC(2019, 2, 20) },
+    { portalId: 289_000, createdAt: Date.UTC(2020, 8, 18) },
+    { portalId: 329_000, createdAt: Date.UTC(2022, 4, 11) },
+    { portalId: 339_000, createdAt: Date.UTC(2022, 9, 21) },
+    { portalId: 400_300, createdAt: Date.UTC(2025, 5, 10) },
+    { portalId: 404_700, createdAt: Date.UTC(2025, 8, 2) },
+    { portalId: 422_500, createdAt: Date.UTC(2026, 8, 15) },
+    { portalId: 423_250, createdAt: Date.UTC(2026, 8, 30) },
+    { portalId: 424_240, createdAt: Date.UTC(2026, 9, 19) },
+  ],
 };
 
 /** Ritmo medio di nuovi ID al giorno, per i portali che imparano dagli annunci di oggi. */

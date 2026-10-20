@@ -98,4 +98,13 @@ describe('acceptLearnedPoint su Subito', () => {
   it('rifiuta un annuncio vecchio rinnovato oggi', () => {
     expect(acceptLearnedPoint({ portalId: 650_000_000, createdAt: at(20) }, pts, RATE)).toBe(false);
   });
+
+  it('CasaDaPrivato: ID recenti a ottobre 2026, ID vecchi prima del trasloco del 2018', () => {
+    const pts = DEFAULT_CALIBRATION.casadaprivato;
+    const recent = estimateCreatedAt(424_000, pts)!;
+    expect(recent).toBeGreaterThanOrEqual(Date.UTC(2026, 9, 1));
+    expect(recent).toBeLessThanOrEqual(Date.UTC(2026, 9, 20));
+    expect(estimateCreatedAt(152_000, pts)!).toBeLessThan(Date.UTC(2018, 2, 12));
+    expect(estimateCreatedAt(15_000, pts)!).toBeGreaterThan(Date.UTC(2010, 0, 1));
+  });
 });

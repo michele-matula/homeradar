@@ -127,7 +127,7 @@ export class LeadService {
           category: o.category ?? opts.searchCategory ?? prev?.category ?? 'residential',
           surfaceM2: o.surfaceM2 ?? prev?.surfaceM2 ?? null,
           rooms: o.rooms ?? prev?.rooms ?? null,
-          currentPrice: o.price ?? prev?.currentPrice ?? null,
+          currentPrice: o.priceReserved ? null : (o.price ?? prev?.currentPrice ?? null),
           portalCreatedAt: o.portalCreatedAt ?? prev?.portalCreatedAt ?? null,
           estimatedCreatedAt: estimateCreatedAt(o.portalId, pointsFor(o.portal)),
           lastDrop: drop ?? prev?.lastDrop ?? null,

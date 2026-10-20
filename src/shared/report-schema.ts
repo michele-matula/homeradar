@@ -5,7 +5,7 @@ import { z } from 'zod';
 export const PILOT_CODE_RE = /^[A-Z0-9-]{4,32}$/;
 export const FEEDBACK_MAX = 2000;
 
-const portal = z.enum(['immobiliare', 'idealista', 'subito']);
+const portal = z.enum(['immobiliare', 'idealista', 'subito', 'casadaprivato']);
 const priority = z.enum(['high', 'medium', 'verify', 'none']);
 const status = z.enum(['new', 'to_contact', 'contacted', 'discarded']);
 const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
@@ -21,7 +21,7 @@ export const UsageReportSchema = z.object({
   version,
   sentAt: z.number().int(),
   timezoneOffset: z.number().int().min(-900).max(900),
-  enabledPortals: z.array(portal).max(3),
+  enabledPortals: z.array(portal).max(4),
   usage: z.object({
     browsingDays: z.array(day).max(400),
     panelDays: z.array(day).max(400),
@@ -34,13 +34,13 @@ export const UsageReportSchema = z.object({
   }),
   leads: z.object({
     total: count,
-    byPortal: z.record(portal, count),
+    byPortal: z.partialRecord(portal, count),
     byPriority: z.record(priority, count),
     newLast7Days: count,
   }),
   technical: z.object({
     counters: z.record(z.string().max(40), count),
-    adapterWarning: z.array(portal).max(3),
+    adapterWarning: z.array(portal).max(4),
     errors: z.array(z.object({ at: z.number().int(), message: z.string().max(200) })).max(20),
   }),
 });

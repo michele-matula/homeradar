@@ -13,6 +13,10 @@ Da `worker/`:
 5. `npx wrangler secret put ADMIN_PASSWORD` (una password lunga, solo tua).
 6. `npx wrangler deploy`: annota l'indirizzo `https://homeradar-pilot.<account>.workers.dev/`.
 
+## Aggiornare il Worker prima dell'estensione
+
+Quando lo schema del report cambia (per esempio un nuovo portale nell'enum, come `casadaprivato`), ridistribuisci il Worker (`npx wrangler deploy` da `worker/`) **prima** di consegnare la nuova estensione: altrimenti rifiuterebbe i report delle estensioni nuove (il vecchio Worker non conosce `casadaprivato`). Con `byPortal` come `partialRecord` il Worker nuovo accetta i report sia delle estensioni vecchie (senza `casadaprivato`) sia di quelle nuove.
+
 ## Build dell'estensione per il pilota
 
 Nella radice del repository crea `.env` (ignorato da git):

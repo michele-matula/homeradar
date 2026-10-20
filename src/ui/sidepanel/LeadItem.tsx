@@ -36,7 +36,7 @@ export function LeadItem({ lead, now, onChange, onDelete, onSplit }: Props) {
   };
   useEffect(() => setNotes(state.notes), [state.notes]);
 
-  const price = listing.currentPrice != null ? `€ ${formatEuro(listing.currentPrice)}` : 'Prezzo n.d.';
+  const price = listing.currentPrice != null ? `€ ${formatEuro(listing.currentPrice)}` : 'Trattativa riservata';
   const visits = `Visto ${listing.seenCount} ${listing.seenCount === 1 ? 'volta' : 'volte'}`;
 
   return (
@@ -89,7 +89,7 @@ export function LeadItem({ lead, now, onChange, onDelete, onSplit }: Props) {
                   )}
                   <span className="sources__facts">
                     {[
-                      s.listing.currentPrice != null ? `€ ${formatEuro(s.listing.currentPrice)}` : 'Prezzo n.d.',
+                      s.listing.currentPrice != null ? `€ ${formatEuro(s.listing.currentPrice)}` : 'Trattativa riservata',
                       s.listing.surfaceM2 != null ? `${s.listing.surfaceM2} m²` : null,
                       s.evaluation.ageDays != null ? `${s.evaluation.ageEstimated ? '~' : ''}${s.evaluation.ageDays} gg` : null,
                     ].filter(Boolean).join(' · ')}

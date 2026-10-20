@@ -45,6 +45,8 @@ const PORTAL_HELP: Record<Portal, string> = {
     "Legge gli annunci delle ricerche che apri su Idealista.it. Il portale non mostra la data di pubblicazione: l'età è stimata (indicata con «~»). Ordinare ogni tanto per «più recenti» rende la stima più precisa. Con «Cerca» legge anche le ricerche della tua zona.",
   subito:
     "Legge i risultati delle ricerche nella categoria Immobili di Subito.it. La data mostrata da Subito è quella dell'ultimo rinnovo, non della pubblicazione: l'età è stimata (indicata con «~»). Con «Cerca» legge anche le ricerche della tua zona.",
+  casadaprivato:
+    "Legge gli annunci delle ricerche che apri su CasaDaPrivato.it, dove pubblicano solo privati. Il portale mostra solo la data dell'ultimo aggiornamento: l'età è stimata (indicata con «~»). Gli annunci a trattativa riservata compaiono senza prezzo. Con «Cerca» legge anche le ricerche della tua zona.",
 };
 
 /** `File.text()` manca in alcuni ambienti (jsdom): in quel caso si passa da FileReader. */

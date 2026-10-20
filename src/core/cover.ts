@@ -8,6 +8,7 @@ const COVER_HOSTS: Record<Portal, (host: string) => boolean> = {
   immobiliare: (h) => h === 'pwm.im-cdn.it',
   idealista: (h) => /^img\d*\.idealista\.it$/.test(h),
   subito: (h) => h === 'images.sbito.it',
+  casadaprivato: (h) => h === 'static.casadaprivato.it',
 };
 
 /** Regola di Subito per la miniatura (~10 KB): senza `rule` il server risponde 400. */

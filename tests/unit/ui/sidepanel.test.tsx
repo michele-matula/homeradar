@@ -325,9 +325,10 @@ describe('App', () => {
   });
 
   it('selezionare tutti i siti equivale a "Tutti i siti"', async () => {
-    render(<App api={fakeApi([lead(1, 'high'), from('subito', lead(2, 'high')), from('idealista', lead(3, 'high'))])} />);
+    render(<App api={fakeApi([lead(1, 'high'), from('subito', lead(2, 'high')), from('idealista', lead(3, 'high')), from('casadaprivato', lead(4, 'high'))])} />);
     fireEvent.click(await screen.findByRole('button', { name: 'Immobiliare (1)' }));
     fireEvent.click(screen.getByRole('button', { name: 'Idealista (1)' }));
+    fireEvent.click(screen.getByRole('button', { name: 'CasaDaPrivato (1)' }));
     fireEvent.click(screen.getByRole('button', { name: 'Subito (1)' }));
     expect(screen.getByRole('button', { name: 'Tutti i siti' }).getAttribute('aria-pressed')).toBe('true');
     expect(screen.getByRole('button', { name: 'Subito (1)' }).getAttribute('aria-pressed')).toBe('false');
@@ -341,7 +342,7 @@ describe('App', () => {
     expect((subito as HTMLInputElement).checked).toBe(true);
     fireEvent.click(subito);
     expect(await screen.findByText('Subito.it disattivato')).toBeTruthy();
-    expect(api.saveSettings).toHaveBeenCalledWith({ ...DEFAULT_SETTINGS, enabledPortals: { immobiliare: true, idealista: true, subito: false } });
+    expect(api.saveSettings).toHaveBeenCalledWith({ ...DEFAULT_SETTINGS, enabledPortals: { immobiliare: true, idealista: true, subito: false, casadaprivato: true } });
     expect((screen.getByRole('switch', { name: 'Subito.it' }) as HTMLInputElement).checked).toBe(false);
   });
 
@@ -437,7 +438,7 @@ describe('App', () => {
   it('mostra il banner quando l\'adattatore segnala un problema', async () => {
     render(<App api={fakeApi([], { immobiliare: true })} />);
     expect(await screen.findByText('Immobiliare.it potrebbe essere cambiato: alcuni dati non sono stati letti.')).toBeTruthy();
-    expect(screen.getByText('Nessun lead in questa scheda. Premi «Cerca» o naviga su Immobiliare.it, Idealista.it o Subito.it per raccoglierne.')).toBeTruthy();
+    expect(screen.getByText('Nessun lead in questa scheda. Premi «Cerca» o naviga su Immobiliare.it, Idealista.it, Subito.it o CasaDaPrivato.it per raccoglierne.')).toBeTruthy();
     expect(screen.queryByText(/Elimina tutti/)).toBeNull();
   });
 
@@ -491,6 +492,29 @@ describe('App', () => {
     expect(max.getAttribute('aria-invalid')).toBe('true');
     expect(min.getAttribute('aria-invalid')).toBe('false');
     expect(titles()).toEqual(['Bilocale 1', 'Bilocale 2', 'Bilocale 3']);
+  });
+
+  it('«Solo trattativa riservata»: mostra i lead senza prezzo, svuota la fascia, si spegne scrivendo un prezzo e con «Azzera filtri»', async () => {
+    const leads = [withPrice(lead(1, 'high'), 150000), at(lead(2, 'high'), { currentPrice: null })];
+    render(<App api={fakeApi(leads)} />);
+    const min = (await screen.findByLabelText('Prezzo minimo in migliaia di euro')) as HTMLInputElement;
+    expect(screen.getAllByText('Trattativa riservata')).toHaveLength(1);
+    expect(screen.queryByText('Prezzo n.d.')).toBeNull();
+    fireEvent.change(min, { target: { value: '100' } });
+    const btn = screen.getByRole('button', { name: 'Solo trattativa riservata' });
+    expect(btn.getAttribute('aria-pressed')).toBe('false');
+    fireEvent.click(btn);
+    expect(btn.getAttribute('aria-pressed')).toBe('true');
+    expect(min.value).toBe('');
+    expect(titles()).toEqual(['Bilocale 2']);
+    expect(screen.getByText('Elimina tutti «trattativa riservata» (1)')).toBeTruthy();
+    fireEvent.change(min, { target: { value: '100' } });
+    expect(btn.getAttribute('aria-pressed')).toBe('false');
+    expect(titles()).toEqual(['Bilocale 1']);
+    fireEvent.click(btn);
+    fireEvent.click(screen.getByRole('button', { name: 'Azzera filtri' }));
+    expect(btn.getAttribute('aria-pressed')).toBe('false');
+    expect(titles()).toHaveLength(2);
   });
 
   it('"Elimina tutti" riporta ricerca e prezzo, elimina solo i visibili e la conferma si annulla se cambia la ricerca', async () => {

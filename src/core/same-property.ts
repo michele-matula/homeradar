@@ -6,6 +6,8 @@ export const SURFACE_TOLERANCE_PERCENT = 5;
 export const SURFACE_TOLERANCE_M2 = 3;
 /** Scarto ammesso sul prezzo, in percentuale del minore. */
 export const PRICE_TOLERANCE_PERCENT = 5;
+/** Sotto questo prezzo (un canone, un valore a caso) un annuncio non entra nei confronti: né tra portali né nelle ripubblicazioni. */
+export const MIN_COMPARABLE_PRICE = 10_000;
 /** Ripubblicazione sullo stesso portale: il prezzo nuovo può scendere fino al 20% o salire fino al 5% rispetto al vecchio. */
 export const REPOST_MAX_DROP_PERCENT = 20;
 export const REPOST_MAX_RISE_PERCENT = 5;
@@ -42,7 +44,7 @@ interface Candidate {
 
 function candidate(listing: ListingRecord): Candidate | null {
   const { surfaceM2: m2, currentPrice: price } = listing;
-  if (m2 == null || m2 <= 0 || price == null || price <= 0) return null;
+  if (m2 == null || m2 <= 0 || price == null || price < MIN_COMPARABLE_PRICE) return null;
   return { listing, m2, price };
 }
 

@@ -35,7 +35,7 @@ async function panelWithZone(context: BrowserContext, extensionId: string): Prom
       type: 'saveSettings',
       settings: {
         ...settings,
-        enabledPortals: { immobiliare: true, idealista: false, subito: false },
+        enabledPortals: { immobiliare: true, idealista: false, subito: false, casadaprivato: false },
         searchArea: { comuni: [{ istat: '015059', name: "Cassano d'Adda", province: 'MI' }], categories: ['residential'] },
       },
     });
@@ -80,4 +80,34 @@ test('Ferma interrompe il giro', async ({ context, extensionId }) => {
   await panel.getByRole('button', { name: 'Cerca', exact: true }).click();
   await panel.getByRole('button', { name: 'Ferma' }).click();
   await expect(panel.getByText(/^Giro fermato/)).toBeVisible({ timeout: 10_000 });
+});
+
+test('Cerca: giro con il solo CasaDaPrivato acceso', async ({ context, extensionId }) => {
+  // Senza i link /pagina-N la pagina 1 è l'ultima: il giro finisce qui, senza chiedere la pagina 2 (che darebbe 404 e «in parte»).
+  const last = readFileSync('tests/fixtures/casadaprivato/search-salerno-ultima.html', 'utf8').replace(/<ul class="pagination">[\s\S]*?<\/ul>/, '');
+  expect(last).not.toContain('/pagina-');
+  await context.route('https://www.casadaprivato.it/**', (route) => {
+    const { pathname } = new URL(route.request().url());
+    if (pathname === '/annunci-vendita/immobili/salerno-salerno') return route.fulfill({ contentType: 'text/html', body: last });
+    return route.fulfill({ status: 404, body: '' });
+  });
+  const panel = await context.newPage();
+  await panel.goto(`chrome-extension://${extensionId}/sidepanel.html`);
+  await panel.evaluate(async () => {
+    const settings = (await chrome.runtime.sendMessage({ type: 'getSettings' })).data;
+    await chrome.runtime.sendMessage({
+      type: 'saveSettings',
+      settings: {
+        ...settings,
+        enabledPortals: { immobiliare: false, idealista: false, subito: false, casadaprivato: true },
+        searchArea: { comuni: [{ istat: '065116', name: 'Salerno', province: 'SA' }], categories: ['residential'] },
+      },
+    });
+  });
+  await panel.reload();
+  await panel.getByRole('button', { name: 'Cerca', exact: true }).click();
+  // Esito esatto: «Giro completato in parte» non deve passare.
+  await expect(panel.getByText(/^Giro completato( · .*)?$/)).toBeVisible({ timeout: 20_000 });
+  await expect(panel.getByText(/in parte/)).toHaveCount(0);
+  await expect(panel.getByText(/^[1-9]\d* nuovi · 0 ribassi · 0 non più visti$/)).toBeVisible();
 });

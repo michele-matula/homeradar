@@ -7,7 +7,7 @@ const DAY_MS = 86_400_000;
 const STALE_MS = 3 * DAY_MS;
 // 32 caratteri senza 0/O e 1/I: un byte modulo 32 è uniforme.
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-const PORTAL_NAMES: Record<string, string> = { immobiliare: 'Immobiliare', idealista: 'Idealista', subito: 'Subito' };
+const PORTAL_NAMES: Record<string, string> = { immobiliare: 'Immobiliare', idealista: 'Idealista', subito: 'Subito', casadaprivato: 'CasaDaPrivato' };
 
 export function generateCode(): string {
   const chars = [...crypto.getRandomValues(new Uint8Array(8))].map((b) => ALPHABET[b % ALPHABET.length]!).join('');

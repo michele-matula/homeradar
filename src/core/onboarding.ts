@@ -2,7 +2,7 @@
  * Versione dell'informativa. Si alza solo se cambia cosa viene salvato o come viene usato
  * (es. nuovi dati del lead): l'agente deve riconfermare. Refusi e legenda non la alzano.
  */
-export const ONBOARDING_VERSION = 7;
+export const ONBOARDING_VERSION = 8;
 
 /** Voci del riquadro "Cosa è cambiato", per versione dell'informativa. */
 export const ONBOARDING_CHANGES: Record<number, string[]> = {
@@ -17,6 +17,9 @@ export const ONBOARDING_CHANGES: Record<number, string[]> = {
   ],
   7: [
     'HomeRadar ora salva il link della foto di copertina degli annunci e la mostra nel pannello: la foto si carica dai server delle immagini del portale quando apri il pannello, non viene copiata sul tuo computer.',
+  ],
+  8: [
+    "HomeRadar ora legge anche le ricerche di CasaDaPrivato.it, dove pubblicano solo privati. Salva gli stessi dati degli altri portali, mai nomi, telefoni o descrizioni; l'età è stimata (indicata con «~») e gli annunci a trattativa riservata compaiono senza prezzo.",
   ],
 };
 
