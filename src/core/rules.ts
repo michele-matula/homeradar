@@ -15,6 +15,7 @@ const VERIFY_REASON: Record<Portal, string> = {
   immobiliare: "Età da verificare: apri l'annuncio",
   idealista: 'Età stimata vicina alla soglia',
   subito: 'Età stimata vicina alla soglia',
+  casadaprivato: 'Età stimata vicina alla soglia',
 };
 
 interface AgeFacts {

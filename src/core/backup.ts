@@ -36,7 +36,7 @@ export interface BackupFile extends BackupData {
   extensionVersion: string;
 }
 
-const PORTAL_DOMAINS: Record<Portal, string> = { immobiliare: 'immobiliare.it', idealista: 'idealista.it', subito: 'subito.it' };
+const PORTAL_DOMAINS: Record<Portal, string> = { immobiliare: 'immobiliare.it', idealista: 'idealista.it', subito: 'subito.it', casadaprivato: 'casadaprivato.it' };
 
 /** Il link dell'annuncio viene mostrato nel pannello: solo https verso il dominio del suo portale. */
 function isPortalUrl(url: string, portal: Portal): boolean {
@@ -103,7 +103,7 @@ const SplitSchema = z.object({ a: z.string(), b: z.string(), at: num }).refine((
 
 const SettingsSchema = z.object({
   minAgeDays: num.optional(), minDropPercent: num.optional(), retentionDays: num.optional(), autoBackup: z.boolean().optional(),
-  enabledPortals: z.object({ immobiliare: z.boolean().optional(), idealista: z.boolean().optional(), subito: z.boolean().optional() }).optional(),
+  enabledPortals: z.object({ immobiliare: z.boolean().optional(), idealista: z.boolean().optional(), subito: z.boolean().optional(), casadaprivato: z.boolean().optional() }).optional(),
   pilotCode: z.string().optional(), reportingEnabled: z.boolean().optional(),
   // La validazione vera la fa validateSettings, come per gli altri campi.
   searchArea: z.object({

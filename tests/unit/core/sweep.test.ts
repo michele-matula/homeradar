@@ -93,7 +93,7 @@ describe('giro: passi', () => {
   });
 
   it('portale spento: le sue ricerche si saltano', () => {
-    const s = skipDisabled(createSweep([IMM, SUB], 0, 'id'), { immobiliare: false, idealista: true, subito: true });
+    const s = skipDisabled(createSweep([IMM, SUB], 0, 'id'), { immobiliare: false, idealista: true, subito: true, casadaprivato: true });
     expect(s.runs.map((r) => r.outcome)).toEqual(['skipped', 'pending']);
   });
 });

@@ -8,6 +8,8 @@ const SUB = 'https://images.sbito.it/api/v1/sbt-ads-images-pro/images/3f/3f48389
 describe('isCoverUrl', () => {
   it('accetta i server immagini di ogni portale', () => {
     expect(isCoverUrl('immobiliare', IMMO)).toBe(true);
+    expect(isCoverUrl('casadaprivato', 'https://static.casadaprivato.it/images/properties/mediumthumbs/1/a.jpg')).toBe(true);
+    expect(isCoverUrl('casadaprivato', 'https://www.casadaprivato.it/images/no-thumb.svg')).toBe(false);
     expect(isCoverUrl('idealista', IDEA)).toBe(true);
     expect(isCoverUrl('idealista', 'https://img.idealista.it/x.jpg')).toBe(true);
     expect(isCoverUrl('subito', `${SUB}?rule=${SUBITO_COVER_RULE}`)).toBe(true);

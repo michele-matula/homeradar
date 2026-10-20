@@ -5,7 +5,7 @@ import type { SearchArea } from '@/shared/types';
 import { obs } from './helpers';
 
 const cassano = { istat: '015059', name: "Cassano d'Adda", province: 'MI' };
-const ALL = { immobiliare: true, idealista: true, subito: true };
+const ALL = { immobiliare: true, idealista: true, subito: true, casadaprivato: true };
 
 describe('searchesFor', () => {
   it('una ricerca per comune e categoria; Subito una sola ricerca per comune', () => {
@@ -30,13 +30,13 @@ describe('searchesFor', () => {
   });
 
   it('solo portali attivi e categorie scelte; niente senza comuni', () => {
-    const specs = searchesFor({ comuni: [cassano], categories: ['residential'] }, { immobiliare: true, idealista: false, subito: true });
+    const specs = searchesFor({ comuni: [cassano], categories: ['residential'] }, { immobiliare: true, idealista: false, subito: true, casadaprivato: true });
     expect(specs.map((s) => s.key)).toEqual(['immobiliare|comune:015059|case', 'subito|comune:015059|immobili']);
     expect(searchesFor({ comuni: [], categories: ['residential'] }, ALL)).toEqual([]);
   });
 
   it('province con nome diverso sui portali: Monza e Brianza', () => {
-    const [ide, sub] = searchesFor({ comuni: [{ istat: '108033', name: 'Monza', province: 'MB' }], categories: ['residential'] }, { immobiliare: false, idealista: true, subito: true });
+    const [ide, sub] = searchesFor({ comuni: [{ istat: '108033', name: 'Monza', province: 'MB' }], categories: ['residential'] }, { immobiliare: false, idealista: true, subito: true, casadaprivato: true });
     expect(ide!.url).toBe('https://www.idealista.it/vendita-case/monza-monza-brianza/?ordine=da-privati-asc');
     expect(sub!.url).toBe('https://www.subito.it/annunci-lombardia/vendita/immobili/monza-brianza/monza/?advt=0');
   });

@@ -1,9 +1,9 @@
 import type { UsageStats } from '@/core/usage';
 
-export type Portal = 'immobiliare' | 'idealista' | 'subito';
-export const PORTALS: Portal[] = ['immobiliare', 'idealista', 'subito'];
-export const PORTAL_SITES: Record<Portal, string> = { immobiliare: 'Immobiliare.it', idealista: 'Idealista.it', subito: 'Subito.it' };
-export const PORTAL_TAGS: Record<Portal, string> = { immobiliare: 'Immobiliare', idealista: 'Idealista', subito: 'Subito' };
+export type Portal = 'immobiliare' | 'idealista' | 'subito' | 'casadaprivato';
+export const PORTALS: Portal[] = ['immobiliare', 'idealista', 'subito', 'casadaprivato'];
+export const PORTAL_SITES: Record<Portal, string> = { immobiliare: 'Immobiliare.it', idealista: 'Idealista.it', subito: 'Subito.it', casadaprivato: 'CasaDaPrivato.it' };
+export const PORTAL_TAGS: Record<Portal, string> = { immobiliare: 'Immobiliare', idealista: 'Idealista', subito: 'Subito', casadaprivato: 'CasaDaPrivato' };
 export type SellerType = 'private' | 'agency' | 'constructor' | 'unknown';
 export type PageKind = 'search' | 'detail' | 'other';
 
@@ -245,7 +245,7 @@ export const DEFAULT_SETTINGS: Settings = {
   minDropPercent: 0,
   retentionDays: 90,
   autoBackup: true,
-  enabledPortals: { immobiliare: true, idealista: true, subito: true },
+  enabledPortals: { immobiliare: true, idealista: true, subito: true, casadaprivato: true },
   pilotCode: '',
   reportingEnabled: true,
   // Di default solo le case: le altre categorie allungano il giro (una ricerca in più per comune e categoria).

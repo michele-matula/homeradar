@@ -10,7 +10,7 @@ const report = (p: Record<string, unknown> = {}) => ({
     browsingDays: ['2026-10-17'], panelDays: [], statusChanges: { contacted: 1 }, recallsSet: 0, notesWritten: 0,
     exports: { xlsx: 0, csv: 0 }, firstActiveDay: '2026-10-17', lastActiveDay: '2026-10-17',
   },
-  leads: { total: 3, byPortal: { immobiliare: 3, idealista: 0, subito: 0 }, byPriority: { high: 1, medium: 1, verify: 0, none: 1 }, newLast7Days: 2 },
+  leads: { total: 3, byPortal: { immobiliare: 3, idealista: 0, subito: 0, casadaprivato: 0 }, byPriority: { high: 1, medium: 1, verify: 0, none: 1 }, newLast7Days: 2 },
   technical: { counters: { ingested: 10 }, adapterWarning: [], errors: [] },
   ...p,
 });

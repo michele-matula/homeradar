@@ -15,7 +15,7 @@ const payload = (p: Record<string, unknown> = {}) => JSON.stringify({
     browsingDays: ['2026-10-16', '2026-10-17'], panelDays: ['2026-10-17'], statusChanges: { contacted: 4 }, recallsSet: 0, notesWritten: 0,
     exports: { xlsx: 2, csv: 1 }, firstActiveDay: '2026-10-16', lastActiveDay: '2026-10-17',
   },
-  leads: { total: 40, byPortal: { immobiliare: 40, idealista: 0, subito: 0 }, byPriority: { high: 7, medium: 0, verify: 0, none: 33 }, newLast7Days: 5 },
+  leads: { total: 40, byPortal: { immobiliare: 40, idealista: 0, subito: 0, casadaprivato: 0 }, byPriority: { high: 7, medium: 0, verify: 0, none: 33 }, newLast7Days: 5 },
   technical: { counters: {}, adapterWarning: ['idealista'], errors: [{ at: 0, message: 'result[0]: price <testo>' }] },
   ...p,
 });

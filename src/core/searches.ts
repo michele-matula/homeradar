@@ -6,6 +6,8 @@ import { PORTALS, type ListingObservation, type Portal, type PropertyCategory, t
 
 const BUILDERS: Record<Portal, { searches(c: ComuneInfo[], k: PropertyCategory[]): SearchSpec[]; pageUrl(first: string, page: number): string }> = {
   immobiliare, idealista, subito,
+  // Provvisorio: l'adattatore di CasaDaPrivato arriva col Task 4, che sostituisce questa voce.
+  casadaprivato: { searches: () => [], pageUrl: (first) => first },
 };
 
 /** Tempo medio di una ricerca nel giro (prova di ritmo del 2026-10-18: caricamento più pausa). */
@@ -20,7 +22,7 @@ export function searchesFor(area: SearchArea, enabled: Record<Portal, boolean>):
 
 /** Stima per la zona, con tutti i portali: una pagina per ricerca, come nei comuni medi. */
 export function estimateMinutes(area: SearchArea): { searches: number; minutes: number } {
-  const searches = searchesFor(area, { immobiliare: true, idealista: true, subito: true }).length;
+  const searches = searchesFor(area, Object.fromEntries(PORTALS.map((p) => [p, true])) as Record<Portal, boolean>).length;
   return { searches, minutes: Math.max(1, Math.round((searches * SECONDS_PER_SEARCH) / 60)) };
 }
 

@@ -32,7 +32,7 @@ function harness(o: Partial<SweepRunnerDeps> = {}) {
     saveState: async (s) => { stored = s; },
     plan: async () => [IMM, SUB],
     blockReason: async () => null,
-    enabledPortals: async () => ({ immobiliare: true, idealista: true, subito: true }),
+    enabledPortals: async () => ({ immobiliare: true, idealista: true, subito: true, casadaprivato: true }),
     finish: async (s) => { finished.push(s); return { outcome: s.status } as SweepResult; },
     countNew: async () => 0,
     lastResult: async () => null,

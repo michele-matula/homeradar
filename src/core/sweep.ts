@@ -11,8 +11,8 @@ export const MAX_PAGES_PER_PORTAL = 60;
 const FAST = import.meta.env.WXT_SWEEP_FAST === '1';
 export const PAGE_TIMEOUT_MS = FAST ? 5_000 : 45_000;
 export const PAUSE_MS: Record<Portal, [number, number]> = FAST
-  ? { immobiliare: [100, 200], idealista: [100, 200], subito: [100, 200] }
-  : { immobiliare: [4_000, 10_000], idealista: [8_000, 14_000], subito: [4_000, 10_000] };
+  ? { immobiliare: [100, 200], idealista: [100, 200], subito: [100, 200], casadaprivato: [100, 200] }
+  : { immobiliare: [4_000, 10_000], idealista: [8_000, 14_000], subito: [4_000, 10_000], casadaprivato: [4_000, 10_000] };
 
 export type SearchOutcome = 'pending' | 'complete' | 'capped' | 'blocked' | 'error' | 'notFound' | 'skipped';
 

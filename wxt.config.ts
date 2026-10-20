@@ -1,7 +1,7 @@
 import { loadEnv } from 'vite';
 import { defineConfig } from 'wxt';
 
-const PORTAL_HOSTS = ['https://www.immobiliare.it/*', 'https://www.idealista.it/*', 'https://www.subito.it/*'];
+const PORTAL_HOSTS = ['https://www.immobiliare.it/*', 'https://www.idealista.it/*', 'https://www.subito.it/*', 'https://www.casadaprivato.it/*'];
 
 export default defineConfig({
   srcDir: 'src',
@@ -13,7 +13,7 @@ export default defineConfig({
     const url = loadEnv(mode, process.cwd(), 'WXT_').WXT_REPORT_URL;
     return {
       name: 'HomeRadar',
-      description: 'Evidenzia gli annunci di privati maturi su Immobiliare.it, Idealista.it e Subito.it',
+      description: 'Evidenzia gli annunci di privati maturi su Immobiliare.it, Idealista.it, Subito.it e CasaDaPrivato.it',
       permissions: ['sidePanel', 'alarms', 'clipboardWrite', 'downloads', 'offscreen', 'storage'],
       host_permissions: [...PORTAL_HOSTS, ...(url ? [`${new URL(url).origin}/*`] : [])],
       action: { default_title: 'HomeRadar' },

@@ -325,9 +325,10 @@ describe('App', () => {
   });
 
   it('selezionare tutti i siti equivale a "Tutti i siti"', async () => {
-    render(<App api={fakeApi([lead(1, 'high'), from('subito', lead(2, 'high')), from('idealista', lead(3, 'high'))])} />);
+    render(<App api={fakeApi([lead(1, 'high'), from('subito', lead(2, 'high')), from('idealista', lead(3, 'high')), from('casadaprivato', lead(4, 'high'))])} />);
     fireEvent.click(await screen.findByRole('button', { name: 'Immobiliare (1)' }));
     fireEvent.click(screen.getByRole('button', { name: 'Idealista (1)' }));
+    fireEvent.click(screen.getByRole('button', { name: 'CasaDaPrivato (1)' }));
     fireEvent.click(screen.getByRole('button', { name: 'Subito (1)' }));
     expect(screen.getByRole('button', { name: 'Tutti i siti' }).getAttribute('aria-pressed')).toBe('true');
     expect(screen.getByRole('button', { name: 'Subito (1)' }).getAttribute('aria-pressed')).toBe('false');
@@ -341,7 +342,7 @@ describe('App', () => {
     expect((subito as HTMLInputElement).checked).toBe(true);
     fireEvent.click(subito);
     expect(await screen.findByText('Subito.it disattivato')).toBeTruthy();
-    expect(api.saveSettings).toHaveBeenCalledWith({ ...DEFAULT_SETTINGS, enabledPortals: { immobiliare: true, idealista: true, subito: false } });
+    expect(api.saveSettings).toHaveBeenCalledWith({ ...DEFAULT_SETTINGS, enabledPortals: { immobiliare: true, idealista: true, subito: false, casadaprivato: true } });
     expect((screen.getByRole('switch', { name: 'Subito.it' }) as HTMLInputElement).checked).toBe(false);
   });
 
@@ -437,7 +438,7 @@ describe('App', () => {
   it('mostra il banner quando l\'adattatore segnala un problema', async () => {
     render(<App api={fakeApi([], { immobiliare: true })} />);
     expect(await screen.findByText('Immobiliare.it potrebbe essere cambiato: alcuni dati non sono stati letti.')).toBeTruthy();
-    expect(screen.getByText('Nessun lead in questa scheda. Premi «Cerca» o naviga su Immobiliare.it, Idealista.it o Subito.it per raccoglierne.')).toBeTruthy();
+    expect(screen.getByText('Nessun lead in questa scheda. Premi «Cerca» o naviga su Immobiliare.it, Idealista.it, Subito.it o CasaDaPrivato.it per raccoglierne.')).toBeTruthy();
     expect(screen.queryByText(/Elimina tutti/)).toBeNull();
   });
 
