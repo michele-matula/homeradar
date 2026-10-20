@@ -134,20 +134,24 @@ if (kind.startsWith('idealista-')) {
   process.exit(0);
 }
 
-const DROP = new Set([
-  'phones', 'phone', 'displayName', 'label', 'agencyUrl', 'imageUrls', 'image', 'imageGender', 'imageType',
-  'description', 'defaultDescription', 'caption', 'multimedia', 'photo', 'photos',
-  'featureList', 'features', 'ga4features', 'mainFeatures', 'primaryFeatures', 'costs', 'cadastrals', 'energy',
-  // Riconducono al venditore o alla casa: immagine del telefono, testo del link con via e civico, posizione esatta.
-  'phoneUrl', 'anchor', 'latitude', 'longitude', 'marker', 'idGeoHash',
-]);
+// Lista dei campi ammessi, come gli schemi zod dell'adattatore (src/adapters/immobiliare/schemas.ts): tutto il resto,
+// compresi i campi che il sito aggiungerà, resta fuori. `true` tiene il valore; un oggetto descrive i figli; dentro un
+// array la forma vale per ogni elemento. La foto non è qui: la copertina finta la aggiunge withCover.
+const KEEP_REAL_ESTATE = {
+  id: true, title: true, contract: true, createdAt: true,
+  price: { visible: true, value: true, loweredPrice: { originalPrice: true, currentPrice: true, discountPercentage: true, date: true } },
+  properties: { surface: true, rooms: true, typology: { name: true }, location: { address: true, city: true, macrozone: true, microzone: true } },
+  advertiser: { agency: { type: true }, supervisor: { type: true } },
+};
+const KEEP_RESULT = { realEstate: KEEP_REAL_ESTATE, seo: { url: true } };
 
-function scrub(v) {
-  if (Array.isArray(v)) return v.map(scrub);
-  if (v && typeof v === 'object') {
-    return Object.fromEntries(Object.entries(v).filter(([k]) => !DROP.has(k)).map(([k, x]) => [k, scrub(x)]));
-  }
-  return v;
+function pick(v, shape) {
+  if (shape === true || v == null) return v;
+  if (Array.isArray(v)) return v.map((x) => pick(x, shape));
+  if (typeof v !== 'object') return undefined;
+  const out = {};
+  for (const [k, s] of Object.entries(shape)) if (k in v) out[k] = pick(v[k], s);
+  return out;
 }
 
 // Titolo e indirizzo contengono via e civico di privati: li sostituiamo con valori sintetici.
@@ -167,7 +171,7 @@ const withCover = (re, original, n) => {
   return { ...re, properties: [{ ...first, photo: { urls: { small: `https://pwm.im-cdn.it/image/${n}/xxs-c.jpg` } } }, ...rest] };
 };
 const anonymizeResults = (results) => results.map((r, i) => {
-  const s = scrub(r);
+  const s = pick(r, KEEP_RESULT);
   return { ...s, realEstate: withCover(anonymize(s.realEstate, i + 1), r.realEstate, i + 1) };
 });
 
@@ -178,7 +182,7 @@ if (kind === 'search') {
   const d = q.state.data;
   out = { props: { pageProps: { dehydratedState: { queries: [{ state: { data: { count: d.count, currentPage: d.currentPage, results: anonymizeResults(d.results) } } }] } } } };
 } else if (kind === 'detail') {
-  out = { props: { pageProps: { detailData: { realEstate: anonymize(scrub(raw.props.pageProps.detailData.realEstate), 1) } } } };
+  out = { props: { pageProps: { detailData: { realEstate: anonymize(pick(raw.props.pageProps.detailData.realEstate, KEEP_REAL_ESTATE), 1) } } } };
 } else {
   out = { count: raw.count, currentPage: raw.currentPage, results: anonymizeResults(raw.results) };
 }
