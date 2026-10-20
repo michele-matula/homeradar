@@ -10,7 +10,7 @@ function lead(key: string, priority: Priority, ageDays: number | null, status: L
     prices: [],
     market: null,
     others: [],
-    reposted: false, missing: null, missingPortals: [],
+    reposted: false, missing: null, missingPortals: [], covers: [],
   };
 }
 

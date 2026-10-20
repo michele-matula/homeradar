@@ -19,7 +19,7 @@ const lead: LeadView = {
   prices: [],
   market: null,
   others: [],
-  reposted: false, missing: null, missingPortals: [],
+  reposted: false, missing: null, missingPortals: [], covers: [],
 };
 
 describe('toExportRows', () => {

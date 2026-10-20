@@ -12,7 +12,7 @@ function lead(key: string, f: ListingFields = {}): LeadView {
     prices: [],
     market: null,
     others: [],
-    reposted: false, missing: null, missingPortals: [],
+    reposted: false, missing: null, missingPortals: [], covers: [],
   };
 }
 const keys = (ls: LeadView[]) => ls.map((l) => l.listing.key);

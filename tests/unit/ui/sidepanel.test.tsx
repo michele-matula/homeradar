@@ -31,6 +31,7 @@ function lead(id: number, priority: Priority, status: LeadStatus = 'new'): LeadV
     ],
     market: null,
     others: [],
+    covers: [],
     reposted: false, missing: null, missingPortals: [],
   };
 }
@@ -734,5 +735,15 @@ describe('revisione: filtri per categoria multipli', () => {
     expect(boxChip.disabled).toBe(false);
     fireEvent.click(boxChip);
     expect(document.querySelectorAll('li.lead').length).toBe(2);
+  });
+});
+
+describe('LeadItem: copertina', () => {
+  it("ogni lead ha la miniatura: foto se c'è, altrimenti riquadro neutro", () => {
+    const cover = 'https://pwm.im-cdn.it/image/1/xxs-c.jpg';
+    const { container, rerender } = render(<LeadItem lead={{ ...lead(1, 'high'), covers: [cover] }} now={0} onChange={() => {}} onDelete={() => {}} />);
+    expect(container.querySelector('.lead__body .cover img')!.getAttribute('src')).toBe(cover);
+    rerender(<LeadItem lead={lead(2, 'high')} now={0} onChange={() => {}} onDelete={() => {}} />);
+    expect(container.querySelector('.lead__body .cover--empty')).not.toBeNull();
   });
 });

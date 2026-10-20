@@ -318,6 +318,8 @@ export interface LeadView {
   missing: number | null;
   /** Portali da cui l'immobile è sparito mentre resta visibile su un altro. */
   missingPortals: Portal[];
+  /** Copertine del gruppo in ordine di preferenza (principale, altre fonti vive, annunci precedenti); vuoto se nessuna. */
+  covers: string[];
 }
 
 export interface Diagnostics {

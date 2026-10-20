@@ -4,6 +4,7 @@ import { aboveMarketText, isAboveMarket, marketExplanation } from '@/core/market
 import { addDays, formatRecallDate, fromDateInput, RECALL_SHORTCUTS, recallLabel, recallStatus, startOfLocalDay, toDateInput } from '@/core/recall';
 import { formatDate, formatDayMonth, formatEuro } from '@/shared/format';
 import { LEAD_STATUSES, PORTAL_TAGS, type LeadStatus, type LeadView } from '@/shared/types';
+import { Cover } from './Cover';
 import { ExternalIcon, TrashIcon } from './Icons';
 import { InfoTip } from './InfoTip';
 import { Sparkline } from './Sparkline';
@@ -57,11 +58,16 @@ export function LeadItem({ lead, now, onChange, onDelete, onSplit }: Props) {
         </div>
         <Sparkline prices={prices.map((p) => p.price)} />
       </div>
-      <div className="lead__head">
-        <div className="lead__title">{listing.title}</div>
-        <div className="lead__price">{price}</div>
+      <div className="lead__body">
+        <Cover key={lead.covers.join(' ')} covers={lead.covers} href={listing.url} />
+        <div className="lead__main">
+          <div className="lead__head">
+            <div className="lead__title">{listing.title}</div>
+            <div className="lead__price">{price}</div>
+          </div>
+          <div className="lead__meta">{[...evaluation.reasons, visits].join(' · ')}</div>
+        </div>
       </div>
-      <div className="lead__meta">{[...evaluation.reasons, visits].join(' · ')}</div>
       {isAboveMarket(market) && (
         <div className="lead__market">
           <span className="market-tag">{aboveMarketText(market)}</span>

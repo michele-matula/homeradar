@@ -187,6 +187,15 @@ button, input, select { font: inherit; color: inherit; }
 }
 .lead__price { flex: none; font-weight: 700; font-size: 14px; color: var(--brand); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .lead__meta { margin: 4px 0 10px; color: var(--muted); font-size: 12px; }
+/* Miniatura a sinistra di titolo e prezzo: stessa misura con o senza foto, così la lista non si sposta. */
+.lead__body { display: flex; align-items: flex-start; gap: 10px; }
+.lead__main { flex: 1; min-width: 0; }
+.cover {
+  flex: none; display: flex; align-items: center; justify-content: center; width: 96px; height: 72px; margin: 8px 0 10px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; background: var(--surface-muted); color: var(--subtle);
+}
+.cover__img { display: block; width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 299px) { .cover { width: 72px; height: 54px; } }
 /* Riga "sopra mercato": il fumetto della nota si apre sotto la riga, largo quanto la card. */
 .lead__market { position: relative; display: flex; align-items: center; gap: 6px; margin: -4px 0 10px; }
 .market-tag {
