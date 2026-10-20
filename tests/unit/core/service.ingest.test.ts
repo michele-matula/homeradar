@@ -157,3 +157,24 @@ describe('ingest: categoria e giro', () => {
     expect(drops).toEqual(['immobiliare:128416572', 'immobiliare:128416572']);
   });
 });
+
+describe('ingest: copertina', () => {
+  const A = 'https://pwm.im-cdn.it/image/1/xxs-c.jpg';
+  const B = 'https://pwm.im-cdn.it/image/2/xxs-c.jpg';
+
+  it('salva la copertina; senza copertina il campo non esiste', async () => {
+    const { db, svc } = setup();
+    await svc.ingest([obs({ coverUrl: A }), obs({ portalId: 2, url: 'https://www.immobiliare.it/annunci/2/', coverUrl: null })]);
+    expect((await db.listings.get('immobiliare:128416572'))!.coverUrl).toBe(A);
+    expect('coverUrl' in (await db.listings.get('immobiliare:2'))!).toBe(false);
+  });
+
+  it('una lettura senza copertina tiene quella nota, una nuova la sostituisce', async () => {
+    const { db, svc } = setup();
+    await svc.ingest([obs({ coverUrl: A })]);
+    await svc.ingest([obs({ coverUrl: null })]);
+    expect((await db.listings.get('immobiliare:128416572'))!.coverUrl).toBe(A);
+    await svc.ingest([obs({ coverUrl: B })]);
+    expect((await db.listings.get('immobiliare:128416572'))!.coverUrl).toBe(B);
+  });
+});

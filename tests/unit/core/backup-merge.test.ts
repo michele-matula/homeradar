@@ -100,3 +100,19 @@ describe('mergeBackup separazioni', () => {
     expect(mergeBackup(current, withSubito, NOW).splits).toEqual([{ a: 'idealista:2', b: 'subito:3', at: 2 }]);
   });
 });
+
+describe('mergeBackup: copertina', () => {
+  const COVER = 'https://pwm.im-cdn.it/image/1/xxs-c.jpg';
+
+  it("il record più recente senza copertina tiene quella dell'altro", () => {
+    const cur = { ...empty(), listings: [listing({ coverUrl: COVER })], leadStates: [state()] };
+    const m = mergeBackup(cur, file({ listings: [listing({ lastSeenAt: NOW + 1000 })] }), NOW);
+    expect(m.listings[0]!.coverUrl).toBe(COVER);
+  });
+
+  it('record senza copertina da entrambe le parti: nessuna scrittura', () => {
+    const cur = { ...empty(), listings: [listing()], leadStates: [state()] };
+    const m = mergeBackup(cur, file(), NOW);
+    expect(m.summary).toEqual({ added: 0, updated: 0, unchanged: 1 });
+  });
+});

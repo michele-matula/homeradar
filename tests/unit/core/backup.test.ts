@@ -163,3 +163,22 @@ describe('backup: zona di lavoro', () => {
     expect(parseBackup(JSON.parse(JSON.stringify(file))).settings?.searchArea).toEqual(settings.searchArea);
   });
 });
+
+describe('backup: copertina', () => {
+  const COVER = 'https://pwm.im-cdn.it/image/1/xxs-c.jpg';
+  const withListing = (l: ReturnType<typeof listing>): BackupData => ({ ...data(), listings: [l] });
+
+  it('andata e ritorno con la copertina', () => {
+    expect(parseBackup(roundTrip(withListing(listing({ coverUrl: COVER })))).listings[0]!.coverUrl).toBe(COVER);
+  });
+
+  it('un file senza copertina si legge senza il campo', () => {
+    expect('coverUrl' in parseBackup(roundTrip(data())).listings[0]!).toBe(false);
+  });
+
+  it('una copertina su un server non ammesso sparisce, il resto si importa', () => {
+    const parsed = parseBackup(roundTrip(withListing(listing({ coverUrl: 'https://evil.example/x.jpg' }))));
+    expect(parsed.listings).toHaveLength(1);
+    expect('coverUrl' in parsed.listings[0]!).toBe(false);
+  });
+});

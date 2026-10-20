@@ -142,6 +142,9 @@ export class LeadService {
         // Se la visita precedente è recente, lastSeenAt non avanza: altrimenti visite ravvicinate
         // spezzerebbero all'infinito la finestra di VISIT_GAP_MS.
         if (prev && now - prev.lastSeenAt < VISIT_GAP_MS) record.lastSeenAt = prev.lastSeenAt;
+        // La copertina si scrive solo se nota: una lettura senza foto (scheda, card senza img) non cancella quella salvata.
+        const cover = o.coverUrl ?? prev?.coverUrl;
+        if (cover) record.coverUrl = cover;
         await listings.put(record);
         await this.recordSnapshots(key, drop, o.price, now);
         if (!(await leadStates.get(key))) {

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { categoryFromTypology } from '@/core/category';
+import { coverOrNull } from '@/core/cover';
 import { splitId } from '@/core/same-property';
 import { validateSettings } from '@/core/settings';
 import {
@@ -65,15 +66,22 @@ const ListingSchema = z
     firstSeenAt: num, lastSeenAt: num, seenCount: int.min(1),
     // Facoltativi: i backup precedenti al giro delle ricerche non li hanno.
     category: z.enum(PROPERTY_CATEGORIES).optional(), sweepScope: text.optional(), missedSweeps: int.min(0).optional(), missingSince: num.nullable().optional(),
+    // Facoltativa: i backup precedenti alla copertina non l'hanno.
+    coverUrl: z.string().nullable().optional(),
   })
   .refine((l) => l.key === listingKey(l.portal, l.portalId) && isPortalUrl(l.url, l.portal))
-  .transform((l): ListingRecord => ({
-    ...l,
-    category: l.category ?? categoryFromTypology(l.typology) ?? 'residential',
-    sweepScope: l.sweepScope ?? null,
-    missedSweeps: l.missedSweeps ?? 0,
-    missingSince: l.missingSince ?? null,
-  }));
+  .transform(({ coverUrl, ...l }): ListingRecord => {
+    // Solo server immagini ammessi: un URL diverso sparisce senza far fallire l'importazione.
+    const cover = coverOrNull(l.portal, coverUrl);
+    return {
+      ...l,
+      category: l.category ?? categoryFromTypology(l.typology) ?? 'residential',
+      sweepScope: l.sweepScope ?? null,
+      missedSweeps: l.missedSweeps ?? 0,
+      missingSince: l.missingSince ?? null,
+      ...(cover ? { coverUrl: cover } : {}),
+    };
+  });
 
 const SnapshotSchema = z.object({ listingKey: z.string(), price: num, at: num, source: z.enum(['observed', 'declared']) });
 
@@ -246,6 +254,9 @@ export function mergeBackup(current: CurrentData, incoming: BackupData, now: num
       lastSeenAt: Math.max(cur.lastSeenAt, inc.lastSeenAt),
       seenCount: Math.max(cur.seenCount, inc.seenCount),
     };
+    // Il record più recente può non avere la copertina (backup precedente alla funzione): si tiene quella dell'altro.
+    const cover = newer.coverUrl ?? (newer === inc ? cur : inc).coverUrl;
+    if (cover) merged.coverUrl = cover;
     const changed = stable(merged) !== stable(cur);
     if (changed) out.listings.push(merged);
     if (changed || touched.has(inc.key)) out.summary.updated++;
