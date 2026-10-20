@@ -14,6 +14,7 @@ Durata: ~10 minuti. Usa `npm run build` e carica `.output/chrome-mv3` in Chrome.
    - [ ] Nessun errore; nel pannello quell'annuncio non mostra più "~" davanti ai giorni.
 5. Apri il pannello laterale.
    - [ ] Schede con conteggi; cambia lo stato di un lead e scrivi una nota; ricarica il pannello: dati mantenuti.
+   - [ ] Il lead ha la miniatura della foto dell'annuncio; un annuncio senza foto ha il riquadro con la casa.
    - [ ] Filtro per badge: scegli "Da verificare" e restano solo quei lead; i conteggi dei filtri corrispondono alla scheda; cambiando scheda il filtro resta attivo e i filtri senza annunci sono disattivati.
    - [ ] Con un filtro attivo il pulsante dice "Elimina tutti «…» (n)" e n è il numero dei lead filtrati (premi "Annulla", non confermare).
    - [ ] Ricerca: scrivi il nome di una zona o di una via che vedi nei lead (anche senza accenti); lista e numeri sulle schede si aggiornano mentre scrivi; la ✕ svuota la ricerca e torna tutto come prima.
@@ -44,6 +45,7 @@ Naviga a mano, senza automazione: Idealista usa DataDome.
     - [ ] Badge sulla nuova pagina; nessun banner "ricarica".
 14. Apri la scheda di un privato con ribasso.
     - [ ] Nel pannello il lead ha l'etichetta "Idealista" e "Ribassato del …% (… → … €) rilevato il gg/mm".
+    - [ ] Il lead ha la miniatura della foto dell'annuncio; un annuncio senza foto ha il riquadro con la casa.
 15. Apri `?ordine=pubblicazione-desc` (prima pagina), poi Impostazioni → "Copia report diagnostico".
     - [ ] Il report dice "Avviso adattatore: no" e ha il contatore `domScans`.
 16. Export XLSX/CSV.
@@ -65,6 +67,7 @@ Naviga a mano, senza automazione: Idealista usa DataDome.
     - [ ] Nessun banner, nessun errore `[HomeRadar]` in console.
 23. Pannello.
     - [ ] Lead con etichetta "Subito" ed età con "~"; vicino alla soglia "Età incerta".
+    - [ ] Il lead ha la miniatura della foto dell'annuncio; un annuncio senza foto ha il riquadro con la casa.
 24. Export XLSX/CSV.
     - [ ] Colonna "Portale" con "Subito.it"; nessun nome o telefono del venditore.
 25. Impostazioni → "Copia report diagnostico".

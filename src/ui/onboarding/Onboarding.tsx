@@ -123,7 +123,7 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
         <ul>
           <li>
             Gli annunci di privati che vedi nelle ricerche: titolo, indirizzo completo (via e civico, come pubblicato
-            nell'annuncio), città e zona, tipologia, m², locali, prezzo e link.
+            nell'annuncio), città e zona, tipologia, m², locali, prezzo, link e link della foto di copertina.
           </li>
           <li>Lo storico dei prezzi, per riconoscere i ribassi.</li>
           <li>
@@ -160,6 +160,10 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
           <li>
             Annunci, stati e note restano solo nel tuo browser, su questo computer: non vengono inviati a nessun server, nemmeno
             a chi ha creato HomeRadar.
+          </li>
+          <li>
+            Il pannello mostra la foto di copertina dei tuoi lead caricandola dai server delle immagini del portale, come
+            fa la pagina di ricerca. La foto non viene copiata sul tuo computer.
           </li>
           <li>
             Ogni giorno HomeRadar invia al gestore del pilota statistiche d'uso anonime (giorni d'uso, numero di lead, passaggi
