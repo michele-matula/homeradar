@@ -10,7 +10,7 @@ const ESTIMATED_YEARS_FROM_DAYS = 3 * 365;
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
-// Su Immobiliare la scheda contiene la data vera; su Idealista e Subito no.
+// Su Immobiliare la scheda contiene la data vera; su Idealista, Subito e CasaDaPrivato no.
 const VERIFY_REASON: Record<Portal, string> = {
   immobiliare: "Età da verificare: apri l'annuncio",
   idealista: 'Età stimata vicina alla soglia',

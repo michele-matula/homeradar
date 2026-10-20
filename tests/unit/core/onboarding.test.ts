@@ -92,9 +92,17 @@ describe('v6', () => {
 
 describe('v7', () => {
   it('la copertina dei lead richiede una nuova conferma', () => {
-    expect(ONBOARDING_VERSION).toBe(7);
-    expect(changesSince(6)).toEqual([
+    expect(ONBOARDING_VERSION).toBeGreaterThanOrEqual(7);
+    expect(changesSince(6, ONBOARDING_CHANGES, 7)).toEqual([
       'HomeRadar ora salva il link della foto di copertina degli annunci e la mostra nel pannello: la foto si carica dai server delle immagini del portale quando apri il pannello, non viene copiata sul tuo computer.',
     ]);
+  });
+});
+
+describe('v8', () => {
+  it('CasaDaPrivato richiede una nuova conferma', () => {
+    expect(ONBOARDING_VERSION).toBe(8);
+    expect(changesSince(7)).toEqual([ONBOARDING_CHANGES[8]![0]]);
+    expect(ONBOARDING_CHANGES[8]![0]).toContain('CasaDaPrivato.it');
   });
 });

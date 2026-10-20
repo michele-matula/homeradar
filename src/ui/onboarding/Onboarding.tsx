@@ -89,7 +89,7 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
         <section className="card">
           <h2 className="onboarding__title">HomeRadar è attivo</h2>
           <p>
-            Apri una ricerca su Immobiliare.it, Idealista.it o Subito.it, oppure scegli qui sotto la tua zona e premi «Cerca» nel
+            Apri una ricerca su Immobiliare.it, Idealista.it, Subito.it o CasaDaPrivato.it, oppure scegli qui sotto la tua zona e premi «Cerca» nel
             pannello: i lead dei privati si aggiornano da soli.
           </p>
           <p>Suggerimento: fissa l'icona di HomeRadar nella barra di Chrome (icona del puzzle, poi la puntina) per aprire il pannello con un clic.</p>
@@ -113,7 +113,7 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
       <section className="card">
         <h2 className="onboarding__title">Benvenuto in HomeRadar</h2>
         <p>
-          Su Immobiliare.it, Idealista.it e Subito.it HomeRadar riconosce gli annunci pubblicati da privati e li segnala, così
+          Su Immobiliare.it, Idealista.it, Subito.it e CasaDaPrivato.it HomeRadar riconosce gli annunci pubblicati da privati e li segnala, così
           trovi prima i proprietari da contattare. Lavora sulle pagine che apri tu e, quando premi «Cerca» nel pannello, sulle
           ricerche dei comuni che hai scelto: le apre in una finestra a parte e le legge come faresti tu. Non parte mai da solo.
         </p>
@@ -194,7 +194,7 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
           <li><Badge priority="none">Privato</Badge><span>annuncio di un privato senza segnali particolari.</span></li>
           <li>
             <Badge priority="none">~120 gg</Badge>
-            <span>età stimata: Idealista e Subito non pubblicano la data dell'annuncio, quindi HomeRadar la stima; su Immobiliare l'età è esatta.</span>
+            <span>età stimata: Idealista, Subito e CasaDaPrivato non pubblicano la data dell'annuncio, quindi HomeRadar la stima; su Immobiliare l'età è esatta.</span>
           </li>
           <li><Badge priority="medium">−8%</Badge><span>ribasso rispetto al prezzo più alto visto.</span></li>
           <li>
