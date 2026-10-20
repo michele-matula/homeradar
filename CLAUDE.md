@@ -47,7 +47,7 @@ Flusso Subito: `bridge (MAIN world) → content script (ISOLATED) → adapter.pa
 
 - Mai richieste HTTP dell'estensione verso le pagine e le API del portale (DataDome; rischio legale). Il pannello può mostrare la copertina dei lead salvati dai server delle immagini dei portali (`src/core/cover.ts`). Niente crawling: il giro delle ricerche parte solo dal clic dell'agente su «Cerca», naviga una scheda alla volta con pause e si ferma alla prima verifica. L'unica richiesta in uscita è il report del pilota verso `WXT_REPORT_URL`.
 - Salvare solo annunci di privati; mai telefoni o nomi del venditore.
-- Il repository è pubblico: le fixture vanno sempre passate da `scripts/sanitize-fixture.mjs`; i file grezzi stanno in `fixtures-raw/` (ignorata).
+- Il repository è pubblico: le fixture vanno sempre passate da `scripts/sanitize-fixture.mjs`; i file grezzi stanno in `fixtures-raw/` (ignorata). Per Immobiliare e Subito il sanitizer tiene solo i campi elencati (`KEEP_REAL_ESTATE`/`KEEP_RESULT`, `ad()`): se l'adattatore legge un campo nuovo, aggiungilo lì e rigenera. `tests/unit/adapters/fixtures-privacy.test.ts` controlla tutte le fixture.
 - Timestamp sempre in ms epoch UTC.
 - Se un portale cambia struttura: aggiorna gli schemi (Immobiliare, `src/adapters/immobiliare/schemas.ts`; Subito, `src/adapters/subito/schemas.ts`) o i selettori (Idealista, `src/adapters/idealista/parse.ts`), ricattura le fixture (vedi `docs/smoke-test.md`), non modificare le fixture a mano.
 

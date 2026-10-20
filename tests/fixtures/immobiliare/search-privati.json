@@ -16,23 +16,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 479000,
-            "formattedValue": "€ 479.000",
-            "priceRange": "300.001 - 500.000 &euro;"
+            "value": 479000
            },
            "properties": [
             {
              "surface": "125 m²",
              "rooms": "4",
-             "bathrooms": "2",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 1",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Porta Vittoria, Lodi",
               "microzone": "Lodi - Brenta"
              }
@@ -55,23 +50,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 360000,
-            "formattedValue": "€ 360.000",
-            "priceRange": "300.001 - 500.000 &euro;"
+            "value": 360000
            },
            "properties": [
             {
              "surface": "96 m²",
              "rooms": "4",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 2",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Bicocca, Niguarda",
               "microzone": "Greco - Segnano"
              }
@@ -94,23 +84,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 270000,
-            "formattedValue": "€ 270.000",
-            "priceRange": "200.001 - 300.000 &euro;"
+            "value": 270000
            },
            "properties": [
             {
              "surface": "65 m²",
              "rooms": "2",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 3",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Forlanini",
               "microzone": "Viale Ungheria - Mecenate"
              }
@@ -133,23 +118,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 269000,
-            "formattedValue": "€ 269.000",
-            "priceRange": "200.001 - 300.000 &euro;"
+            "value": 269000
            },
            "properties": [
             {
              "surface": "53 m²",
              "rooms": "3",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 4",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Solari, Washington",
               "microzone": "Frua"
              }
@@ -172,23 +152,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 395000,
-            "formattedValue": "€ 395.000",
-            "priceRange": "300.001 - 500.000 &euro;"
+            "value": 395000
            },
            "properties": [
             {
              "surface": "65 m²",
              "rooms": "2",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 5",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Solari, Washington",
               "microzone": "Solari"
              }
@@ -211,23 +186,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 329000,
-            "formattedValue": "€ 329.000",
-            "priceRange": "300.001 - 500.000 &euro;"
+            "value": 329000
            },
            "properties": [
             {
              "surface": "54 m²",
              "rooms": "2",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 6",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Pasteur, Rovereto",
               "microzone": "Pasteur"
              }
@@ -250,23 +220,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 430000,
-            "formattedValue": "€ 430.000",
-            "priceRange": "300.001 - 500.000 &euro;"
+            "value": 430000
            },
            "properties": [
             {
              "surface": "95 m²",
              "rooms": "5",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 7",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "San Siro, Trenno",
               "microzone": "Monte Stella"
              }
@@ -289,23 +254,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 324000,
-            "formattedValue": "€ 324.000",
-            "priceRange": "300.001 - 500.000 &euro;"
+            "value": 324000
            },
            "properties": [
             {
              "surface": "106 m²",
              "rooms": "5+",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 8",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Uptown, Cascina Merlata, Viale Certosa",
               "microzone": "Certosa"
              }
@@ -328,23 +288,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 165000,
-            "formattedValue": "€ 165.000",
-            "priceRange": "150.001 - 200.000 &euro;"
+            "value": 165000
            },
            "properties": [
             {
              "surface": "28 m²",
              "rooms": "1",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 9",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Forlanini",
               "microzone": "Viale Ungheria - Mecenate"
              }
@@ -367,23 +322,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 430000,
-            "formattedValue": "€ 430.000",
-            "priceRange": "300.001 - 500.000 &euro;"
+            "value": 430000
            },
            "properties": [
             {
              "surface": "84 m²",
              "rooms": "3",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 10",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Bande Nere, Inganni",
               "microzone": "Gambara"
              }
@@ -406,23 +356,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 1090000,
-            "formattedValue": "€ 1.090.000",
-            "priceRange": "oltre 500.000 &euro;"
+            "value": 1090000
            },
            "properties": [
             {
              "surface": "180 m²",
              "rooms": "5+",
-             "bathrooms": "2",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 11",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Centrale, Repubblica",
               "microzone": "Buenos Aires"
              }
@@ -445,23 +390,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 220000,
-            "formattedValue": "€ 220.000",
-            "priceRange": "200.001 - 300.000 &euro;"
+            "value": 220000
            },
            "properties": [
             {
              "surface": "51 m²",
              "rooms": "2",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 12",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Ponte Lambro, Santa Giulia",
               "microzone": "Santa Giulia"
              }
@@ -484,23 +424,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 240000,
-            "formattedValue": "€ 240.000",
-            "priceRange": "200.001 - 300.000 &euro;"
+            "value": 240000
            },
            "properties": [
             {
              "surface": "60 m²",
              "rooms": "2",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 13",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Precotto, Turro",
               "microzone": "Villa San Giovanni"
              }
@@ -523,23 +458,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 185000,
-            "formattedValue": "€ 185.000",
-            "priceRange": "150.001 - 200.000 &euro;"
+            "value": 185000
            },
            "properties": [
             {
              "surface": "42 m²",
              "rooms": "2",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 14",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Cimiano, Crescenzago, Adriano",
               "microzone": "Cimiano"
              }
@@ -562,23 +492,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 940000,
-            "formattedValue": "€ 940.000",
-            "priceRange": "oltre 500.000 &euro;"
+            "value": 940000
            },
            "properties": [
             {
              "surface": "153 m²",
              "rooms": "5",
-             "bathrooms": "2",
              "typology": {
-              "id": 15,
               "name": "Attico"
              },
              "location": {
               "address": "Via Esempio 15",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Affori, Bovisa",
               "microzone": "Quarto Oggiaro"
              }
@@ -601,23 +526,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 720000,
-            "formattedValue": "€ 720.000",
-            "priceRange": "oltre 500.000 &euro;"
+            "value": 720000
            },
            "properties": [
             {
              "surface": "193 m²",
              "rooms": "5",
-             "bathrooms": "2",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 16",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Ripamonti, Vigentino",
               "microzone": "Quintosole - Chiaravalle"
              }
@@ -640,23 +560,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 259000,
-            "formattedValue": "€ 259.000",
-            "priceRange": "200.001 - 300.000 &euro;"
+            "value": 259000
            },
            "properties": [
             {
              "surface": "50 m²",
              "rooms": "2",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 17",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Famagosta, Barona",
               "microzone": "Tre Castelli - Faenza"
              }
@@ -679,23 +594,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 790000,
-            "formattedValue": "€ 790.000",
-            "priceRange": "oltre 500.000 &euro;"
+            "value": 790000
            },
            "properties": [
             {
              "surface": "95 m²",
              "rooms": "5+",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 18",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Cenisio, Sarpi, Isola",
               "microzone": "Farini"
              }
@@ -718,23 +628,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 430000,
-            "formattedValue": "€ 430.000",
-            "priceRange": "300.001 - 500.000 &euro;"
+            "value": 430000
            },
            "properties": [
             {
              "surface": "90 m²",
              "rooms": "3",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 19",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "San Siro, Trenno",
               "microzone": "Gallaratese"
              }
@@ -757,23 +662,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 249000,
-            "formattedValue": "€ 249.000",
-            "priceRange": "200.001 - 300.000 &euro;"
+            "value": 249000
            },
            "properties": [
             {
              "surface": "71 m²",
              "rooms": "2",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 20",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Città Studi, Susa",
               "microzone": "Città Studi"
              }
@@ -796,23 +696,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 575000,
-            "formattedValue": "€ 575.000",
-            "priceRange": "oltre 500.000 &euro;"
+            "value": 575000
            },
            "properties": [
             {
              "surface": "96 m²",
              "rooms": "2",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 21",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Centrale, Repubblica",
               "microzone": "Centrale"
              }
@@ -835,23 +730,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 350000,
-            "formattedValue": "€ 350.000",
-            "priceRange": "300.001 - 500.000 &euro;"
+            "value": 350000
            },
            "properties": [
             {
              "surface": "120 m²",
              "rooms": "4",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 22",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "San Siro, Trenno",
               "microzone": "Gallaratese"
              }
@@ -874,22 +764,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 268000,
-            "formattedValue": "€ 268.000",
-            "priceRange": "200.001 - 300.000 &euro;"
+            "value": 268000
            },
            "properties": [
             {
              "surface": "31 m²",
              "rooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 23",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Porta Venezia, Indipendenza",
               "microzone": "Porta Venezia"
              }
@@ -912,23 +798,18 @@
            "contract": "sale",
            "price": {
             "visible": true,
-            "value": 319000,
-            "formattedValue": "€ 319.000",
-            "priceRange": "300.001 - 500.000 &euro;"
+            "value": 319000
            },
            "properties": [
             {
              "surface": "35 m²",
              "rooms": "2",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 24",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Ripamonti, Vigentino",
               "microzone": "Ripamonti - Fondazione Prada"
              }
@@ -952,31 +833,23 @@
            "price": {
             "visible": true,
             "value": 235000,
-            "formattedValue": "€ 235.000",
-            "priceRange": "200.001 - 300.000 &euro;",
             "loweredPrice": {
              "originalPrice": "€ 249.000",
              "currentPrice": "€ 235.000",
              "discountPercentage": "5,6",
-             "priceDecreasedBy": "€ 14.000",
-             "passedDays": 19,
-             "date": "21/09/2026",
-             "typologiesCount": 0
+             "date": "21/09/2026"
             }
            },
            "properties": [
             {
              "surface": "62 m²",
              "rooms": "2",
-             "bathrooms": "1",
              "typology": {
-              "id": 14,
               "name": "Appartamento"
              },
              "location": {
               "address": "Via Esempio 25",
               "city": "Milano",
-              "province": "Milano",
               "macrozone": "Precotto, Turro",
               "microzone": "Turro"
              }

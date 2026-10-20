@@ -50,3 +50,40 @@ describe('adattatore sulle fixture reali', () => {
     expect(r.observations[0]!.portalCreatedAt).toBeGreaterThan(Date.UTC(2015, 0, 1));
   });
 });
+
+// I campi che l'adattatore legge (schemas.ts), più la copertina finta: il sanitizer tiene solo questi.
+const REAL_ESTATE = [
+  'id', 'title', 'contract', 'createdAt',
+  'price.visible', 'price.value',
+  'price.loweredPrice.originalPrice', 'price.loweredPrice.currentPrice', 'price.loweredPrice.discountPercentage', 'price.loweredPrice.date',
+  'properties[].surface', 'properties[].rooms', 'properties[].typology.name',
+  'properties[].location.address', 'properties[].location.city', 'properties[].location.macrozone', 'properties[].location.microzone',
+  'properties[].photo.urls.small',
+  'advertiser.agency.type', 'advertiser.supervisor.type',
+].map((p) => `realEstate.${p}`);
+const RESULT = [...REAL_ESTATE, 'seo.url'];
+const SEARCH = 'props.pageProps.dehydratedState.queries[].state.data';
+const ALLOWED = [
+  `${SEARCH}.count`, `${SEARCH}.currentPage`, ...RESULT.map((p) => `${SEARCH}.results[].${p}`),
+  'count', 'currentPage', ...RESULT.map((p) => `results[].${p}`),
+  ...REAL_ESTATE.map((p) => `props.pageProps.detailData.${p}`),
+];
+
+/** Percorsi delle foglie, con gli indici degli array scritti come []. Un valore null o vuoto è una foglia. */
+function leafPaths(v: unknown, path = '', out: string[] = []): string[] {
+  if (Array.isArray(v)) {
+    if (!v.length) out.push(`${path}[]`);
+    for (const x of v) leafPaths(x, `${path}[]`, out);
+  } else if (v && typeof v === 'object' && Object.keys(v).length) {
+    for (const [k, x] of Object.entries(v)) leafPaths(x, path ? `${path}.${k}` : k, out);
+  } else out.push(path);
+  return out;
+}
+
+describe.each(['search-privati.json', 'api-listings.json', 'detail-private.json', 'search-salerno.json', 'api-salerno.json'])('fixture %s: solo campi ammessi', (name) => {
+  it("contiene solo i campi che l'adattatore legge", () => {
+    const extra = [...new Set(leafPaths(JSON.parse(read(name))))]
+      .filter((p) => !ALLOWED.some((a) => a === p || a.startsWith(`${p}.`) || a.startsWith(`${p}[]`)));
+    expect(extra).toEqual([]);
+  });
+});
