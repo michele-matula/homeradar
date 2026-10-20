@@ -60,10 +60,12 @@ describe('acceptObservation', () => {
     expect(acceptObservation(imm!, obs({ category: null }))).toBe(true);
     expect(acceptObservation(imm!, obs({ category: 'residential' }))).toBe(true);
   });
-  it('Subito tiene tutte le categorie', () => {
-    expect(acceptObservation(sub!, obs({ category: 'garage' }))).toBe(true);
+  it('Subito tiene solo le categorie scelte, anche se la pagina le porta tutte', () => {
+    expect(acceptObservation(sub!, obs({ category: 'garage' }))).toBe(false);
+    expect(acceptObservation(sub!, obs({ category: 'residential' }))).toBe(true);
+    expect(acceptObservation(sub!, obs({ category: null }))).toBe(true);
   });
-  it('categoria della ricerca solo se è una', () => {
+  it('categoria della ricerca solo se la pagina ne porta una', () => {
     expect(searchCategory(imm!)).toBe('residential');
     expect(searchCategory(sub!)).toBeNull();
   });

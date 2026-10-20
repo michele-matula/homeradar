@@ -221,8 +221,8 @@ export function SettingsView({ api, onSaved, download = downloadBlob, onOpenGuid
         <div className="settings__row">
           <h2 className="card__title">La tua zona</h2>
           <InfoTip label="La tua zona">
-            I comuni e le categorie che «Cerca» visita sui portali attivi, una ricerca per comune e categoria. Su Subito una
-            sola ricerca per comune porta tutte le categorie. Ogni modifica è salvata subito.
+            I comuni e le categorie che «Cerca» visita sui portali attivi, una ricerca per comune e categoria. Su Subito basta
+            una ricerca per comune, che tiene solo le categorie scelte. Ogni modifica è salvata subito.
           </InfoTip>
         </div>
         <ZoneEditor value={form.searchArea} onChange={(searchArea) => void saveNow({ searchArea }, 'Zona salvata')} />

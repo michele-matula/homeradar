@@ -33,7 +33,7 @@ export function acceptObservation(spec: SearchSpec, o: ListingObservation): bool
   return o.category == null || spec.categories.includes(o.category);
 }
 
-/** Categoria da usare se la tipologia non la dice; null se la ricerca ne comprende più di una. */
+/** Categoria da usare se la tipologia non la dice; null se la pagina ne porta più di una. */
 export function searchCategory(spec: SearchSpec): PropertyCategory | null {
-  return spec.categories.length === 1 ? spec.categories[0]! : null;
+  return !spec.mixedCategories && spec.categories.length === 1 ? spec.categories[0]! : null;
 }

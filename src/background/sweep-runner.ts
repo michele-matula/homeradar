@@ -180,7 +180,8 @@ export function createSweepRunner(d: SweepRunnerDeps) {
         if (s.sweep.current == null || !s.awaiting || (url != null && !samePage(s.expectedUrl, url))) return { observations: [], options: {} };
         const spec = s.sweep.runs[s.sweep.current]!.spec;
         const accepted = observations.filter((o) => acceptObservation(spec, o));
-        s.sweep = markSeen(s.sweep, accepted);
+        // Visti anche gli scartati: sono ancora online e non devono diventare "non più visti".
+        s.sweep = markSeen(s.sweep, observations);
         await d.saveState(s);
         const onDrop = (key: string) => {
           if (st && !st.sweep.drops.includes(key)) st.sweep = { ...st.sweep, drops: [...st.sweep.drops, key] };

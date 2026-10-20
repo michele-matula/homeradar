@@ -86,7 +86,8 @@ describe('sweep runner', () => {
     ]);
     expect(r!.observations.map((o) => o.portalId)).toEqual([1]);
     expect(r!.options).toMatchObject({ sweepScope: IMM.key, searchCategory: 'commercial' });
-    expect(h.stored()!.sweep.seen).toEqual(['immobiliare:1']);
+    // Visti tutti e due: l'annuncio scartato è ancora online, non deve diventare "non più visto".
+    expect(h.stored()!.sweep.seen).toEqual(['immobiliare:1', 'immobiliare:2']);
   });
 
   it('scarta gli annunci della scheda del giro fuori da una pagina in corso', async () => {

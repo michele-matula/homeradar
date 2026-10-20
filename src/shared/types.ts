@@ -28,8 +28,10 @@ export interface SearchSpec {
   key: string;
   /** Per il pannello: "Treviglio · Case". */
   label: string;
-  /** Categorie ammesse; una sola per Immobiliare e Idealista, tutte per Subito. */
+  /** Categorie ammesse: una sola per Immobiliare e Idealista, quelle scelte per Subito. */
   categories: PropertyCategory[];
+  /** La pagina porta tutte le categorie (Subito "immobili"): la categoria di un annuncio non si deduce dalla ricerca. */
+  mixedCategories?: boolean;
   url: string;
 }
 
