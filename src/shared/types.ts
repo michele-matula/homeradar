@@ -116,6 +116,8 @@ export interface ListingObservation {
   surfaceM2: number | null;
   rooms: number | null;
   price: number | null;
+  /** Il portale dichiara il prezzo riservato ("Trattativa Riservata" su CasaDaPrivato): azzera il prezzo salvato. */
+  priceReserved?: boolean;
   sellerType: SellerType;
   portalCreatedAt: number | null;
   lastDrop: ObservedPriceDrop | null;
