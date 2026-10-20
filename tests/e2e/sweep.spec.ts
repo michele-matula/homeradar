@@ -83,7 +83,9 @@ test('Ferma interrompe il giro', async ({ context, extensionId }) => {
 });
 
 test('Cerca: giro con il solo CasaDaPrivato acceso', async ({ context, extensionId }) => {
-  const last = readFileSync('tests/fixtures/casadaprivato/search-salerno-ultima.html', 'utf8');
+  // Senza i link /pagina-N la pagina 1 è l'ultima: il giro finisce qui, senza chiedere la pagina 2 (che darebbe 404 e «in parte»).
+  const last = readFileSync('tests/fixtures/casadaprivato/search-salerno-ultima.html', 'utf8').replace(/<ul class="pagination">[\s\S]*?<\/ul>/, '');
+  expect(last).not.toContain('/pagina-');
   await context.route('https://www.casadaprivato.it/**', (route) => {
     const { pathname } = new URL(route.request().url());
     if (pathname === '/annunci-vendita/immobili/salerno-salerno') return route.fulfill({ contentType: 'text/html', body: last });
@@ -104,6 +106,8 @@ test('Cerca: giro con il solo CasaDaPrivato acceso', async ({ context, extension
   });
   await panel.reload();
   await panel.getByRole('button', { name: 'Cerca', exact: true }).click();
-  await expect(panel.getByText(/^Giro completato/)).toBeVisible({ timeout: 20_000 });
+  // Esito esatto: «Giro completato in parte» non deve passare.
+  await expect(panel.getByText(/^Giro completato( · .*)?$/)).toBeVisible({ timeout: 20_000 });
+  await expect(panel.getByText(/in parte/)).toHaveCount(0);
   await expect(panel.getByText(/^[1-9]\d* nuovi · 0 ribassi · 0 non più visti$/)).toBeVisible();
 });

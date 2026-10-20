@@ -77,7 +77,7 @@ Naviga a mano, senza automazione: Idealista usa DataDome.
 
 Nota: i numeri progressivi dei punti sono quelli storici; i punti qui sotto hanno la sigla CDP.
 
-CDP1. Apri `https://www.casadaprivato.it/annunci-vendita/salerno/` (e una pagina 2 con `/pagina-2`).
+CDP1. Apri `https://www.casadaprivato.it/annunci-vendita/immobili/salerno-salerno` (e una pagina 2 con `/pagina-2`).
     - [ ] Badge su ogni annuncio della ricerca; nessun badge sugli annunci dei comuni vicini (sezione "annunci simili").
 CDP2. Un annuncio a «Trattativa Riservata».
     - [ ] Nel pannello compare senza prezzo, con "Trattativa riservata"; il filtro "Solo trattativa riservata" lo mostra.

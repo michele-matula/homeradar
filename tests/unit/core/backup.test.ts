@@ -103,6 +103,17 @@ describe('buildBackup / parseBackup', () => {
     });
     expect(parseBackup(raw).listings).toHaveLength(2);
   });
+
+  it('accetta un annuncio e le impostazioni di CasaDaPrivato', () => {
+    const raw = roundTrip({
+      ...data(),
+      settings: { ...DEFAULT_SETTINGS, enabledPortals: { ...DEFAULT_SETTINGS.enabledPortals, casadaprivato: true } },
+      listings: [listing({ key: 'casadaprivato:424125', portal: 'casadaprivato', portalId: 424125, url: 'https://www.casadaprivato.it/appartamenti/annuncio-424125' })],
+    });
+    const out = parseBackup(raw);
+    expect(out.listings[0]!.portal).toBe('casadaprivato');
+    expect(out.settings?.enabledPortals.casadaprivato).toBe(true);
+  });
 });
 
 describe('nomi dei file e riepilogo', () => {
