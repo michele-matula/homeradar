@@ -14,4 +14,8 @@ describe('pageProblem', () => {
   it('null su una pagina normale', () => {
     expect(pageProblem(doc('<body><ul><li>annuncio</li></ul></body>'))).toBeNull();
   });
+  it('ignora i testi dentro gli script (traduzioni in __NEXT_DATA__ di Immobiliare)', () => {
+    const next = '<script id="__NEXT_DATA__" type="application/json">{"t":"La pagina che stai cercando non è presente","u":"Al momento non siamo disponibili"}</script>';
+    expect(pageProblem(doc(`<body><ul><li>annuncio</li></ul>${next}</body>`))).toBeNull();
+  });
 });
