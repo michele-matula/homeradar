@@ -114,3 +114,17 @@ test("esporta un backup e lo reimporta dopo aver azzerato l'archivio", async ({ 
   await expect(panel.getByLabel('Note', { exact: true })).toHaveValue('richiamare giovedì');
   await expect(panel.getByLabel('Stato', { exact: true })).toHaveValue('to_contact');
 });
+
+test('il pannello mostra una miniatura per ogni lead; foto non raggiungibile → riquadro neutro', async ({ context, extensionId }) => {
+  const page = await context.newPage();
+  await page.goto(SEARCH);
+  await page.locator('[data-homeradar-badge]').first().waitFor();
+
+  const panel = await context.newPage();
+  await panel.goto(`chrome-extension://${extensionId}/sidepanel.html`);
+  await expect(panel.locator('.lead').first()).toBeVisible();
+  const leads = await panel.locator('.lead').count();
+  await expect(panel.locator('.lead .lead__body .cover')).toHaveCount(leads);
+  // Le fixture di Milano non hanno foto e le immagini sono bloccate: ogni miniatura è il riquadro neutro.
+  await expect(panel.locator('.lead .cover--empty')).toHaveCount(leads);
+});
