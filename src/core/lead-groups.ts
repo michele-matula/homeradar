@@ -123,6 +123,11 @@ export function buildLeadViews({ listings, states, snapshots, splits }: Archive,
   });
 }
 
+/** Un annuncio del gruppo è comparso per la prima volta da `since` (filtro "da questo giro"). */
+export function seenSince(v: LeadView, since: number): boolean {
+  return [v.listing, ...v.others.map((o) => o.listing)].some((x) => x.firstSeenAt >= since);
+}
+
 /** Un lead si mostra se ha segnali, è già stato lavorato o ha un richiamo: l'icona lo conta. */
 export function isListed(v: LeadView): boolean {
   return v.evaluation.priority !== 'none' || v.state.status !== 'new' || v.state.recallAt != null;

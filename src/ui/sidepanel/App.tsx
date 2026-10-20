@@ -1,6 +1,7 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { warnedPortals } from '@/core/diagnostics';
 import { applyQuery, describeQuery, isEmptyQuery, parseThousands, type LeadQuery } from '@/core/lead-filters';
+import { seenSince } from '@/core/lead-groups';
 import { groupByRecall, groupByStatus, leadCategories, leadKeys, leadPortals, PRIORITY_LABELS, RECALL_GROUP_LABELS, SORT_KEYS, SORT_LABELS, sortLeadsBy, type SortKey } from '@/core/leads';
 import { needsOnboarding } from '@/core/onboarding';
 import { isDue } from '@/core/recall';
@@ -113,7 +114,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
   const now = Date.now();
   const beforeCategories = applyQuery(leads, query).filter((l) =>
     (!missingOnly || l.missing != null || l.missingPortals.length > 0)
-    && (since == null || [l.listing, ...l.others.map((o) => o.listing)].some((x) => x.firstSeenAt >= since)));
+    && (since == null || seenSince(l, since)));
   // Le categorie si contano prima del loro filtro: così se ne può scegliere più di una.
   const applied = categories.length ? beforeCategories.filter((l) => leadCategories(l).some((c) => categories.includes(c))) : beforeCategories;
   const inTab = (list: LeadView[], t: Tab) => (t === 'recall' ? list.filter((l) => l.state.recallAt != null) : groupByStatus(list)[t]);

@@ -3,7 +3,7 @@ import { acceptLearnedPoint, DEFAULT_CALIBRATION, estimateCreatedAt, LEARN_RATE_
 import { AUTO_BACKUP_SLOTS, buildBackup, mergeBackup, parseBackup, type BackupFile } from '@/core/backup';
 import type { HomeRadarDB } from '@/core/db';
 import { warnedPortals } from '@/core/diagnostics';
-import { buildLeadViews, defaultState, isListed, mergeGroupState, type Archive } from '@/core/lead-groups';
+import { buildLeadViews, defaultState, isListed, mergeGroupState, seenSince, type Archive } from '@/core/lead-groups';
 import { leadKeys, sortLeads } from '@/core/leads';
 import { MISSING_SWEEPS, missingUpdates } from '@/core/missing';
 import { ONBOARDING_VERSION } from '@/core/onboarding';
@@ -316,9 +316,9 @@ export class LeadService {
     return stale.length;
   }
 
-  /** Annunci comparsi per la prima volta da `since` (giro o navigazione). */
-  countNewSince(since: number): Promise<number> {
-    return this.db.listings.filter((l) => l.firstSeenAt >= since).count();
+  /** Lead "Nuovi" con un annuncio comparso da `since` (giro o navigazione): quelli che mostra "Vedi i nuovi". */
+  async countNewSince(since: number): Promise<number> {
+    return (await this.listLeads()).filter((v) => v.state.status === 'new' && seenSince(v, since)).length;
   }
 
   /** Aggiorna "non più visto"; restituisce quanti annunci lo sono diventati in questo giro. */
