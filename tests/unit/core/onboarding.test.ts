@@ -85,7 +85,16 @@ describe('informativa', () => {
 
 describe('v6', () => {
   it('il giro delle ricerche richiede una nuova conferma', () => {
-    expect(ONBOARDING_VERSION).toBe(6);
+    expect(ONBOARDING_VERSION).toBeGreaterThanOrEqual(6);
     expect(changesSince(5).join(' ')).toContain('«Cerca»');
+  });
+});
+
+describe('v7', () => {
+  it('la copertina dei lead richiede una nuova conferma', () => {
+    expect(ONBOARDING_VERSION).toBe(7);
+    expect(changesSince(6)).toEqual([
+      'HomeRadar ora salva il link della foto di copertina degli annunci e la mostra nel pannello: la foto si carica dai server delle immagini del portale quando apri il pannello, non viene copiata sul tuo computer.',
+    ]);
   });
 });

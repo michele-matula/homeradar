@@ -17,7 +17,7 @@ function lead(portal: Portal, priority: Priority, firstSeenAt: number, others: n
   return {
     listing: listing(1, firstSeenAt), evaluation,
     state: { listingKey: `${portal}:1`, status: 'new', notes: 'chiamare il sig. Bianchi 3331234567', statusChangedAt: 0, updatedAt: 0, recallAt: null },
-    prices: [], market: null, reposted: false, missing: null, missingPortals: [],
+    prices: [], market: null, reposted: false, missing: null, missingPortals: [], covers: [],
     others: others.map((seen, i) => ({ listing: listing(100 + i, seen), evaluation, prices: [], previous: false })),
   };
 }

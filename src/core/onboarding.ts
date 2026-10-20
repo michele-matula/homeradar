@@ -2,7 +2,7 @@
  * Versione dell'informativa. Si alza solo se cambia cosa viene salvato o come viene usato
  * (es. nuovi dati del lead): l'agente deve riconfermare. Refusi e legenda non la alzano.
  */
-export const ONBOARDING_VERSION = 6;
+export const ONBOARDING_VERSION = 7;
 
 /** Voci del riquadro "Cosa è cambiato", per versione dell'informativa. */
 export const ONBOARDING_CHANGES: Record<number, string[]> = {
@@ -14,6 +14,9 @@ export const ONBOARDING_CHANGES: Record<number, string[]> = {
   ],
   6: [
     "Ora puoi scegliere la tua zona di lavoro (comuni e categorie) e premere «Cerca» nel pannello: HomeRadar apre le ricerche dei portali in una finestra a parte e aggiorna i lead, solo quando lo chiedi tu. Salva anche la categoria dell'immobile e segnala gli annunci che non compaiono più nei giri.",
+  ],
+  7: [
+    'HomeRadar ora salva il link della foto di copertina degli annunci e la mostra nel pannello: la foto si carica dai server delle immagini del portale quando apri il pannello, non viene copiata sul tuo computer.',
   ],
 };
 

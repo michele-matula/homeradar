@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // Gli oggetti zod scartano le chiavi non dichiarate: questa è la lista dei campi ammessi.
 // Di advertiser restano solo company e type: nome, telefono, userId e negozio non escono mai.
-// body (descrizione) e immagini non sono dichiarati.
+// body (descrizione) non è dichiarato; delle immagini resta solo la base dell'URL.
 const ValuesSchema = z.array(z.object({ key: z.string() }));
 const GeoValueSchema = z.object({ value: z.string() }).nullish();
 
@@ -13,6 +13,8 @@ export const CommonAdSchema = z.object({
   advertiser: z.object({ company: z.boolean(), type: z.number().nullish() }),
   geo: z.object({ town: GeoValueSchema, zone: GeoValueSchema }).nullish(),
   urls: z.object({ default: z.string() }),
+  // __NEXT_DATA__: cdnBaseUrl; API di hades: cdn_base_url. Una forma inattesa diventa null e non scarta l'annuncio.
+  images: z.array(z.object({ cdnBaseUrl: z.string().optional(), cdn_base_url: z.string().optional() })).nullish().catch(null),
 });
 
 /** Annuncio in __NEXT_DATA__: features indicizzate per uri, data di rinnovo in date. */

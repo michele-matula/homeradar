@@ -61,6 +61,12 @@ function byPrimary(a: LeadSource, b: LeadSource): number {
   return a.listing.key < b.listing.key ? -1 : 1;
 }
 
+/** Copertine del gruppo: principale, poi le altre fonti vive, poi gli annunci precedenti; senza vuoti né doppioni. */
+export function coversOf(members: LeadSource[]): string[] {
+  const ordered = [...members.filter((m) => !m.previous), ...members.filter((m) => m.previous)];
+  return [...new Set(ordered.map((m) => m.listing.coverUrl).filter((u): u is string => !!u))];
+}
+
 /** Un lead per immobile, senza filtri di visibilità né ordinamento. */
 export function buildLeadViews({ listings, states, snapshots, splits }: Archive, settings: Settings, now: number): LeadView[] {
   const stateByKey = new Map(states.map((s) => [s.listingKey, s]));
@@ -119,6 +125,7 @@ export function buildLeadViews({ listings, states, snapshots, splits }: Archive,
       reposted: others.some((o) => o.previous),
       missing: allGone ? Math.max(...goneHeads.map((m) => m.listing.missingSince ?? 0)) : null,
       missingPortals: allGone ? [] : [...new Set(goneHeads.map((m) => m.listing.portal))],
+      covers: coversOf(members),
     };
   });
 }

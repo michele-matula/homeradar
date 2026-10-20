@@ -2,6 +2,7 @@
 // descrizioni, nome del venditore (.professional-name) e contatti non vengono mai letti.
 import { parseEuro } from '@/adapters/immobiliare/format';
 import { categoryFromTypology } from '@/core/category';
+import { coverOrNull } from '@/core/cover';
 import type { ListingObservation, ObservationSource, ObservedPriceDrop, ParseResult, SellerType } from '@/shared/types';
 import { listingIdFromHref } from './urls';
 
@@ -59,12 +60,12 @@ function parseDrop(scope: Element, price: number | null): ObservedPriceDrop | nu
 
 function observation(
   id: number, title: string, price: number | null, features: string[], sellerType: SellerType,
-  lastDrop: ObservedPriceDrop | null, source: ObservationSource,
+  lastDrop: ObservedPriceDrop | null, coverUrl: string | null, source: ObservationSource,
 ): ListingObservation {
   const t = parseTitle(title);
   return {
     portal: 'idealista', portalId: id, url: listingUrl(id), title, address: t.address, city: t.city, zone: t.zone, typology: t.typology, category: categoryFromTypology(t.typology),
-    ...parseFeatures(features), price, sellerType, portalCreatedAt: null, lastDrop, source,
+    ...parseFeatures(features), price, sellerType, portalCreatedAt: null, lastDrop, coverUrl, source,
   };
 }
 
@@ -85,7 +86,9 @@ export function parseSearch(root: ParentNode): ParseResult {
     }
     const price = parseEuro(text(card.querySelector('.item-price')));
     const features = [...card.querySelectorAll('.item-detail')].map((d) => text(d));
-    out.observations.push(observation(id, title, price, features, sellerOfCard(card), parseDrop(card, price), 'search'));
+    // Copertina: l'src è già presente anche sulle card non ancora caricate (loading="lazy").
+    const cover = coverOrNull('idealista', card.querySelector('picture.item-multimedia img')?.getAttribute('src'));
+    out.observations.push(observation(id, title, price, features, sellerOfCard(card), parseDrop(card, price), cover, 'search'));
   });
   return out;
 }
@@ -109,7 +112,7 @@ export function parseDetail(root: ParentNode, url: string): ParseResult {
     ? 'private'
     : root.querySelector('.professional-name') ? 'agency' : 'unknown';
   const title = fullTitle.replace(' in vendita in ', ' in ');
-  return { observations: [observation(id, title, price, features, sellerType, parseDrop(info, price), 'detail')], errors: [] };
+  return { observations: [observation(id, title, price, features, sellerType, parseDrop(info, price), null, 'detail')], errors: [] };
 }
 
 /** C'è un link alla pagina successiva (".../lista-N.htm") nella paginazione. */

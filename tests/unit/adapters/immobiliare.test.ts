@@ -35,6 +35,7 @@ describe('immobiliareAdapter.parseNextData — ricerca', () => {
         sellerType: 'private',
         portalCreatedAt: null,
         lastDrop: { fromPrice: 249000, toPrice: 235000, percent: 5.6, date: Date.UTC(2026, 8, 21) },
+        coverUrl: null,
         source: 'search',
       },
     ]);
@@ -165,5 +166,37 @@ describe('riassunto della pagina', () => {
     expect(parseSearchData({ results, currentPage: 2, maxPages: 2 }).page).toEqual({ results: 2, privates: 1, lastPage: true });
     expect(parseSearchData({ results, currentPage: 1, maxPages: 2 }).page).toMatchObject({ lastPage: false });
     expect(parseSearchData({ results: [] }).page).toEqual({ results: 0, privates: 0, lastPage: true });
+  });
+});
+
+describe('copertina', () => {
+  const photo = { id: 1, caption: 'Soggiorno', urls: { small: 'https://pwm.im-cdn.it/image/1/xxs-c.jpg', medium: 'https://pwm.im-cdn.it/image/1/m-c.jpg' } };
+  const withPhoto = (p: unknown) => realEstate({ properties: [{ ...realEstate().properties[0], photo: p }] });
+  const parse = (re: unknown) => A.parseNextData(searchNextData([searchResult(re)]), SEARCH_URL);
+
+  it('prende la foto piccola della prima proprietà', () => {
+    expect(parse(withPhoto(photo)).observations[0]!.coverUrl).toBe('https://pwm.im-cdn.it/image/1/xxs-c.jpg');
+  });
+
+  it('anche dalla risposta XHR', () => {
+    const r = A.parseIntercepted(API_URL, { results: [searchResult(withPhoto(photo))] });
+    expect(r.observations[0]!.coverUrl).toBe('https://pwm.im-cdn.it/image/1/xxs-c.jpg');
+  });
+
+  it('senza foto: null', () => {
+    expect(parse(realEstate()).observations[0]!.coverUrl).toBeNull();
+  });
+
+  it('foto di forma inattesa o su un altro server: annuncio letto, copertina null', () => {
+    for (const p of [{ urls: 'x' }, 42, { urls: { small: 'https://evil.example/x.jpg' } }]) {
+      const r = parse(withPhoto(p));
+      expect(r.errors).toEqual([]);
+      expect(r.observations).toHaveLength(1);
+      expect(r.observations[0]!.coverUrl).toBeNull();
+    }
+  });
+
+  it('la didascalia della foto non esce', () => {
+    expect(JSON.stringify(parse(withPhoto(photo)).observations)).not.toContain('Soggiorno');
   });
 });

@@ -124,6 +124,24 @@ describe('buildLeadViews: ripubblicazioni', () => {
     expect(v!.evaluation.badgeText).toMatch(/· 2 portali · ripubblicato$/);
   });
 
+  it('copertine: principale, altre teste, poi annunci precedenti; senza vuoti né doppioni', () => {
+    const c = (n: number) => `https://pwm.im-cdn.it/image/${n}/xxs-c.jpg`;
+    const twin = rec('idealista', 9, { currentPrice: 272000, firstSeenAt: NOW - 5 * DAY_MS, lastSeenAt: NOW, coverUrl: 'https://img4.idealista.it/9.jpg' });
+    const [v] = buildLeadViews(
+      { listings: [{ ...before, coverUrl: c(1) }, { ...head, coverUrl: c(2) }, twin], states: [], snapshots, splits: [] },
+      DEFAULT_SETTINGS, NOW,
+    );
+    const heads = [v!.listing, ...v!.others.filter((o) => !o.previous).map((o) => o.listing)].map((l) => l.coverUrl);
+    expect(v!.covers).toEqual([...heads, c(1)]);
+  });
+
+  it('nessuna copertina: lista vuota; doppioni tolti', () => {
+    expect(buildLeadViews(archive([rec('subito', 3)]), DEFAULT_SETTINGS, NOW)[0]!.covers).toEqual([]);
+    const same = 'https://pwm.im-cdn.it/image/7/xxs-c.jpg';
+    const [v] = buildLeadViews({ listings: [{ ...before, coverUrl: same }, { ...head, coverUrl: same }], states: [], snapshots, splits: [] }, DEFAULT_SETTINGS, NOW);
+    expect(v!.covers).toEqual([same]);
+  });
+
   it('un lead da solo o tra portali non è ripubblicato', () => {
     const views = buildLeadViews(archive([rec('immobiliare', 1), rec('idealista', 2), rec('subito', 3, { city: 'Roma' })]), DEFAULT_SETTINGS, NOW);
     expect(views.every((v) => !v.reposted && v.others.every((o) => !o.previous))).toBe(true);

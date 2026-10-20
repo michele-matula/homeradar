@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from './fixtures';
+import type { BrowserContext } from '@playwright/test';
 import { buildSearchHtml } from './fixture-page';
 
 const nextData = JSON.parse(readFileSync('tests/fixtures/immobiliare/search-privati.json', 'utf8'));
@@ -113,4 +114,52 @@ test("esporta un backup e lo reimporta dopo aver azzerato l'archivio", async ({ 
   await panel.getByRole('tab', { name: /^Da contattare \(1\)$/ }).click();
   await expect(panel.getByLabel('Note', { exact: true })).toHaveValue('richiamare giovedì');
   await expect(panel.getByLabel('Stato', { exact: true })).toHaveValue('to_contact');
+});
+
+test.describe('copertina nel pannello', () => {
+  // Ricerca di Salerno con le copertine (URL finti su pwm.im-cdn.it). Le route aggiunte nel test hanno la precedenza
+  // su quelle della beforeEach, che bloccano ogni host diverso da www.immobiliare.it.
+  const salerno = JSON.parse(readFileSync('tests/fixtures/immobiliare/search-salerno.json', 'utf8'));
+  const SALERNO = 'https://www.immobiliare.it/vendita-case/salerno/?criterio=privateFirst';
+  // PNG 1×1 trasparente.
+  const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
+
+  const openPanel = async (context: BrowserContext, extensionId: string) => {
+    await context.route('https://www.immobiliare.it/vendita-case/salerno/**', (route) => route.fulfill({ contentType: 'text/html', body: buildSearchHtml(salerno) }));
+    const page = await context.newPage();
+    await page.goto(SALERNO);
+    await page.locator('[data-homeradar-badge]').first().waitFor();
+    const panel = await context.newPage();
+    await panel.goto(`chrome-extension://${extensionId}/sidepanel.html`);
+    await expect(panel.locator('.lead').first()).toBeVisible();
+    // Primo lead con una copertina: la miniatura parte come <img>.
+    const i = await panel.locator('.lead').evaluateAll((ls) => ls.findIndex((l) => l.querySelector('.cover__img')));
+    expect(i).toBeGreaterThanOrEqual(0);
+    return { panel, lead: panel.locator('.lead').nth(i) };
+  };
+
+  test('la miniatura carica la foto dal server immagini, senza referrer', async ({ context, extensionId }) => {
+    const referers: (string | undefined)[] = [];
+    await context.route('https://pwm.im-cdn.it/**', (route) => {
+      referers.push(route.request().headers().referer);
+      return route.fulfill({ contentType: 'image/png', body: PNG });
+    });
+    const { lead } = await openPanel(context, extensionId);
+    await lead.scrollIntoViewIfNeeded();
+    const img = lead.locator('.cover__img');
+    await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);
+    await expect(lead.locator('.cover--empty')).toHaveCount(0);
+    expect(referers.length).toBeGreaterThan(0);
+    expect(referers.every((r) => !r)).toBe(true);
+  });
+
+  test('foto non raggiungibile: riquadro neutro della stessa misura', async ({ context, extensionId }) => {
+    const { lead } = await openPanel(context, extensionId);
+    const before = await lead.locator('.cover').boundingBox();
+    await lead.scrollIntoViewIfNeeded();
+    await expect(lead.locator('.cover--empty')).toBeVisible();
+    await expect(lead.locator('.cover__img')).toHaveCount(0);
+    const after = await lead.locator('.cover').boundingBox();
+    expect([after!.width, after!.height]).toEqual([before!.width, before!.height]);
+  });
 });

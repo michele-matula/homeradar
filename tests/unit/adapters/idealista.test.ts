@@ -69,7 +69,7 @@ describe('ricerca', () => {
         portal: 'idealista', portalId: 37118651, url: 'https://www.idealista.it/immobile/37118651/',
         title: 'Quadrilocale in Via Esempio, 1, Precotto, Milano', address: 'Via Esempio, 1', city: 'Milano', zone: 'Precotto',
         typology: 'Quadrilocale', category: 'residential', surfaceM2: 101, rooms: 4, price: 245000, sellerType: 'private', portalCreatedAt: null,
-        lastDrop: null, source: 'search',
+        lastDrop: null, coverUrl: null, source: 'search',
       }],
     });
   });
@@ -136,7 +136,7 @@ describe('scheda', () => {
         portal: 'idealista', portalId: 37118651, url: DETAIL_URL,
         title: 'Bilocale in Via Esempio, 2, Mercalli - Quadronno, Milano', address: 'Via Esempio, 2', city: 'Milano',
         zone: 'Mercalli - Quadronno', typology: 'Bilocale', category: 'residential', surfaceM2: 52, rooms: 2, price: 445000, sellerType: 'private',
-        portalCreatedAt: null, lastDrop: { fromPrice: 450000, toPrice: 445000, percent: 1.1, date: null }, source: 'detail',
+        portalCreatedAt: null, lastDrop: { fromPrice: 450000, toPrice: 445000, percent: 1.1, date: null }, coverUrl: null, source: 'detail',
       }],
     });
   });
@@ -198,5 +198,30 @@ describe('revisione: pagina senza elenco', () => {
   it('nessun riassunto se manca il contenitore dei risultati', () => {
     document.body.innerHTML = '<main><p>Pagina non trovata</p></main>';
     expect(A.readDocument!(document, 'https://www.idealista.it/vendita-case/treviglio-bergamo/').page).toBeUndefined();
+  });
+});
+
+describe('copertina', () => {
+  const IMG = 'https://img4.idealista.it/blur/480_360_mq/0/id.pro.it.image.master/4b/6d/bf/780558105.jpg';
+
+  it("prende l'src dell'img della card", () => {
+    document.body.innerHTML = searchBody([card({ img: IMG })]);
+    expect(read().observations[0]!.coverUrl).toBe(IMG);
+  });
+
+  it('card senza foto, src relativo o di un altro server: null, annuncio letto', () => {
+    document.body.innerHTML = searchBody([
+      card({ id: 1, img: null }),
+      card({ id: 2, img: 'x.jpg' }),
+      card({ id: 3, img: 'https://evil.example/x.jpg' }),
+    ]);
+    const r = read();
+    expect(r.errors).toEqual([]);
+    expect(r.observations.map((o) => o.coverUrl)).toEqual([null, null, null]);
+  });
+
+  it('la scheda annuncio non porta copertina', () => {
+    renderDetail(document);
+    expect(read(DETAIL_URL).observations[0]!.coverUrl).toBeNull();
   });
 });

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // Gli oggetti zod scartano le chiavi non dichiarate: questa è la lista dei campi ammessi.
-// Telefoni, nomi, descrizioni e foto non sono dichiarati e quindi non escono mai.
+// Telefoni, nomi e descrizioni non sono dichiarati e quindi non escono mai; della foto resta solo l'URL piccolo della copertina.
 export const LoweredPriceSchema = z.object({
   originalPrice: z.string(),
   currentPrice: z.string(),
@@ -27,6 +27,8 @@ export const PropertySchema = z.object({
   rooms: z.string().nullish(),
   typology: z.object({ name: z.string() }).nullish(),
   location: LocationSchema.nullish(),
+  // Copertina: solo l'URL piccolo. Una forma inattesa diventa null e non scarta la proprietà.
+  photo: z.object({ urls: z.object({ small: z.string() }) }).nullish().catch(null),
 });
 
 export const AdvertiserSchema = z.object({
