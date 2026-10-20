@@ -23,15 +23,17 @@ describe('searchesFor', () => {
       'https://www.idealista.it/vendita-terreni/cassano-d-adda-milano/?ordine=da-privati-asc',
       'https://www.idealista.it/vendita-garage/cassano-d-adda-milano/?ordine=da-privati-asc',
       'https://www.subito.it/annunci-lombardia/vendita/immobili/milano/cassano-d-adda/?advt=0',
+      'https://www.casadaprivato.it/annunci-vendita/immobili/milano-cassano_d_adda',
     ]);
     expect(new Set(specs.map((s) => s.key)).size).toBe(specs.length);
     expect(specs[1]).toMatchObject({ key: 'immobiliare|comune:015059|negozi', label: "Cassano d'Adda · Negozi", categories: ['commercial'] });
-    expect(specs.at(-1)).toMatchObject({ key: 'subito|comune:015059|immobili', categories: ['residential', 'commercial', 'land', 'garage'] });
+    expect(specs.at(-1)).toMatchObject({ key: 'casadaprivato|comune:015059|immobili', categories: ['residential', 'commercial', 'land', 'garage'] });
+    expect(specs.at(-2)).toMatchObject({ key: 'subito|comune:015059|immobili', categories: ['residential', 'commercial', 'land', 'garage'] });
   });
 
   it('solo portali attivi e categorie scelte; niente senza comuni', () => {
     const specs = searchesFor({ comuni: [cassano], categories: ['residential'] }, { immobiliare: true, idealista: false, subito: true, casadaprivato: true });
-    expect(specs.map((s) => s.key)).toEqual(['immobiliare|comune:015059|case', 'subito|comune:015059|immobili']);
+    expect(specs.map((s) => s.key)).toEqual(['immobiliare|comune:015059|case', 'subito|comune:015059|immobili', 'casadaprivato|comune:015059|immobili']);
     expect(searchesFor({ comuni: [], categories: ['residential'] }, ALL)).toEqual([]);
   });
 
@@ -74,7 +76,7 @@ describe('acceptObservation', () => {
 describe('estimateMinutes', () => {
   it('circa 14 secondi a ricerca, arrotondato al minuto', () => {
     const area: SearchArea = { comuni: searchComuni('ca', 10).map(toRef), categories: ['residential'] };
-    expect(estimateMinutes({ comuni: [cassano], categories: ['residential'] })).toEqual({ searches: 3, minutes: 1 });
-    expect(estimateMinutes(area)).toEqual({ searches: 30, minutes: 7 });
+    expect(estimateMinutes({ comuni: [cassano], categories: ['residential'] })).toEqual({ searches: 4, minutes: 1 });
+    expect(estimateMinutes(area)).toEqual({ searches: 40, minutes: 9 });
   });
 });

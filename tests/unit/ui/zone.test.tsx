@@ -29,8 +29,8 @@ describe('ZoneEditor', () => {
   it('mostra la durata stimata del giro', () => {
     const cassano = { istat: '015059', name: "Cassano d'Adda", province: 'MI' };
     const { rerender } = render(<ZoneEditor value={{ comuni: [cassano], categories: ['residential'] }} onChange={vi.fn()} />);
-    expect(screen.getByText('Circa 3 ricerche: il giro dura circa 1 minuto.')).toBeTruthy();
+    expect(screen.getByText('Circa 4 ricerche: il giro dura circa 1 minuto.')).toBeTruthy();
     rerender(<ZoneEditor value={{ comuni: [cassano], categories: ['residential', 'commercial', 'land', 'garage'] }} onChange={vi.fn()} />);
-    expect(screen.getByText('Circa 12 ricerche: il giro dura circa 3 minuti.')).toBeTruthy();
+    expect(screen.getByText('Circa 13 ricerche: il giro dura circa 3 minuti.')).toBeTruthy();
   });
 });

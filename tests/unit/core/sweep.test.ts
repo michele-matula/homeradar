@@ -12,11 +12,27 @@ const spec = (portal: Portal, key: string, url: string): SearchSpec => ({
 const IMM = spec('immobiliare', 'immobiliare|comune:016219|case', 'https://www.immobiliare.it/vendita-case/treviglio/?criterio=privateFirst');
 const IDE = spec('idealista', 'idealista|comune:016219|case', 'https://www.idealista.it/vendita-case/treviglio-bergamo/?ordine=da-privati-asc');
 const SUB = spec('subito', 'subito|comune:016219|immobili', 'https://www.subito.it/annunci-lombardia/vendita/immobili/bergamo/treviglio/?advt=0');
+const CDP = spec('casadaprivato', 'casadaprivato|comune:016219|immobili', 'https://www.casadaprivato.it/annunci-vendita/immobili/bergamo-treviglio');
 const report = (portal: Portal, o: Partial<PageReport> = {}): PageReport => ({
   portal, url: 'x', results: 25, privates: 25, lastPage: false, blocked: false, notFound: false, parseErrors: 0, ...o,
 });
 /** Avanza: sceglie il passo e lo marca in corso. */
 const step = (s: SweepState) => beginStep(s, nextStep(s)!);
+
+describe('giro: CasaDaPrivato', () => {
+  it('portale di soli privati: una pagina piena non chiude la ricerca; senza pagina successiva o vuota sì', () => {
+    let s = step(createSweep([CDP], 0, 'id'));
+    s = onPageRead(s, report('casadaprivato', { results: 20, privates: 5 }));
+    expect(s.runs[0]!.outcome).toBe('pending');
+    s = step(s);
+    expect(stepUrl(s, 0)).toBe(`${CDP.url}/pagina-2`);
+    s = onPageRead(s, report('casadaprivato', { lastPage: true }));
+    expect(s.runs[0]!.outcome).not.toBe('pending');
+    let t = step(createSweep([CDP], 0, 'id'));
+    t = onPageRead(t, report('casadaprivato', { results: 0, privates: 0 }));
+    expect(t.runs[0]!.outcome).not.toBe('pending');
+  });
+});
 
 describe('giro: passi', () => {
   it('alterna i portali e costruisce gli URL di pagina', () => {

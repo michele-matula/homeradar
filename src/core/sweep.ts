@@ -83,9 +83,12 @@ export function stepUrl(s: SweepState, index: number): string {
   return pageUrl(run.spec, run.pages + 1);
 }
 
-/** Immobiliare e Idealista mettono i privati prima: la prima agenzia chiude la ricerca. Subito filtra già i privati. */
+/** Portali con soli annunci di privati: nessuna agenzia a chiudere la ricerca. */
+const ALL_PRIVATE: Portal[] = ['subito', 'casadaprivato'];
+
+/** Immobiliare e Idealista mettono i privati prima: la prima agenzia chiude la ricerca. Subito e CasaDaPrivato hanno già solo privati. */
 function isLastPage(portal: Portal, r: PageReport): boolean {
-  return r.results === 0 || r.lastPage || (portal !== 'subito' && r.privates < r.results);
+  return r.results === 0 || r.lastPage || (!ALL_PRIVATE.includes(portal) && r.privates < r.results);
 }
 
 const portalPages = (s: SweepState, p: Portal) => s.runs.reduce((n, r) => n + (r.spec.portal === p ? r.pages : 0), 0);

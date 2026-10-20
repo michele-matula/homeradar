@@ -1,3 +1,4 @@
+import * as casadaprivato from '@/adapters/casadaprivato/search-urls';
 import * as idealista from '@/adapters/idealista/search-urls';
 import * as immobiliare from '@/adapters/immobiliare/search-urls';
 import * as subito from '@/adapters/subito/search-urls';
@@ -5,9 +6,7 @@ import { comuneInfo, type ComuneInfo } from '@/core/comuni';
 import { PORTALS, type ListingObservation, type Portal, type PropertyCategory, type SearchArea, type SearchSpec } from '@/shared/types';
 
 const BUILDERS: Record<Portal, { searches(c: ComuneInfo[], k: PropertyCategory[]): SearchSpec[]; pageUrl(first: string, page: number): string }> = {
-  immobiliare, idealista, subito,
-  // Provvisorio: l'adattatore di CasaDaPrivato arriva col Task 4, che sostituisce questa voce.
-  casadaprivato: { searches: () => [], pageUrl: (first) => first },
+  immobiliare, idealista, subito, casadaprivato,
 };
 
 /** Tempo medio di una ricerca nel giro (prova di ritmo del 2026-10-18: caricamento più pausa). */
