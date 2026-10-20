@@ -46,6 +46,15 @@ describe('parseSearch', () => {
     expect(o.url).toBe('https://www.casadaprivato.it/appartamenti/appartamento-in-vendita-salerno-424125');
     expect(casadaprivatoAdapter.cardFor(doc([card({ id: 424125, slug: 'appartamento-in-vendita-salerno' })]), 424125)).not.toBeNull();
   });
+  it('href assoluto: url senza doppio dominio', () => {
+    const o = first(card({ id: 424125, path: 'appartamenti' }).replaceAll('href="/appartamenti', 'href="https://www.casadaprivato.it/appartamenti'));
+    expect(o.portalId).toBe(424125);
+    expect(o.url).toBe('https://www.casadaprivato.it/appartamenti/annuncio-424125');
+  });
+  it('superficie con virgola decimale: parte intera', () => {
+    expect(first(card({ amenities: ['3 locali', '85,5 mq'] })).surfaceM2).toBe(85);
+    expect(first(card({ amenities: ['3 locali', '1.250 mq'] })).surfaceM2).toBe(1250);
+  });
   it('trattativa riservata: prezzo null e priceReserved', () => {
     for (const p of ['Trattativa Riservata', 'trattativa riservata']) expect(first(card({ price: p }))).toMatchObject({ price: null, priceReserved: true });
   });

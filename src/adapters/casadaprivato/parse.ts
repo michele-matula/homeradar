@@ -28,7 +28,8 @@ function parseAmenities(items: string[]): { rooms: number | null; surfaceM2: num
   for (const t of items) {
     const r = /^(\d+)\+?\s+local/i.exec(t);
     if (r) rooms = Number(r[1]);
-    const s = /^([\d.]+)\s*mq\b/i.exec(t);
+    // Parte intera, come Idealista: "85,5 mq" → 85; il punto è il separatore delle migliaia.
+    const s = /^(\d[\d.]*)(?:,\d+)?\s*mq\b/i.exec(t);
     if (s) surfaceM2 = Number(s[1]!.replace(/\./g, ''));
   }
   return { rooms, surfaceM2 };
@@ -54,7 +55,7 @@ export function parseSearch(root: ParentNode, _url: string): ParseResult {
     // Copertina: data-src; src è il segnaposto /images/no-thumb.svg, che coverOrNull scarta.
     const cover = coverOrNull('casadaprivato', img?.getAttribute('data-src') || img?.getAttribute('src'));
     const obs: ListingObservation = {
-      portal: 'casadaprivato', portalId: id, url: BASE + href, title, address: t.address, city: t.city, zone: null, typology: t.typology,
+      portal: 'casadaprivato', portalId: id, url: new URL(href, BASE).href, title, address: t.address, city: t.city, zone: null, typology: t.typology,
       category: categoryFromPath(href) ?? categoryFromTypology(t.typology),
       ...parseAmenities([...card.querySelectorAll('ul.amenities li')].map((li) => text(li))),
       price, ...(reserved ? { priceReserved: true } : {}), sellerType: 'private', portalCreatedAt: null, lastDrop: null, coverUrl: cover, source: 'search',

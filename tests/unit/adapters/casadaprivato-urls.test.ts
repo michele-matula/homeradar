@@ -11,6 +11,10 @@ describe('ricerche CasaDaPrivato', () => {
     expect(cdpSlug('Capaccio Paestum')).toBe('capaccio_paestum');
     expect(cdpSlug('Salerno')).toBe('salerno');
   });
+  it('trattini e nomi bilingue: spazi, apostrofi e trattini diventano _ (non verificato sul sito per i nomi con trattino)', () => {
+    expect(cdpSlug('Castel San Giorgio-Nord')).toBe('castel_san_giorgio_nord');
+    expect(cdpSlug('Bolzano/Bozen')).toBe('bolzano');
+  });
   it('una ricerca immobili per comune', () => {
     expect(searches([cava], ['residential'])).toEqual([{
       portal: 'casadaprivato', key: 'casadaprivato|comune:065037|immobili', label: "Cava de' Tirreni · Immobili", categories: ['residential'], mixedCategories: true,

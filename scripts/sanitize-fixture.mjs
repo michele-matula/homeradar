@@ -74,10 +74,16 @@ if (kind === 'casadaprivato-search') {
   const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const text = (e) => (e?.textContent ?? '').replace(/\s+/g, ' ').trim();
   // Titolo "{tipologia} da Privato a {comune}[, {indirizzo o frazione}]": l'indirizzo diventa "Via Esempio N".
+  // Il comune si accetta solo se è quello della pagina (h1 "… a {comune}") o è fatto di sole lettere, spazi,
+  // apostrofi e trattini (max 40 caratteri, niente cifre): senza virgola, il titolo potrebbe portare un indirizzo.
+  const h1City = /.* a (.+)$/.exec(text(document.querySelector('h1.page-title')))?.[1]?.trim() ?? 'Salerno';
   const anonymizeTitle = (title, n) => {
     const m = /^(.+?) da Privato a ([^,]+)(,.*)?$/.exec(title.trim());
-    if (!m) return `Immobile da Privato a Salerno${title.includes(',') ? `, Via Esempio ${n}` : ''}`;
-    return `${m[1]} da Privato a ${m[2].trim()}${m[3] ? `, Via Esempio ${n}` : ''}`;
+    if (!m) return `Immobile da Privato a ${h1City}${title.includes(',') ? `, Via Esempio ${n}` : ''}`;
+    const typology = /^[\p{L} \/']+$/u.test(m[1].trim()) ? m[1].trim() : 'Immobile';
+    const city = m[2].trim();
+    const cityOk = city === h1City || (/^[\p{L} '-]+$/u.test(city) && city.length <= 40);
+    return `${typology} da Privato a ${cityOk ? city : h1City}${m[3] ? `, Via Esempio ${n}` : ''}`;
   };
   // Il sottotitolo è testo libero del privato: resta solo la forma "{parola} in vendita".
   const subtitleOf = (s) => (/^[\p{L}]+ in vendita$/u.test(s) && s.length <= 40 ? s : 'Immobile in vendita');
