@@ -37,3 +37,20 @@ describe('validateSettings', () => {
     expect(() => validateSettings({ reportingEnabled: 'sì' as unknown as boolean })).toThrow('Invio statistiche non valido');
   });
 });
+
+describe('validateSettings: zona di lavoro', () => {
+  const tre = { istat: '016219', name: 'Treviglio', province: 'BG' };
+  it('predefinita: nessun comune, solo le case', () => {
+    expect(validateSettings({}).searchArea).toEqual({ comuni: [], categories: ['residential'] });
+  });
+  it('toglie i doppioni e ordina le categorie', () => {
+    const s = validateSettings({ searchArea: { comuni: [tre, tre], categories: ['garage', 'residential', 'garage'] } });
+    expect(s.searchArea).toEqual({ comuni: [tre], categories: ['residential', 'garage'] });
+  });
+  it('rifiuta comuni malformati, troppi comuni e nessuna categoria', () => {
+    expect(() => validateSettings({ searchArea: { comuni: [{ ...tre, istat: '16219' }], categories: ['residential'] } })).toThrow('Zona di lavoro non valida');
+    const many = Array.from({ length: 31 }, (_, i) => ({ istat: String(100000 + i), name: `C${i}`, province: 'BG' }));
+    expect(() => validateSettings({ searchArea: { comuni: many, categories: ['residential'] } })).toThrow('Al massimo 30 comuni');
+    expect(() => validateSettings({ searchArea: { comuni: [tre], categories: [] } })).toThrow('Scegli almeno una categoria');
+  });
+});

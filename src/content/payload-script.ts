@@ -48,6 +48,8 @@ export function runPayloadContentScript(ctx: ScriptContext, adapter: PortalAdapt
 
   watcher.check();
   ctx.setInterval(() => watcher.check(), 1000);
+  // Verifica di DataDome o pagina inesistente: nessun payload arriverà, il giro lo deve sapere subito.
+  setTimeout(() => void controller.checkProblem(document).catch(() => {}), 2500);
 
   let pending: ReturnType<typeof setTimeout> | undefined;
   const observer = new MutationObserver(() => {

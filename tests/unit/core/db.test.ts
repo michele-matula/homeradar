@@ -76,3 +76,25 @@ describe('HomeRadarDB v6', () => {
     expect(await db.leadStates.get('immobiliare:1')).toMatchObject({ status: 'contacted' });
   });
 });
+
+describe('HomeRadarDB v7', () => {
+  it('aggiunge categoria e campi del giro agli annunci già salvati', async () => {
+    const name = `mig7-${Math.random()}`;
+    const old = new Dexie(name);
+    old.version(6).stores({
+      listings: 'key, lastSeenAt', priceSnapshots: '++id, listingKey, [listingKey+at]', leadStates: 'listingKey, status, recallAt',
+      calibration: '[portal+portalId], portal', meta: 'key', splits: '[a+b], a, b',
+    });
+    await old.table('listings').bulkPut([
+      { key: 'immobiliare:1', typology: 'Appartamento', lastSeenAt: 5 },
+      { key: 'immobiliare:2', typology: 'Garage - Box', lastSeenAt: 5 },
+      { key: 'idealista:3', typology: null, lastSeenAt: 5 },
+    ]);
+    old.close();
+
+    const db = new HomeRadarDB(name);
+    expect(await db.listings.get('immobiliare:1')).toMatchObject({ category: 'residential', sweepScope: null, missedSweeps: 0, missingSince: null });
+    expect(await db.listings.get('immobiliare:2')).toMatchObject({ category: 'garage' });
+    expect(await db.listings.get('idealista:3')).toMatchObject({ category: 'residential' });
+  });
+});

@@ -31,6 +31,13 @@ describe('urls', () => {
 });
 
 describe('parseTitle', () => {
+  it('riconosce i locali senza indirizzo: "Locale a <comune>"', () => {
+    expect(parseTitle("Locale a Cassano d'Adda")).toEqual({ typology: 'Locale', address: null, zone: null, city: "Cassano d'Adda" });
+  });
+  it('preferisce sempre la forma "in": "Villa a schiera in Via X, Comune"', () => {
+    expect(parseTitle('Villa a schiera in Via Roma, 3, Treviglio')).toMatchObject({ typology: 'Villa a schiera', city: 'Treviglio' });
+  });
+
   it('separa tipologia, indirizzo con civico, zona e città', () => {
     expect(parseTitle('Trilocale in Via Rogoredo, 27, Rogoredo - Santa Giulia, Milano')).toEqual({
       typology: 'Trilocale', address: 'Via Rogoredo, 27', zone: 'Rogoredo - Santa Giulia', city: 'Milano',
@@ -56,12 +63,12 @@ describe('parseTitle', () => {
 describe('ricerca', () => {
   it('legge un privato con tutti i campi', () => {
     document.body.innerHTML = searchBody([card()]);
-    expect(read()).toEqual({
+    expect(read()).toMatchObject({
       errors: [],
       observations: [{
         portal: 'idealista', portalId: 37118651, url: 'https://www.idealista.it/immobile/37118651/',
         title: 'Quadrilocale in Via Esempio, 1, Precotto, Milano', address: 'Via Esempio, 1', city: 'Milano', zone: 'Precotto',
-        typology: 'Quadrilocale', surfaceM2: 101, rooms: 4, price: 245000, sellerType: 'private', portalCreatedAt: null,
+        typology: 'Quadrilocale', category: 'residential', surfaceM2: 101, rooms: 4, price: 245000, sellerType: 'private', portalCreatedAt: null,
         lastDrop: null, source: 'search',
       }],
     });
@@ -128,7 +135,7 @@ describe('scheda', () => {
       observations: [{
         portal: 'idealista', portalId: 37118651, url: DETAIL_URL,
         title: 'Bilocale in Via Esempio, 2, Mercalli - Quadronno, Milano', address: 'Via Esempio, 2', city: 'Milano',
-        zone: 'Mercalli - Quadronno', typology: 'Bilocale', surfaceM2: 52, rooms: 2, price: 445000, sellerType: 'private',
+        zone: 'Mercalli - Quadronno', typology: 'Bilocale', category: 'residential', surfaceM2: 52, rooms: 2, price: 445000, sellerType: 'private',
         portalCreatedAt: null, lastDrop: { fromPrice: 450000, toPrice: 445000, percent: 1.1, date: null }, source: 'detail',
       }],
     });
@@ -173,5 +180,23 @@ describe('card in pagina', () => {
     expect(A.badgeHost(c).className).toBe('item-multimedia');
     expect(A.cardFor(document, 99)).toBeNull();
     expect(A.cardIds(document)).toEqual([1, 2]);
+  });
+});
+
+describe('riassunto della pagina', () => {
+  const pagination = '<div class="pagination"><ul><li><a href="/vendita-case/treviglio-bergamo/lista-2.htm?ordine=da-privati-asc">2</a></li></ul></div>';
+  it('ultima pagina se manca il link alla successiva', () => {
+    document.body.innerHTML = searchBody([card({ id: 1 }), card({ id: 2, professional: 'true' })]) + pagination;
+    expect(A.readDocument!(document, 'https://www.idealista.it/vendita-case/treviglio-bergamo/?ordine=da-privati-asc').page)
+      .toEqual({ results: 2, privates: 1, lastPage: false });
+    expect(A.readDocument!(document, 'https://www.idealista.it/vendita-case/treviglio-bergamo/lista-2.htm?ordine=da-privati-asc').page)
+      .toMatchObject({ lastPage: true });
+  });
+});
+
+describe('revisione: pagina senza elenco', () => {
+  it('nessun riassunto se manca il contenitore dei risultati', () => {
+    document.body.innerHTML = '<main><p>Pagina non trovata</p></main>';
+    expect(A.readDocument!(document, 'https://www.idealista.it/vendita-case/treviglio-bergamo/').page).toBeUndefined();
   });
 });

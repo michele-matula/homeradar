@@ -18,7 +18,7 @@ function lead(id: number, priority: Priority, status: LeadStatus = 'new'): LeadV
     listing: {
       key, portal: 'immobiliare', portalId: id, url: `https://www.immobiliare.it/annunci/${id}/`, title: `Bilocale ${id}`,
       address: null, city: 'Milano', zone: null, typology: null, surfaceM2: null, rooms: null, currentPrice: 235000,
-      portalCreatedAt: null, estimatedCreatedAt: null, lastDrop: null, firstSeenAt: 0, lastSeenAt: 0, seenCount: 3,
+      portalCreatedAt: null, estimatedCreatedAt: null, lastDrop: null, firstSeenAt: 0, lastSeenAt: 0, seenCount: 3, category: 'residential', sweepScope: null, missedSweeps: 0, missingSince: null,
     },
     evaluation: {
       listingKey: key, portalId: id, priority, ageDays: 173, ageEstimated: false, ageUncertain: false, dropPercent: 5.6,
@@ -31,7 +31,7 @@ function lead(id: number, priority: Priority, status: LeadStatus = 'new'): LeadV
     ],
     market: null,
     others: [],
-    reposted: false,
+    reposted: false, missing: null, missingPortals: [],
   };
 }
 
@@ -66,6 +66,10 @@ function fakeApi(leads: LeadView[], adapterWarning: Diagnostics['adapterWarning'
     getOnboardingStatus: vi.fn(async () => ({ acceptedVersion: 1, acceptedAt: 0, current: 1 })),
     acceptOnboarding: vi.fn(async () => ({ acceptedVersion: 1, acceptedAt: 0, current: 1 })),
     onOnboardingChanged: vi.fn(() => () => {}),
+    startSweep: vi.fn(async () => ({ running: null, last: null })),
+    stopSweep: vi.fn(async () => ({ running: null, last: null })),
+    getSweepStatus: vi.fn(async () => ({ running: null, last: null })),
+    onSweepChanged: vi.fn(() => () => {}),
     getReportingInfo: vi.fn(async () => ({ configured: true, queued: 0, status: { lastSentAt: null, lastAttemptAt: null, lastError: null, codeRejected: false } })),
     sendReportNow: vi.fn(),
     previewReport: vi.fn(),
@@ -99,6 +103,15 @@ describe('LeadItem', () => {
     const fromIdealista = { ...l, listing: { ...l.listing, key: 'idealista:1', portal: 'idealista' as const } };
     render(<ul><LeadItem lead={fromIdealista} now={Date.now()} onChange={() => {}} onDelete={() => {}} /></ul>);
     expect(screen.getByText('Idealista').className).toBe('portal-tag');
+  });
+
+  it('mostra "non più visto" e i portali da cui è sparito', () => {
+    const l = { ...lead(1, 'high'), missing: Date.UTC(2026, 9, 15, 12) };
+    const { unmount } = render(<ul><LeadItem lead={l} now={Date.now()} onChange={() => {}} onDelete={() => {}} /></ul>);
+    expect(screen.getByText('Non più visto dal 15/10/2026')).toBeTruthy();
+    unmount();
+    render(<ul><LeadItem lead={{ ...lead(2, 'high'), missingPortals: ['idealista'] }} now={Date.now()} onChange={() => {}} onDelete={() => {}} /></ul>);
+    expect(screen.getByText('Non più su Idealista')).toBeTruthy();
   });
 
   it('mostra "sopra mercato" con la spiegazione solo da +10%', () => {
@@ -423,7 +436,7 @@ describe('App', () => {
   it('mostra il banner quando l\'adattatore segnala un problema', async () => {
     render(<App api={fakeApi([], { immobiliare: true })} />);
     expect(await screen.findByText('Immobiliare.it potrebbe essere cambiato: alcuni dati non sono stati letti.')).toBeTruthy();
-    expect(screen.getByText('Nessun lead in questa scheda. Naviga su Immobiliare.it, Idealista.it o Subito.it per raccoglierne.')).toBeTruthy();
+    expect(screen.getByText('Nessun lead in questa scheda. Premi «Cerca» o naviga su Immobiliare.it, Idealista.it o Subito.it per raccoglierne.')).toBeTruthy();
     expect(screen.queryByText(/Elimina tutti/)).toBeNull();
   });
 
@@ -691,5 +704,35 @@ describe('eliminazione di massa con lead uniti', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Elimina tutti (2)' }));
     fireEvent.click(screen.getByRole('button', { name: 'Conferma: elimina 3 annunci' }));
     expect(api.deleteListings).toHaveBeenCalledWith(['immobiliare:1', 'idealista:1001', 'immobiliare:2']);
+  });
+});
+
+describe('filtri del giro', () => {
+  const box = (id: number): LeadView => { const l = lead(id, 'high'); return { ...l, listing: { ...l.listing, category: 'garage' } }; };
+  const visibleLeads = () => document.querySelectorAll('li.lead').length;
+
+  it('filtra per categoria', async () => {
+    render(<App api={fakeApi([lead(1, 'high'), box(2)])} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Box (1)' }));
+    expect(visibleLeads()).toBe(1);
+    expect(screen.getByText('Bilocale 2')).toBeTruthy();
+  });
+
+  it('filtra i non più visti', async () => {
+    render(<App api={fakeApi([lead(1, 'high'), { ...lead(2, 'high'), missing: 5 }])} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Non più visti (1)' }));
+    expect(visibleLeads()).toBe(1);
+  });
+});
+
+describe('revisione: filtri per categoria multipli', () => {
+  it('con una categoria scelta si può aggiungerne un\'altra', async () => {
+    const box = (id: number): LeadView => { const l = lead(id, 'high'); return { ...l, listing: { ...l.listing, category: 'garage' } }; };
+    render(<App api={fakeApi([lead(1, 'high'), box(2)])} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Residenziale (1)' }));
+    const boxChip = screen.getByRole('button', { name: 'Box (1)' }) as HTMLButtonElement;
+    expect(boxChip.disabled).toBe(false);
+    fireEvent.click(boxChip);
+    expect(document.querySelectorAll('li.lead').length).toBe(2);
   });
 });

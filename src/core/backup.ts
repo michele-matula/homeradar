@@ -1,8 +1,9 @@
 import { z } from 'zod';
+import { categoryFromTypology } from '@/core/category';
 import { splitId } from '@/core/same-property';
 import { validateSettings } from '@/core/settings';
 import {
-  LEAD_STATUSES, PORTALS, listingKey,
+  LEAD_STATUSES, PORTALS, PROPERTY_CATEGORIES, listingKey,
   type CalibrationPoint, type ImportSummary, type LeadState, type ListingRecord, type Portal, type PriceSnapshot, type Settings,
   type SplitPair,
 } from '@/shared/types';
@@ -62,8 +63,17 @@ const ListingSchema = z
     surfaceM2: num.nullable(), rooms: num.nullable(), currentPrice: num.nullable(),
     portalCreatedAt: num.nullable(), estimatedCreatedAt: num.nullable(), lastDrop: DropSchema.nullable(),
     firstSeenAt: num, lastSeenAt: num, seenCount: int.min(1),
+    // Facoltativi: i backup precedenti al giro delle ricerche non li hanno.
+    category: z.enum(PROPERTY_CATEGORIES).optional(), sweepScope: text.optional(), missedSweeps: int.min(0).optional(), missingSince: num.nullable().optional(),
   })
-  .refine((l) => l.key === listingKey(l.portal, l.portalId) && isPortalUrl(l.url, l.portal));
+  .refine((l) => l.key === listingKey(l.portal, l.portalId) && isPortalUrl(l.url, l.portal))
+  .transform((l): ListingRecord => ({
+    ...l,
+    category: l.category ?? categoryFromTypology(l.typology) ?? 'residential',
+    sweepScope: l.sweepScope ?? null,
+    missedSweeps: l.missedSweeps ?? 0,
+    missingSince: l.missingSince ?? null,
+  }));
 
 const SnapshotSchema = z.object({ listingKey: z.string(), price: num, at: num, source: z.enum(['observed', 'declared']) });
 
@@ -87,6 +97,11 @@ const SettingsSchema = z.object({
   minAgeDays: num.optional(), minDropPercent: num.optional(), retentionDays: num.optional(), autoBackup: z.boolean().optional(),
   enabledPortals: z.object({ immobiliare: z.boolean().optional(), idealista: z.boolean().optional(), subito: z.boolean().optional() }).optional(),
   pilotCode: z.string().optional(), reportingEnabled: z.boolean().optional(),
+  // La validazione vera la fa validateSettings, come per gli altri campi.
+  searchArea: z.object({
+    comuni: z.array(z.object({ istat: z.string(), name: z.string(), province: z.string() })),
+    categories: z.array(z.string()),
+  }).optional(),
 });
 
 const VersionSchema = z.object({ format: z.literal(BACKUP_FORMAT), formatVersion: int.min(1) });

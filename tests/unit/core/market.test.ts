@@ -10,7 +10,7 @@ function rec(perM2: number | null, o: Partial<ListingRecord> = {}): ListingRecor
     key: `immobiliare:${id}`, portal: 'immobiliare', portalId: id, url: '', title: '', address: null,
     city: 'Milano', zone: 'Navigli', typology: null, surfaceM2: 100, rooms: null,
     currentPrice: perM2 == null ? null : perM2 * 100, portalCreatedAt: null, estimatedCreatedAt: null,
-    lastDrop: null, firstSeenAt: 0, lastSeenAt: 0, seenCount: 1, ...o,
+    lastDrop: null, firstSeenAt: 0, lastSeenAt: 0, seenCount: 1, category: 'residential', sweepScope: null, missedSweeps: 0, missingSince: null, ...o,
   };
 }
 const many = (values: number[], o: Partial<ListingRecord> = {}) => values.map((v) => rec(v, o));
@@ -124,5 +124,18 @@ describe('testi', () => {
     );
     expect(marketSummary(zoneCmp(18.4))).toBe('Navigli (Milano), 7 annunci, 4.200 €/m²');
     expect(marketSummary(cityCmp)).toBe('Bologna, 12 annunci, 3.100 €/m²');
+  });
+});
+
+describe('compareToMarket per categoria', () => {
+  it('confronta solo annunci della stessa categoria', () => {
+    const lead = rec(3300);
+    const all = [...many([3000, 3000, 3000, 3000, 3000, 3000]), ...many([1000, 1000, 1000, 1000, 1000, 1000], { category: 'commercial' }), lead];
+    expect(compareToMarket(all).get(lead.key)!.medianPerM2).toBe(3000);
+  });
+
+  it('nessun confronto per box e terreni', () => {
+    expect(compareToMarket([...many([1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000], { category: 'garage' })]).size).toBe(0);
+    expect(compareToMarket([...many([1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000], { category: 'land' })]).size).toBe(0);
   });
 });

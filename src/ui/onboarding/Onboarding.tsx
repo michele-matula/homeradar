@@ -5,6 +5,7 @@ import { formatDate, formatPercent } from '@/shared/format';
 import type { OnboardingStatus, Priority, Settings } from '@/shared/types';
 import type { Api } from '@/ui/sidepanel/api';
 import './onboarding.css';
+import { ZoneStep } from './ZoneStep';
 
 type OnboardingApi = Pick<Api, 'getOnboardingStatus' | 'acceptOnboarding' | 'getSettings' | 'saveSettings'>;
 
@@ -87,9 +88,13 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
       <div className="onboarding">
         <section className="card">
           <h2 className="onboarding__title">HomeRadar è attivo</h2>
-          <p>Apri una ricerca su Immobiliare.it, Idealista.it o Subito.it: i badge compaiono sugli annunci dei privati.</p>
+          <p>
+            Apri una ricerca su Immobiliare.it, Idealista.it o Subito.it, oppure scegli qui sotto la tua zona e premi «Cerca» nel
+            pannello: i lead dei privati si aggiornano da soli.
+          </p>
           <p>Suggerimento: fissa l'icona di HomeRadar nella barra di Chrome (icona del puzzle, poi la puntina) per aprire il pannello con un clic.</p>
         </section>
+        <ZoneStep api={api} initial={data.settings} />
       </div>
     );
   }
@@ -109,8 +114,8 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
         <h2 className="onboarding__title">Benvenuto in HomeRadar</h2>
         <p>
           Su Immobiliare.it, Idealista.it e Subito.it HomeRadar riconosce gli annunci pubblicati da privati e li segnala, così
-          trovi prima i proprietari da contattare. Lavora solo sulle pagine che apri tu: non visita i portali da solo e non fa
-          ricerche al posto tuo.
+          trovi prima i proprietari da contattare. Lavora sulle pagine che apri tu e, quando premi «Cerca» nel pannello, sulle
+          ricerche dei comuni che hai scelto: le apre in una finestra a parte e le legge come faresti tu. Non parte mai da solo.
         </p>
       </section>
       <section className="card">
@@ -121,6 +126,10 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
             nell'annuncio), città e zona, tipologia, m², locali, prezzo e link.
           </li>
           <li>Lo storico dei prezzi, per riconoscere i ribassi.</li>
+          <li>
+            La categoria dell'immobile (residenziale, commerciale, terreno, box), i comuni e le categorie della tua zona e,
+            per gli annunci trovati con «Cerca», se nei giri successivi non compaiono più.
+          </li>
           <li>
             Lo stato che dai a ogni lead, le date di ricontatto e le tue note. Le note le scrivi tu: non inserire dati personali
             che non ti servono.
@@ -140,6 +149,10 @@ export function Onboarding({ api, mode, onDone, changes = ONBOARDING_CHANGES }: 
           <li>Gli annunci di agenzie.</li>
           <li>Nomi e numeri di telefono dei venditori, anche quando il portale li mostra.</li>
         </ul>
+        <p>
+          I portali possono chiedere una verifica («non sei un robot») se vedono molte pagine aperte di fila: in quel caso
+          HomeRadar si ferma su quel portale e te lo dice. Puoi sempre interrompere il giro con «Ferma» o chiudendo la sua finestra.
+        </p>
       </section>
       <section className="card">
         <h2 className="onboarding__h">Dove restano i dati</h2>

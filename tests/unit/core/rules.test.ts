@@ -11,7 +11,7 @@ function listing(o: Partial<ListingRecord> = {}): ListingRecord {
     key: 'immobiliare:1', portal: 'immobiliare', portalId: 1, url: 'u', title: 't',
     address: null, city: null, zone: null, typology: null, surfaceM2: null, rooms: null,
     currentPrice: 235000, portalCreatedAt: null, estimatedCreatedAt: null, lastDrop: null,
-    firstSeenAt: NOW, lastSeenAt: NOW, seenCount: 1, ...o,
+    firstSeenAt: NOW, lastSeenAt: NOW, seenCount: 1, category: 'residential', sweepScope: null, missedSweeps: 0, missingSince: null, ...o,
   };
 }
 const snap = (price: number, at: number, source: PriceSnapshot['source'] = 'observed'): PriceSnapshot => ({ listingKey: 'immobiliare:1', price, at, source });

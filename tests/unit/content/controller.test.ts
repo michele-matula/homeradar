@@ -182,7 +182,7 @@ describe('createController in modalità DOM', () => {
   const card = (id: number) => `<article data-id="${id}"><div class="foto"><img></div></article>`;
   const obsFor = (id: number): ListingObservation => ({
     portal: 'idealista', portalId: id, url: `https://portale.test/immobile/${id}/`, title: 't', address: null, city: null, zone: null,
-    typology: null, surfaceM2: null, rooms: null, price: 1, sellerType: 'private', portalCreatedAt: null, lastDrop: null, source: 'search',
+    typology: null, category: null, surfaceM2: null, rooms: null, price: 1, sellerType: 'private', portalCreatedAt: null, lastDrop: null, source: 'search',
   });
   // Adattatore minimo: una card = un privato; la pagina "?nuovi" segnala l'ID più recente.
   const domAdapter: PortalAdapter = {
@@ -277,5 +277,63 @@ describe('createController DOM: errori e card caricate dopo', () => {
     expect(statuses).toHaveLength(2);
     expect(statuses[0]).toMatchObject({ ok: true, errors: ['card[9]: id o titolo mancanti'] });
     expect(statuses[1]).toMatchObject({ ok: true, errors: [] });
+  });
+});
+
+describe('pageRead per il giro', () => {
+  it('dopo ingest invia il riassunto della pagina, anche senza annunci', async () => {
+    const send = fakeSend();
+    const c = createController({ adapter: immobiliareAdapter, send, root: document, getUrl: () => SEARCH_URL });
+    await c.handle('next-data', SEARCH_URL, searchNextData([searchResult(realEstate()), searchResult(realEstate({ id: 2, advertiser: agencyAdvertiser }), 2)]));
+    const types = send.mock.calls.map(([r]) => r.type);
+    expect(types.indexOf('pageRead')).toBeGreaterThan(types.indexOf('ingest'));
+    expect(send.mock.calls.at(-1)![0]).toEqual({
+      type: 'pageRead', report: { portal: 'immobiliare', url: SEARCH_URL, results: 2, privates: 1, lastPage: false, blocked: false, notFound: false, parseErrors: 0 },
+    });
+    send.mockClear();
+    await c.handle('next-data', SEARCH_URL, searchNextData([]));
+    expect(send.mock.calls.at(-1)![0]).toMatchObject({ type: 'pageRead', report: { results: 0, lastPage: true } });
+  });
+
+  it('checkProblem segnala la verifica e la pagina inesistente solo sulle pagine di ricerca', async () => {
+    const send = fakeSend();
+    let url = SEARCH_URL;
+    const c = createController({ adapter: immobiliareAdapter, send, root: document, getUrl: () => url });
+    const captcha = new DOMParser().parseFromString('<body><iframe src="https://geo.captcha-delivery.com/x"></iframe></body>', 'text/html');
+    await c.checkProblem(captcha);
+    expect(send).toHaveBeenLastCalledWith({
+      type: 'pageRead', report: { portal: 'immobiliare', url: SEARCH_URL, results: 0, privates: 0, lastPage: true, blocked: true, notFound: false, parseErrors: 0 },
+    });
+    const missing = new DOMParser().parseFromString('<body>La pagina che stai cercando non è presente</body>', 'text/html');
+    await c.checkProblem(missing);
+    expect(send.mock.calls.at(-1)![0]).toMatchObject({ report: { blocked: false, notFound: true } });
+    send.mockClear();
+    url = DETAIL_URL;
+    await c.checkProblem(captcha);
+    await c.checkProblem(new DOMParser().parseFromString('<body><ul></ul></body>', 'text/html'));
+    expect(send).not.toHaveBeenCalled();
+  });
+});
+
+describe('revisione: pagina di verifica su Idealista', () => {
+  it('una pagina di verifica non chiude la ricerca come completa: manda solo il blocco', async () => {
+    document.body.innerHTML = '<h1>Ops! Al momento non siamo disponibili</h1>';
+    const send = fakeSend();
+    const url = 'https://www.idealista.it/vendita-case/treviglio-bergamo/?ordine=da-privati-asc';
+    const c = createController({ adapter: idealistaAdapter, send, root: document, getUrl: () => url });
+    await c.scan();
+    const reads = send.mock.calls.map(([r]) => r).filter((r) => r.type === 'pageRead');
+    expect(reads).toEqual([{ type: 'pageRead', report: expect.objectContaining({ blocked: true, notFound: false }) }]);
+  });
+});
+
+describe('revisione: errori di lettura nel riassunto', () => {
+  it('conta gli annunci non letti e i venditori non riconosciuti', async () => {
+    const send = fakeSend();
+    const c = createController({ adapter: immobiliareAdapter, send, root: document, getUrl: () => SEARCH_URL });
+    const broken = { realEstate: { id: 'x' } };
+    const unknownSeller = searchResult(realEstate({ id: 3, advertiser: {} }), 3);
+    await c.handle('next-data', SEARCH_URL, searchNextData([searchResult(realEstate()), broken, unknownSeller]));
+    expect(send.mock.calls.at(-1)![0]).toMatchObject({ type: 'pageRead', report: { parseErrors: 2 } });
   });
 });

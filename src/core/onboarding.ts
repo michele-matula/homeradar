@@ -2,7 +2,7 @@
  * Versione dell'informativa. Si alza solo se cambia cosa viene salvato o come viene usato
  * (es. nuovi dati del lead): l'agente deve riconfermare. Refusi e legenda non la alzano.
  */
-export const ONBOARDING_VERSION = 5;
+export const ONBOARDING_VERSION = 6;
 
 /** Voci del riquadro "Cosa è cambiato", per versione dell'informativa. */
 export const ONBOARDING_CHANGES: Record<number, string[]> = {
@@ -11,6 +11,9 @@ export const ONBOARDING_CHANGES: Record<number, string[]> = {
   4: ["HomeRadar ora riconosce un annuncio tolto e ripubblicato sullo stesso portale: il lead tiene età, storico prezzi, stato e note dell'annuncio precedente, che resta salvato finché rivedi la ripubblicazione."],
   5: [
     "HomeRadar ora invia ogni giorno al gestore del pilota statistiche d'uso anonime ed errori tecnici, con il codice pilota della tua agenzia: mai annunci, indirizzi, prezzi o note. Puoi spegnere l'invio dalle impostazioni, dove trovi anche il modulo per mandare un feedback.",
+  ],
+  6: [
+    "Ora puoi scegliere la tua zona di lavoro (comuni e categorie) e premere «Cerca» nel pannello: HomeRadar apre le ricerche dei portali in una finestra a parte e aggiorna i lead, solo quando lo chiedi tu. Salva anche la categoria dell'immobile e segnala gli annunci che non compaiono più nei giri.",
   ],
 };
 

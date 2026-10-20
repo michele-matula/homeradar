@@ -1,9 +1,10 @@
 import { browser } from 'wxt/browser';
 import type { UsageClientEvent } from '@/core/usage';
-import type { CalibrationHint, LeadStatus, ListingObservation, Portal, PortalState, Settings } from '@/shared/types';
+import type { CalibrationHint, LeadStatus, ListingObservation, PageReport, Portal, PortalState, Settings } from '@/shared/types';
 
 export const LEADS_CHANGED = 'leadsChanged';
 export const ONBOARDING_CHANGED = 'onboardingChanged';
+export const SWEEP_CHANGED = 'sweepChanged';
 
 export type ParseSource = 'next-data' | 'api' | 'dom';
 
@@ -31,7 +32,11 @@ export type Request =
   | { type: 'getReportingInfo' }
   | { type: 'sendReportNow' }
   | { type: 'previewReport' }
-  | { type: 'sendFeedback'; text: string };
+  | { type: 'sendFeedback'; text: string }
+  | { type: 'pageRead'; report: PageReport }
+  | { type: 'startSweep' }
+  | { type: 'stopSweep' }
+  | { type: 'getSweepStatus' };
 
 /** Per i content script: leggere (attivo), no (spento) o no e avvisare (informativa da confermare). */
 export function portalState(portal: Portal): Promise<PortalState> {

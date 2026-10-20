@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { immobiliareAdapter as A } from '@/adapters/immobiliare';
+import { parseSearchData } from '@/adapters/immobiliare';
 import {
   API_URL, DETAIL_URL, SEARCH_URL, agencyAdvertiser, detailNextData, realEstate, searchNextData, searchResult,
 } from './builders';
@@ -27,7 +28,7 @@ describe('immobiliareAdapter.parseNextData — ricerca', () => {
         address: 'Via Esempio',
         city: 'Milano',
         zone: 'Precotto',
-        typology: 'Appartamento',
+        typology: 'Appartamento', category: 'residential',
         surfaceM2: 62,
         rooms: 2,
         price: 235000,
@@ -142,7 +143,7 @@ describe('immobiliareAdapter — risposte intercettate', () => {
 
   it('ignora gli affitti anche nelle risposte intercettate', () => {
     const r = A.parseIntercepted(API_URL, { results: [searchResult(realEstate({ contract: 'rent' }))] });
-    expect(r).toEqual({ observations: [], errors: [] });
+    expect(r).toMatchObject({ observations: [], errors: [] });
   });
 
   it('segnala una risposta senza results', () => {
@@ -155,5 +156,14 @@ describe('immobiliareAdapter.listingIdFromHref', () => {
     expect(A.listingIdFromHref('https://www.immobiliare.it/annunci/128416572/')).toBe(128416572);
     expect(A.listingIdFromHref('/annunci/133428292/?foo=1')).toBe(133428292);
     expect(A.listingIdFromHref('/agenzie-immobiliari/51157/')).toBeNull();
+  });
+});
+
+describe('riassunto della pagina', () => {
+  it('annunci, privati e ultima pagina', () => {
+    const results = [searchResult(realEstate()), searchResult(realEstate({ id: 2, advertiser: agencyAdvertiser }), 2)];
+    expect(parseSearchData({ results, currentPage: 2, maxPages: 2 }).page).toEqual({ results: 2, privates: 1, lastPage: true });
+    expect(parseSearchData({ results, currentPage: 1, maxPages: 2 }).page).toMatchObject({ lastPage: false });
+    expect(parseSearchData({ results: [] }).page).toEqual({ results: 0, privates: 0, lastPage: true });
   });
 });

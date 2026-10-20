@@ -1,6 +1,7 @@
 // Funzioni pure sul DOM già mostrato da Idealista. Si leggono solo i nodi elencati qui:
 // descrizioni, nome del venditore (.professional-name) e contatti non vengono mai letti.
 import { parseEuro } from '@/adapters/immobiliare/format';
+import { categoryFromTypology } from '@/core/category';
 import type { ListingObservation, ObservationSource, ObservedPriceDrop, ParseResult, SellerType } from '@/shared/types';
 import { listingIdFromHref } from './urls';
 
@@ -23,7 +24,11 @@ export interface TitleParts {
 /** "Trilocale in Via X, 27, Zona, Milano"; la scheda ha "Bilocale in vendita in …". */
 export function parseTitle(title: string): TitleParts {
   const m = /^(.+?) in (?:vendita in )?(.+)$/.exec(title.trim());
-  if (!m) return { typology: null, address: null, zone: null, city: null };
+  if (!m) {
+    // Locali e capannoni: "Locale a Cassano d'Adda", senza indirizzo né zona.
+    const a = /^(.+?) a (.+)$/.exec(title.trim());
+    return a ? { typology: a[1]!.trim(), address: null, zone: null, city: a[2]!.trim() } : { typology: null, address: null, zone: null, city: null };
+  }
   const parts = m[2]!.split(',').map((s) => s.trim()).filter(Boolean);
   const city = parts.pop() ?? null;
   let zone: string | null = null;
@@ -58,7 +63,7 @@ function observation(
 ): ListingObservation {
   const t = parseTitle(title);
   return {
-    portal: 'idealista', portalId: id, url: listingUrl(id), title, address: t.address, city: t.city, zone: t.zone, typology: t.typology,
+    portal: 'idealista', portalId: id, url: listingUrl(id), title, address: t.address, city: t.city, zone: t.zone, typology: t.typology, category: categoryFromTypology(t.typology),
     ...parseFeatures(features), price, sellerType, portalCreatedAt: null, lastDrop, source,
   };
 }
@@ -105,4 +110,11 @@ export function parseDetail(root: ParentNode, url: string): ParseResult {
     : root.querySelector('.professional-name') ? 'agency' : 'unknown';
   const title = fullTitle.replace(' in vendita in ', ' in ');
   return { observations: [observation(id, title, price, features, sellerType, parseDrop(info, price), 'detail')], errors: [] };
+}
+
+/** C'è un link alla pagina successiva (".../lista-N.htm") nella paginazione. */
+export function hasNextPage(root: ParentNode, url: string): boolean {
+  const m = /\/lista-(\d+)\.htm/.exec(new URL(url, 'https://www.idealista.it').pathname);
+  const next = `/lista-${(m ? Number(m[1]) : 1) + 1}.htm`;
+  return [...root.querySelectorAll('.pagination a[href]')].some((a) => (a.getAttribute('href') ?? '').includes(next));
 }

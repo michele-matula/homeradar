@@ -26,10 +26,16 @@ interface Entry {
   zoneKey: string | null;
 }
 
+/** Il €/m² dice qualcosa solo per case e immobili commerciali; box e terreni non hanno confronto. */
+const MARKET_CATEGORIES = new Set(['residential', 'commercial']);
+
 function entryOf(listing: ListingRecord): Entry | null {
+  if (!MARKET_CATEGORIES.has(listing.category)) return null;
   const perM2 = validPerM2(listing);
-  const cityKey = normalize(listing.city ?? '');
-  if (perM2 == null || !cityKey) return null;
+  const city = normalize(listing.city ?? '');
+  if (perM2 == null || !city) return null;
+  // La categoria entra nella chiave: un negozio non fa mediana con le case della stessa via.
+  const cityKey = `${listing.category}|${city}`;
   const zone = normalize(listing.zone ?? '');
   return { listing, perM2, cityKey, zoneKey: zone ? `${cityKey}|${zone}` : null };
 }

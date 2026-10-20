@@ -121,3 +121,39 @@ describe('LeadService.ingest', () => {
     expect((await db.listings.get('idealista:37011951'))!.lastDrop).toMatchObject({ toPrice: 600000, date: Date.UTC(2026, 9, 13), dateEstimated: true });
   });
 });
+
+describe('ingest: categoria e giro', () => {
+  it('categoria dalla tipologia, poi dalla ricerca, poi dal valore salvato', async () => {
+    const { db, svc } = setup();
+    await svc.ingest([obs({ category: 'garage' })]);
+    expect((await db.listings.get('immobiliare:128416572'))!.category).toBe('garage');
+    await svc.ingest([obs({ category: null })]);
+    expect((await db.listings.get('immobiliare:128416572'))!.category).toBe('garage');
+    await svc.ingest([obs({ portalId: 7, url: 'https://www.immobiliare.it/annunci/7/', category: null })], undefined, { searchCategory: 'land' });
+    expect((await db.listings.get('immobiliare:7'))!.category).toBe('land');
+    await svc.ingest([obs({ portalId: 8, url: 'https://www.immobiliare.it/annunci/8/', category: null })]);
+    expect((await db.listings.get('immobiliare:8'))!.category).toBe('residential');
+  });
+
+  it('il giro salva la ricerca e azzera "non più visto"; la navigazione a mano tiene la ricerca', async () => {
+    const { db, svc } = setup();
+    await svc.ingest([obs()], undefined, { sweepScope: 'immobiliare|comune:015059|case' });
+    await db.listings.update('immobiliare:128416572', { missedSweeps: 3, missingSince: 123 });
+    await svc.ingest([obs()]);
+    expect(await db.listings.get('immobiliare:128416572')).toMatchObject({ sweepScope: 'immobiliare|comune:015059|case', missedSweeps: 0, missingSince: null });
+  });
+
+  it('segnala i ribassi degli annunci già salvati, non quelli nuovi', async () => {
+    const { svc } = setup();
+    const drops: string[] = [];
+    const onDrop = (k: string) => drops.push(k);
+    await svc.ingest([obs({ price: 235000 })], undefined, { onDrop });
+    expect(drops).toEqual([]);
+    await svc.ingest([obs({ price: 235000 })], undefined, { onDrop });
+    expect(drops).toEqual([]);
+    await svc.ingest([obs({ price: 225000, lastDrop: null })], undefined, { onDrop });
+    expect(drops).toEqual(['immobiliare:128416572']);
+    await svc.ingest([obs({ price: 225000, lastDrop: { fromPrice: 235000, toPrice: 225000, percent: 4.3, date: Date.UTC(2026, 9, 11) } })], undefined, { onDrop });
+    expect(drops).toEqual(['immobiliare:128416572', 'immobiliare:128416572']);
+  });
+});

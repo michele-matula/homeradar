@@ -9,6 +9,7 @@ import { downloadBlob } from './download';
 import { FeedbackCard } from './FeedbackCard';
 import { InfoTip } from './InfoTip';
 import { PilotCard } from './PilotCard';
+import { ZoneEditor } from './ZoneEditor';
 
 type NumberKey = 'minAgeDays' | 'minDropPercent' | 'retentionDays';
 
@@ -39,11 +40,11 @@ const FIELD_HELP: Record<NumberKey, ReactNode> = {
 
 const PORTAL_HELP: Record<Portal, string> = {
   immobiliare:
-    "Legge i risultati delle ricerche che apri su Immobiliare.it, anche le pagine successive. L'età dell'annuncio è quella indicata dal portale.",
+    "Legge i risultati delle ricerche che apri su Immobiliare.it, anche le pagine successive. L'età dell'annuncio è quella indicata dal portale. Con «Cerca» legge anche le ricerche della tua zona.",
   idealista:
-    "Legge gli annunci delle ricerche che apri su Idealista.it. Il portale non mostra la data di pubblicazione: l'età è stimata (indicata con «~»). Ordinare ogni tanto per «più recenti» rende la stima più precisa.",
+    "Legge gli annunci delle ricerche che apri su Idealista.it. Il portale non mostra la data di pubblicazione: l'età è stimata (indicata con «~»). Ordinare ogni tanto per «più recenti» rende la stima più precisa. Con «Cerca» legge anche le ricerche della tua zona.",
   subito:
-    "Legge i risultati delle ricerche nella categoria Immobili di Subito.it. La data mostrata da Subito è quella dell'ultimo rinnovo, non della pubblicazione: l'età è stimata (indicata con «~»).",
+    "Legge i risultati delle ricerche nella categoria Immobili di Subito.it. La data mostrata da Subito è quella dell'ultimo rinnovo, non della pubblicazione: l'età è stimata (indicata con «~»). Con «Cerca» legge anche le ricerche della tua zona.",
 };
 
 /** `File.text()` manca in alcuni ambienti (jsdom): in quel caso si passa da FileReader. */
@@ -123,6 +124,7 @@ export function SettingsView({ api, onSaved, download = downloadBlob, onOpenGuid
       autoBackup: result.autoBackup,
       pilotCode: result.pilotCode,
       reportingEnabled: result.reportingEnabled,
+      searchArea: result.searchArea,
     });
   }
 
@@ -215,6 +217,16 @@ export function SettingsView({ api, onSaved, download = downloadBlob, onOpenGuid
   return (
     <section className="settings">
       {message && <p className={message.startsWith('Errore') ? 'banner banner--error' : 'banner banner--ok'}>{message}</p>}
+      <div className="card">
+        <div className="settings__row">
+          <h2 className="card__title">La tua zona</h2>
+          <InfoTip label="La tua zona">
+            I comuni e le categorie che «Cerca» visita sui portali attivi, una ricerca per comune e categoria. Su Subito basta
+            una ricerca per comune, che tiene solo le categorie scelte. Ogni modifica è salvata subito.
+          </InfoTip>
+        </div>
+        <ZoneEditor value={form.searchArea} onChange={(searchArea) => void saveNow({ searchArea }, 'Zona salvata')} />
+      </div>
       <div className="card">
         <div className="settings__row">
           <h2 className="card__title">Regole dei lead</h2>

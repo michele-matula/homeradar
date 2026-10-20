@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "HomeRadar - prova di ritmo",
+  "version": "0.0.1",
+  "description": "Prova non rilasciata: apre una lista di ricerche in una finestra ridotta a icona e misura tempi e blocchi.",
+  "permissions": ["scripting", "storage"],
+  "host_permissions": ["https://www.immobiliare.it/*", "https://www.idealista.it/*", "https://www.subito.it/*"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_popup": "popup.html" }
+}

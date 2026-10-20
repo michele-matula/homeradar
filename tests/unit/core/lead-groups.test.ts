@@ -8,7 +8,7 @@ function rec(portal: Portal, id: number, o: Partial<ListingRecord> = {}): Listin
   return {
     key: `${portal}:${id}`, portal, portalId: id, url: '', title: `${portal} ${id}`, address: null,
     city: 'Milano', zone: 'Navigli', typology: null, surfaceM2: 80, rooms: 3, currentPrice: 300000,
-    portalCreatedAt: null, estimatedCreatedAt: NOW - 200 * DAY_MS, lastDrop: null, firstSeenAt: 0, lastSeenAt: 0, seenCount: 1, ...o,
+    portalCreatedAt: null, estimatedCreatedAt: NOW - 200 * DAY_MS, lastDrop: null, firstSeenAt: 0, lastSeenAt: 0, seenCount: 1, category: 'residential', sweepScope: null, missedSweeps: 0, missingSince: null, ...o,
   };
 }
 const state = (listingKey: string, o: Partial<LeadState> = {}): LeadState => ({
@@ -127,5 +127,22 @@ describe('buildLeadViews: ripubblicazioni', () => {
   it('un lead da solo o tra portali non è ripubblicato', () => {
     const views = buildLeadViews(archive([rec('immobiliare', 1), rec('idealista', 2), rec('subito', 3, { city: 'Roma' })]), DEFAULT_SETTINGS, NOW);
     expect(views.every((v) => !v.reposted && v.others.every((o) => !o.previous))).toBe(true);
+  });
+});
+
+describe('non più visto', () => {
+  it('lead "non più visto" solo se lo sono tutti i suoi annunci principali', () => {
+    const [v] = buildLeadViews(archive([rec('immobiliare', 1, { missedSweeps: 3, missingSince: 100 })]), DEFAULT_SETTINGS, NOW);
+    expect(v!).toMatchObject({ missing: 100, missingPortals: [] });
+    const [w] = buildLeadViews(archive([rec('immobiliare', 1, { missedSweeps: 2, missingSince: 100 })]), DEFAULT_SETTINGS, NOW);
+    expect(w!).toMatchObject({ missing: null, missingPortals: [] });
+  });
+
+  it('gruppo misto: il principale è quello ancora visto, il portale sparito è segnalato', () => {
+    const a = rec('immobiliare', 1, { missedSweeps: 3, missingSince: 100 });
+    const b = rec('idealista', 2);
+    const [v] = buildLeadViews(archive([a, b]), DEFAULT_SETTINGS, NOW);
+    expect(v!.listing.key).toBe('idealista:2');
+    expect(v!).toMatchObject({ missing: null, missingPortals: ['immobiliare'] });
   });
 });

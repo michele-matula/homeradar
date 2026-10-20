@@ -1,17 +1,22 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { warnedPortals } from '@/core/diagnostics';
 import { applyQuery, describeQuery, isEmptyQuery, parseThousands, type LeadQuery } from '@/core/lead-filters';
-import { groupByRecall, groupByStatus, leadKeys, leadPortals, PRIORITY_LABELS, RECALL_GROUP_LABELS, SORT_KEYS, SORT_LABELS, sortLeadsBy, type SortKey } from '@/core/leads';
+import { seenSince } from '@/core/lead-groups';
+import { groupByRecall, groupByStatus, leadCategories, leadKeys, leadPortals, PRIORITY_LABELS, RECALL_GROUP_LABELS, SORT_KEYS, SORT_LABELS, sortLeadsBy, type SortKey } from '@/core/leads';
 import { needsOnboarding } from '@/core/onboarding';
 import { isDue } from '@/core/recall';
 import { Onboarding } from '@/ui/onboarding/Onboarding';
 import { joinList } from '@/shared/format';
-import { LEAD_STATUSES, PORTAL_SITES, PORTAL_TAGS, PORTALS, type LeadStatus, type LeadView, type Portal, type Priority } from '@/shared/types';
+import {
+  CATEGORY_LABELS, LEAD_STATUSES, PORTAL_SITES, PORTAL_TAGS, PORTALS, PROPERTY_CATEGORIES,
+  type LeadStatus, type LeadView, type Portal, type Priority, type PropertyCategory,
+} from '@/shared/types';
 import { defaultApi, type Api } from './api';
 import { ExportBar } from './ExportBar';
 import { AlertIcon, BackIcon, CloseIcon, Logo, SearchIcon, SettingsIcon } from './Icons';
 import { LeadItem } from './LeadItem';
 import { SettingsView } from './SettingsView';
+import { SweepCard } from './SweepCard';
 import { loadSortByTab, saveSortByTab, type SortByTab } from './sortPrefs';
 
 type Tab = 'recall' | LeadStatus;
@@ -42,6 +47,11 @@ export function App({ api = defaultApi }: { api?: Api }) {
   const [portals, setPortals] = useState<Portal[]>([]);
   /** Solo lead pubblicati su più portali. */
   const [multi, setMulti] = useState(false);
+  /** Filtri che agiscono prima delle schede, come ricerca e prezzo. */
+  const [categories, setCategories] = useState<PropertyCategory[]>([]);
+  const [missingOnly, setMissingOnly] = useState(false);
+  /** "Vedi i nuovi" del giro: lead con una fonte vista per la prima volta da questa data. */
+  const [since, setSince] = useState<number | null>(null);
   const [view, setView] = useState<'leads' | 'settings' | 'guide'>('leads');
   /** Conferma dell'informativa: finché non è 'ok' la lista non si mostra. */
   const [gate, setGate] = useState<'loading' | 'needed' | 'ok' | { error: string }>('loading');
@@ -102,7 +112,12 @@ export function App({ api = defaultApi }: { api?: Api }) {
   const query: LeadQuery = { text, minPrice: minPrice === 'invalid' ? null : minPrice, maxPrice: maxPrice === 'invalid' ? null : maxPrice };
   // Ricerca e prezzo agiscono prima delle schede, così anche i loro conteggi li seguono.
   const now = Date.now();
-  const applied = applyQuery(leads, query);
+  const beforeCategories = applyQuery(leads, query).filter((l) =>
+    (!missingOnly || l.missing != null || l.missingPortals.length > 0)
+    && (since == null || seenSince(l, since)));
+  // Le categorie si contano prima del loro filtro: così se ne può scegliere più di una.
+  const applied = categories.length ? beforeCategories.filter((l) => leadCategories(l).some((c) => categories.includes(c))) : beforeCategories;
+  const inTab = (list: LeadView[], t: Tab) => (t === 'recall' ? list.filter((l) => l.state.recallAt != null) : groupByStatus(list)[t]);
   const groups = groupByStatus(applied);
   const recalls = applied.filter((l) => l.state.recallAt != null);
   const dueCount = recalls.filter((l) => isDue(l.state.recallAt, now)).length;
@@ -116,10 +131,14 @@ export function App({ api = defaultApi }: { api?: Api }) {
     ...(filter === 'all' ? [] : [FILTER_LABELS[filter]]),
     ...(portals.length ? [joinList(portals.map((p) => PORTAL_TAGS[p]), 'e')] : []),
     ...(multi ? ['su più portali'] : []),
+    ...(categories.length ? [joinList(categories.map((c) => CATEGORY_LABELS[c]), 'e')] : []),
+    ...(missingOnly ? ['non più visti'] : []),
+    ...(since != null ? ['da questo giro'] : []),
     ...describeQuery(query),
   ];
   const filterTag = tagParts.length ? ` «${tagParts.join(', ')}»` : '';
-  const anyFilter = filter !== 'all' || portals.length > 0 || multi || !isEmptyQuery(query) || minPrice === 'invalid' || maxPrice === 'invalid';
+  const anyFilter = filter !== 'all' || portals.length > 0 || multi || !isEmptyQuery(query) || minPrice === 'invalid' || maxPrice === 'invalid'
+    || categories.length > 0 || missingOnly || since != null;
   const resetFilters = () => {
     setText('');
     setMinInput('');
@@ -127,7 +146,16 @@ export function App({ api = defaultApi }: { api?: Api }) {
     setFilter('all');
     setPortals([]);
     setMulti(false);
+    setCategories([]);
+    setMissingOnly(false);
+    setSince(null);
   };
+
+  const toggleCategory = (c: PropertyCategory) =>
+    setCategories((cs) => {
+      const next = PROPERTY_CATEGORIES.filter((x) => (x === c ? !cs.includes(x) : cs.includes(x)));
+      return next.length === PROPERTY_CATEGORIES.length ? [] : next;
+    });
 
   // Selezionare tutti i siti equivale a nessun filtro: si torna a "Tutti i siti".
   const togglePortal = (p: Portal) =>
@@ -146,7 +174,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
     });
   };
 
-  useEffect(() => setConfirmingAll(false), [tab, filter, portals, multi, visible.length, text, query.minPrice, query.maxPrice]);
+  useEffect(() => setConfirmingAll(false), [tab, filter, portals, multi, categories, missingOnly, since, visible.length, text, query.minPrice, query.maxPrice]);
 
   return (
     <main className="panel">
@@ -204,6 +232,14 @@ export function App({ api = defaultApi }: { api?: Api }) {
             <Onboarding api={api} mode="review" onDone={() => setView('settings')} />
           ) : (
             <>
+              <SweepCard
+                api={api}
+                onShowNew={(at) => {
+                  setSince(at);
+                  setTab('new');
+                }}
+                onOpenSettings={() => setView('settings')}
+              />
               <nav className="tabs" role="tablist">
                 {TABS.map((t) => {
                   const due = t === 'recall' && dueCount > 0;
@@ -326,6 +362,43 @@ export function App({ api = defaultApi }: { api?: Api }) {
                   );
                 })()}
               </div>
+              <div className="filters" role="group" aria-label="Filtra per categoria">
+                {PROPERTY_CATEGORIES.map((c) => {
+                  const count = inTab(beforeCategories, tab).filter((l) => leadCategories(l).includes(c)).length;
+                  const on = categories.includes(c);
+                  return (
+                    <button
+                      key={c}
+                      type="button"
+                      aria-pressed={on}
+                      aria-label={`${CATEGORY_LABELS[c]} (${count})`}
+                      className={`chip${on ? ' chip--on' : ''}`}
+                      disabled={count === 0 && !on}
+                      onClick={() => toggleCategory(c)}
+                    >
+                      {CATEGORY_LABELS[c]} <span className="chip__count">{count}</span>
+                    </button>
+                  );
+                })}
+                {(() => {
+                  const count = tabLeads(tab).filter((l) => l.missing != null || l.missingPortals.length > 0).length;
+                  return (
+                    <button
+                      type="button"
+                      aria-pressed={missingOnly}
+                      aria-label={`Non più visti (${count})`}
+                      className={`chip${missingOnly ? ' chip--on' : ''}`}
+                      disabled={count === 0 && !missingOnly}
+                      onClick={() => setMissingOnly((m) => !m)}
+                    >
+                      Non più visti <span className="chip__count">{count}</span>
+                    </button>
+                  );
+                })()}
+                {since != null && (
+                  <button type="button" aria-pressed className="chip chip--on" onClick={() => setSince(null)}>Da questo giro ✕</button>
+                )}
+              </div>
               {tab !== 'recall' && (
                 <label className="sort">
                   <span className="sort__label">Ordina per</span>
@@ -368,7 +441,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
                       ? `Nessun lead${filterTag} in questa scheda.`
                       : tab === 'recall'
                         ? 'Nessun richiamo. Imposta una data di ricontatto su un lead con «Richiama…».'
-                        : `Nessun lead in questa scheda. Naviga su ${joinList(PORTALS.map((p) => PORTAL_SITES[p]), 'o')} per raccoglierne.`}
+                        : `Nessun lead in questa scheda. Premi «Cerca» o naviga su ${joinList(PORTALS.map((p) => PORTAL_SITES[p]), 'o')} per raccoglierne.`}
                   </p>
                 </div>
               ) : (

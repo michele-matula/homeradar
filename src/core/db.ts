@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie';
+import { categoryFromTypology } from '@/core/category';
 import type { CalibrationPoint, LeadState, ListingRecord, Portal, PriceSnapshot, SplitPair } from '@/shared/types';
 
 export interface MetaRecord {
@@ -49,5 +50,16 @@ export class HomeRadarDB extends Dexie {
       });
     // v6: coppie di annunci che l'agente ha separato, per non unirle più come stesso immobile.
     this.version(6).stores({ splits: '[a+b], a, b' });
+    // v7: categoria dell'immobile e campi del giro delle ricerche ("non più visto").
+    this.version(7)
+      .stores({ listings: 'key, lastSeenAt' })
+      .upgrade(async (tx) => {
+        await tx.table<Partial<ListingRecord>>('listings').toCollection().modify((l) => {
+          l.category ??= categoryFromTypology(l.typology) ?? 'residential';
+          l.sweepScope ??= null;
+          l.missedSweeps ??= 0;
+          l.missingSince ??= null;
+        });
+      });
   }
 }

@@ -6,6 +6,78 @@ export const PORTAL_SITES: Record<Portal, string> = { immobiliare: 'Immobiliare.
 export const PORTAL_TAGS: Record<Portal, string> = { immobiliare: 'Immobiliare', idealista: 'Idealista', subito: 'Subito' };
 export type SellerType = 'private' | 'agency' | 'constructor' | 'unknown';
 export type PageKind = 'search' | 'detail' | 'other';
+
+/** Categoria normalizzata dell'immobile: il confronto con il mercato e lo stesso immobile valgono solo dentro una categoria. */
+export type PropertyCategory = 'residential' | 'commercial' | 'land' | 'garage';
+export const PROPERTY_CATEGORIES: PropertyCategory[] = ['residential', 'commercial', 'land', 'garage'];
+export const CATEGORY_LABELS: Record<PropertyCategory, string> = { residential: 'Residenziale', commercial: 'Commerciale', land: 'Terreni', garage: 'Box' };
+
+/** Comune della zona di lavoro, come salvato nelle impostazioni. */
+export interface ComuneRef {
+  /** Codice ISTAT, 6 cifre. */
+  istat: string;
+  name: string;
+  /** Sigla della provincia, "BG". */
+  province: string;
+}
+
+/** Una ricerca del giro: URL della pagina 1 e categorie da tenere. Solo dati: si salva in storage.session. */
+export interface SearchSpec {
+  portal: Portal;
+  /** Stabile tra un giro e l'altro: "immobiliare|comune:015059|case", "subito|comune:015059|immobili". */
+  key: string;
+  /** Per il pannello: "Treviglio · Case". */
+  label: string;
+  /** Categorie ammesse: una sola per Immobiliare e Idealista, quelle scelte per Subito. */
+  categories: PropertyCategory[];
+  /** La pagina porta tutte le categorie (Subito "immobili"): la categoria di un annuncio non si deduce dalla ricerca. */
+  mixedCategories?: boolean;
+  url: string;
+}
+
+export type SweepOutcome = 'completed' | 'partial' | 'stopped' | 'interrupted';
+export type PortalSweepOutcome = 'complete' | 'capped' | 'blocked' | 'error' | 'skipped';
+
+export interface PortalSweepStats {
+  pages: number;
+  privates: number;
+  outcome: PortalSweepOutcome;
+}
+
+/** Esito dell'ultimo giro, in `meta.sweep` (fuori dal backup). */
+export interface SweepResult {
+  startedAt: number;
+  finishedAt: number;
+  outcome: SweepOutcome;
+  portals: Partial<Record<Portal, PortalSweepStats>>;
+  /** Ricerche che il portale non riconosce: "Treviglio · Case (Idealista)". */
+  notFound: string[];
+  newCount: number;
+  drops: number;
+  missing: number;
+}
+
+/** Avanzamento del giro in corso, per il pannello. */
+export interface SweepProgress {
+  startedAt: number;
+  total: number;
+  done: number;
+  current: string | null;
+  portals: Partial<Record<Portal, { pages: number; privates: number }>>;
+  newCount: number;
+  drops: number;
+}
+
+export interface SweepStatus {
+  running: SweepProgress | null;
+  last: SweepResult | null;
+}
+
+/** Zona di lavoro: dove e cosa cerca il giro delle ricerche. */
+export interface SearchArea {
+  comuni: ComuneRef[];
+  categories: PropertyCategory[];
+}
 export type ObservationSource = 'search' | 'detail';
 
 export const DAY_MS = 86_400_000;
@@ -39,6 +111,8 @@ export interface ListingObservation {
   city: string | null;
   zone: string | null;
   typology: string | null;
+  /** Categoria riconosciuta dalla tipologia; null se la tipologia non la dice. */
+  category: PropertyCategory | null;
   surfaceM2: number | null;
   rooms: number | null;
   price: number | null;
@@ -48,11 +122,43 @@ export interface ListingObservation {
   source: ObservationSource;
 }
 
+/** Opzioni di `ingest` per le pagine lette dal giro delle ricerche. */
+export interface IngestOptions {
+  /** Ricerca del giro che ha letto la pagina. */
+  sweepScope?: string;
+  /** Categoria della ricerca, usata se la tipologia non dice la categoria. */
+  searchCategory?: PropertyCategory | null;
+  /** Chiamata per un annuncio già salvato il cui prezzo è sceso o che ha un ribasso nuovo dichiarato dal portale. */
+  onDrop?: (listingKey: string) => void;
+}
+
+/** Riassunto di una pagina di ricerca, per la condizione di fine del giro. */
+export interface PageInfo {
+  /** Annunci letti in pagina, agenzie comprese. */
+  results: number;
+  privates: number;
+  lastPage: boolean;
+}
+
+/** Pagina di ricerca letta da un content script, mandata al giro con `pageRead`. */
+export interface PageReport extends PageInfo {
+  portal: Portal;
+  url: string;
+  /** Verifica di DataDome ("non sei un robot"). */
+  blocked: boolean;
+  /** Il portale dice che la pagina non esiste (comune o percorso sbagliato). */
+  notFound: boolean;
+  /** Annunci non letti o con venditore non riconosciuto: la pagina non può dire che la ricerca è completa. */
+  parseErrors: number;
+}
+
 export interface ParseResult {
   observations: ListingObservation[];
   errors: string[];
   /** Pagine "più recenti": ID più alto in pagina, candidato punto di calibrazione. */
   newestId?: number;
+  /** Pagine di ricerca: riassunto per il giro delle ricerche. */
+  page?: PageInfo;
 }
 
 export interface ListingRecord {
@@ -65,6 +171,7 @@ export interface ListingRecord {
   city: string | null;
   zone: string | null;
   typology: string | null;
+  category: PropertyCategory;
   surfaceM2: number | null;
   rooms: number | null;
   currentPrice: number | null;
@@ -74,6 +181,12 @@ export interface ListingRecord {
   firstSeenAt: number;
   lastSeenAt: number;
   seenCount: number;
+  /** `key` dell'ultima ricerca del giro in cui l'annuncio è stato visto; null se visto solo navigando a mano. */
+  sweepScope: string | null;
+  /** Giri consecutivi in cui la sua ricerca è stata completa e l'annuncio non c'era. */
+  missedSweeps: number;
+  /** Inizio del primo di quei giri; null se l'annuncio è stato visto nell'ultimo giro. */
+  missingSince: number | null;
 }
 
 export type SnapshotSource = 'observed' | 'declared';
@@ -119,6 +232,8 @@ export interface Settings {
   pilotCode: string;
   /** Invio giornaliero delle statistiche d'uso anonime al gestore del pilota. */
   reportingEnabled: boolean;
+  /** Comuni e categorie del giro delle ricerche; senza comuni «Cerca» resta spento. */
+  searchArea: SearchArea;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -129,6 +244,8 @@ export const DEFAULT_SETTINGS: Settings = {
   enabledPortals: { immobiliare: true, idealista: true, subito: true },
   pilotCode: '',
   reportingEnabled: true,
+  // Di default solo le case: le altre categorie allungano il giro (una ricerca in più per comune e categoria).
+  searchArea: { comuni: [], categories: ['residential'] },
 };
 
 export interface CalibrationPoint {
@@ -193,6 +310,10 @@ export interface LeadView {
   others: LeadSource[];
   /** Vero se il lead contiene almeno un annuncio sostituito da una ripubblicazione. */
   reposted: boolean;
+  /** Non più visto nei giri: data del primo giro mancato; null se almeno un annuncio principale c'è ancora. */
+  missing: number | null;
+  /** Portali da cui l'immobile è sparito mentre resta visibile su un altro. */
+  missingPortals: Portal[];
 }
 
 export interface Diagnostics {

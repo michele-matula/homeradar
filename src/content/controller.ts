@@ -1,5 +1,6 @@
 import type { PayloadKind, PortalAdapter } from '@/adapters/types';
 import { removeBadges, renderBadge } from '@/content/badges';
+import { pageProblem } from '@/content/page-problem';
 import type { ParseSource, Request } from '@/shared/messages';
 import type { Evaluation, ParseResult, PortalState } from '@/shared/types';
 
@@ -16,6 +17,11 @@ export interface ControllerDeps {
   portalState?: () => Promise<PortalState>;
   /** Informativa da confermare: chiamata al massimo una volta per pagina (avviso sul portale). */
   onOnboardingNeeded?: () => void;
+}
+
+/** Documento della pagina: root è il documento o un suo nodo. */
+function docOf(root: ParentNode): Document {
+  return (root as Node).ownerDocument ?? (root as Document);
 }
 
 export function createController({ adapter, send, root, getUrl, portalState = async () => 'active', onOnboardingNeeded }: ControllerDeps) {
@@ -53,15 +59,35 @@ export function createController({ adapter, send, root, getUrl, portalState = as
 
   async function process(result: ParseResult, source: ParseSource): Promise<void> {
     const total = result.errors.length + result.observations.length;
-    const hasUnknownSeller = result.observations.some((o) => o.sellerType === 'unknown');
+    const unknownSellers = result.observations.filter((o) => o.sellerType === 'unknown').length;
+    const hasUnknownSeller = unknownSellers > 0;
     const ok = !hasUnknownSeller && (total === 0 || result.errors.length <= total * 0.2);
     for (const o of result.observations) seen.add(o.portalId);
     await send({ type: 'parseStatus', portal: adapter.portal, ok, errors: result.errors, source });
-    if (!result.observations.length) return;
-    const calibrationHint = result.newestId != null ? { portal: adapter.portal, portalId: result.newestId } : undefined;
-    const evs = (await send({ type: 'ingest', observations: result.observations, ...(calibrationHint ? { calibrationHint } : {}) })) as Evaluation[];
-    for (const ev of evs) evaluations.set(ev.portalId, ev);
-    applyAll();
+    if (result.observations.length) {
+      const calibrationHint = result.newestId != null ? { portal: adapter.portal, portalId: result.newestId } : undefined;
+      const evs = (await send({ type: 'ingest', observations: result.observations, ...(calibrationHint ? { calibrationHint } : {}) })) as Evaluation[];
+      for (const ev of evs) evaluations.set(ev.portalId, ev);
+      applyAll();
+    }
+    // Dopo ingest: il giro passa alla pagina successiva solo quando gli annunci di questa sono salvati.
+    // Una pagina di verifica o inesistente non è una ricerca vuota: al giro va solo il problema.
+    if (await checkProblem(docOf(root))) return;
+    if (result.page) {
+      await send({ type: 'pageRead', report: { portal: adapter.portal, url: getUrl(), ...result.page, blocked: false, notFound: false, parseErrors: result.errors.length + unknownSellers } });
+    }
+  }
+
+  /** Pagina di ricerca senza dati perché il portale chiede una verifica o non trova la pagina: lo dice al giro. */
+  async function checkProblem(doc: Document): Promise<boolean> {
+    if (adapter.pageKind(getUrl()) !== 'search') return false;
+    const problem = pageProblem(doc);
+    if (!problem) return false;
+    await send({
+      type: 'pageRead',
+      report: { portal: adapter.portal, url: getUrl(), results: 0, privates: 0, lastPage: true, blocked: problem === 'blocked', notFound: problem === 'notFound', parseErrors: 0 },
+    });
+    return true;
   }
 
   async function handle(kind: PayloadKind, url: string, payload: unknown): Promise<void> {
@@ -97,5 +123,5 @@ export function createController({ adapter, send, root, getUrl, portalState = as
     await process({ ...result, observations: fresh, errors: freshErrors }, 'dom');
   }
 
-  return { handle, scan, applyAll, hasUnseenListings, isEnabled };
+  return { handle, scan, applyAll, hasUnseenListings, isEnabled, checkProblem };
 }

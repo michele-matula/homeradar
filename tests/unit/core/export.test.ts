@@ -9,7 +9,7 @@ const lead: LeadView = {
     title: 'Bilocale via Esempio 1, Precotto, Milano', address: 'Via Esempio', city: 'Milano', zone: 'Precotto',
     typology: 'Appartamento', surfaceM2: 62, rooms: 2, currentPrice: 235000, portalCreatedAt: null,
     estimatedCreatedAt: Date.UTC(2026, 3, 20), lastDrop: { fromPrice: 249000, toPrice: 235000, percent: 5.6, date: Date.UTC(2026, 8, 21) },
-    firstSeenAt: Date.UTC(2026, 9, 1), lastSeenAt: Date.UTC(2026, 9, 10), seenCount: 3,
+    firstSeenAt: Date.UTC(2026, 9, 1), lastSeenAt: Date.UTC(2026, 9, 10), seenCount: 3, category: 'residential', sweepScope: null, missedSweeps: 0, missingSince: null,
   },
   evaluation: {
     listingKey: 'immobiliare:128416572', portalId: 128416572, priority: 'high', ageDays: 173, ageEstimated: true, ageUncertain: false,
@@ -19,7 +19,7 @@ const lead: LeadView = {
   prices: [],
   market: null,
   others: [],
-  reposted: false,
+  reposted: false, missing: null, missingPortals: [],
 };
 
 describe('toExportRows', () => {
@@ -43,7 +43,7 @@ describe('toExportRows', () => {
   it('mappa tutte le colonne', () => {
     expect(toExportRows([lead])).toEqual([{
       'Priorità': 'Alta', 'Stato': 'Da contattare', 'Richiamo': '', 'Portale': 'Immobiliare.it', 'Titolo': 'Bilocale via Esempio 1, Precotto, Milano',
-      'Indirizzo': 'Via Esempio', 'Città/Zona': 'Milano / Precotto', 'Tipologia': 'Appartamento', 'm²': 62, 'Locali': 2,
+      'Indirizzo': 'Via Esempio', 'Città/Zona': 'Milano / Precotto', 'Tipologia': 'Appartamento', 'Categoria': 'Residenziale', 'm²': 62, 'Locali': 2,
       'Prezzo attuale': 235000, 'Prezzo massimo noto': 249000, 'Calo %': 5.6, 'Sopra mercato %': '', 'Confronto mercato': '','Data ultimo ribasso': '21/09/2026',
       'Online da (giorni)': 173, 'Età stimata': 'sì', 'Ripubblicato': '', 'Prima visita': '01/10/2026', 'Ultima visita': '10/10/2026',
       'Note': 'chiamare la sera', 'URL': 'https://www.immobiliare.it/annunci/128416572/', 'Altri URL': '',

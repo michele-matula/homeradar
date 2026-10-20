@@ -16,6 +16,8 @@ export default defineContentScript({
     });
     const scan = () => controller.scan().catch((err) => console.warn('[HomeRadar]', err));
     scan();
+    // Verifica di DataDome: nessuna card, il giro lo deve sapere subito.
+    setTimeout(() => void controller.checkProblem(document).catch(() => {}), 2500);
 
     // Card caricate dopo (lazy-load) o rigenerate dal sito: nuova lettura con debounce.
     // scan() senza card nuove riapplica solo i badge, quindi i badge inseriti non creano cicli.

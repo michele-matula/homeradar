@@ -1,5 +1,6 @@
 import { PRIORITY_ORDER } from '@/core/leads';
 import { compareToMarket } from '@/core/market';
+import { isMissing } from '@/core/missing';
 import { evaluate, evaluateGroup } from '@/core/rules';
 import { groupListings } from '@/core/same-property';
 import {
@@ -49,6 +50,9 @@ export function mergeGroupState(members: MemberState[]): LeadState {
 
 /** Principale del gruppo: priorità più alta, poi età maggiore, poi visto più di recente, poi chiave. */
 function byPrimary(a: LeadSource, b: LeadSource): number {
+  // Il principale è un annuncio ancora visto nei giri, se ce n'è uno.
+  const gone = Number(isMissing(a.listing)) - Number(isMissing(b.listing));
+  if (gone !== 0) return gone;
   const p = PRIORITY_ORDER[a.evaluation.priority] - PRIORITY_ORDER[b.evaluation.priority];
   if (p !== 0) return p;
   const age = (b.evaluation.ageDays ?? -1) - (a.evaluation.ageDays ?? -1);
@@ -102,6 +106,9 @@ export function buildLeadViews({ listings, states, snapshots, splits }: Archive,
 
   return units.map((members) => {
     const [primary, ...others] = members as [LeadSource, ...LeadSource[]];
+    const heads = members.filter((m) => !m.previous);
+    const goneHeads = heads.filter((m) => isMissing(m.listing));
+    const allGone = goneHeads.length === heads.length;
     return {
       listing: primary.listing,
       evaluation: others.length ? evaluateGroup(primary.listing, members, settings, now) : primary.evaluation,
@@ -110,8 +117,15 @@ export function buildLeadViews({ listings, states, snapshots, splits }: Archive,
       market: market.get(primary.listing.key) ?? null,
       others,
       reposted: others.some((o) => o.previous),
+      missing: allGone ? Math.max(...goneHeads.map((m) => m.listing.missingSince ?? 0)) : null,
+      missingPortals: allGone ? [] : [...new Set(goneHeads.map((m) => m.listing.portal))],
     };
   });
+}
+
+/** Un annuncio del gruppo è comparso per la prima volta da `since` (filtro "da questo giro"). */
+export function seenSince(v: LeadView, since: number): boolean {
+  return [v.listing, ...v.others.map((o) => o.listing)].some((x) => x.firstSeenAt >= since);
 }
 
 /** Un lead si mostra se ha segnali, è già stato lavorato o ha un richiamo: l'icona lo conta. */
