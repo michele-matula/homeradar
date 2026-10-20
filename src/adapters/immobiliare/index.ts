@@ -1,5 +1,6 @@
 import type { PayloadKind, PortalAdapter } from '@/adapters/types';
 import { categoryFromTypology } from '@/core/category';
+import { coverOrNull } from '@/core/cover';
 import type {
   ListingObservation, ObservationSource, ParseResult, PriceDrop, SellerType,
 } from '@/shared/types';
@@ -46,6 +47,7 @@ function toObservation(re: RealEstate, url: string, source: ObservationSource): 
     sellerType: sellerTypeOf(re.advertiser),
     portalCreatedAt: re.createdAt != null ? re.createdAt * 1000 : null,
     lastDrop: price == null ? null : toLastDrop(re.price.loweredPrice),
+    coverUrl: coverOrNull('immobiliare', p.photo?.urls.small),
     source,
   };
 }

@@ -14,6 +14,8 @@ export interface CardOpts {
   price?: string;
   details?: string[];
   drop?: { from: string; pct: string };
+  /** src dell'img della copertina; null = card senza foto (`item-multimedia_no-pictures`). */
+  img?: string | null;
 }
 
 const dropHtml = (d?: { from: string; pct: string }) =>
@@ -24,7 +26,9 @@ export function card(o: CardOpts = {}): string {
   const prof = o.professional === undefined ? 'false' : o.professional;
   const title = o.title ?? 'Quadrilocale in Via Esempio, 1, Precotto, Milano';
   return `<article class="item extended-item item-multimedia-container" data-element-id="${id}"${prof === null ? '' : ` data-is-professional-ad="${prof}"`} data-is-offmarket="false">
-    <picture class="item-multimedia"><div class="item-multimedia-pictures"><div class="item-multimedia-pictures__container"></div></div><div class="item-gallery"><img src="x.jpg" alt=""></div></picture>
+    ${o.img === null
+      ? '<picture class="item-multimedia item-multimedia_no-pictures"></picture>'
+      : `<picture class="item-multimedia"><div class="item-multimedia-pictures"><div class="item-multimedia-pictures__container"></div></div><div class="item-gallery"><img src="${o.img ?? 'x.jpg'}" alt="" loading="lazy"></div></picture>`}
     <div class="item-info-container">
       <a href="/immobile/${id}/" role="heading" class="item-link" title="${title}">${title}</a>
       <div class="price-row"><span class="item-price h2-simulated">${o.price ?? '245.000<span class="txt-big">€</span>'}</span><span class="item-price-by-area">2.426 €/m²</span>${dropHtml(o.drop)}</div>

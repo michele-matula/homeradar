@@ -119,6 +119,8 @@ export interface ListingObservation {
   sellerType: SellerType;
   portalCreatedAt: number | null;
   lastDrop: ObservedPriceDrop | null;
+  /** Foto di copertina su un server immagini ammesso (`core/cover.ts`); null se manca o non è riconosciuta. */
+  coverUrl: string | null;
   source: ObservationSource;
 }
 
@@ -187,6 +189,8 @@ export interface ListingRecord {
   missedSweeps: number;
   /** Inizio del primo di quei giri; null se l'annuncio è stato visto nell'ultimo giro. */
   missingSince: number | null;
+  /** Foto di copertina; assente se non nota (mai null: un record senza copertina ha la stessa forma di prima). */
+  coverUrl?: string;
 }
 
 export type SnapshotSource = 'observed' | 'declared';

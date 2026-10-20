@@ -9,7 +9,7 @@ describe('parseNextData', () => {
     expect(r.observations).toEqual([{
       portal: 'subito', portalId: 664390119, url: 'https://www.subito.it/appartamenti/annuncio-664390119.htm',
       title: 'Bilocale in Via Esempio 1', address: null, city: 'Milano', zone: 'Città Studi', typology: 'Appartamenti', category: 'residential',
-      surfaceM2: 65, rooms: 2, price: 250000, sellerType: 'private', portalCreatedAt: null, lastDrop: null, source: 'search',
+      surfaceM2: 65, rooms: 2, price: 250000, sellerType: 'private', portalCreatedAt: null, lastDrop: null, coverUrl: null, source: 'search',
     }]);
   });
 
@@ -150,5 +150,31 @@ describe('riassunto della pagina', () => {
     expect(A.parseNextData(json, SEARCH_URL, NOW).page).toEqual({ results: 2, privates: 2, lastPage: false });
     expect(A.parseNextData(json, `${SEARCH_URL}?o=3`, NOW).page).toMatchObject({ lastPage: true });
     expect(A.parseNextData(nextData([]), SEARCH_URL, NOW).page).toMatchObject({ results: 0, lastPage: true });
+  });
+});
+
+describe('copertina', () => {
+  const BASE = 'https://images.sbito.it/api/v1/sbt-ads-images-pro/images/3f/3f48389a-ec1a-4435-b055-4b21a05401a8';
+  const COVER = `${BASE}?rule=vertical-mini-card-1x-auto`;
+
+  it('__NEXT_DATA__: cdnBaseUrl della prima immagine con la regola della miniatura', () => {
+    const r = A.parseNextData(nextData([nextAd(1, { images: [{ cdnBaseUrl: BASE }, { cdnBaseUrl: `${BASE}2` }] })]), SEARCH_URL, NOW);
+    expect(r.observations[0]!.coverUrl).toBe(COVER);
+  });
+
+  it('API: cdn_base_url', () => {
+    const r = A.parseApi(API_URL, apiResponse([apiAd(1, { images: [{ uri: 'imgid:x', base_url: 'https://s.sbito.it/img/x', cdn_base_url: BASE }] })]), NOW);
+    expect(r.observations[0]!.coverUrl).toBe(COVER);
+  });
+
+  it('senza immagini, forma inattesa o altro server: null, annuncio letto', () => {
+    const r = A.parseNextData(nextData([
+      nextAd(1, { images: [] }),
+      nextAd(2, { images: undefined }),
+      nextAd(3, { images: 'x' }),
+      nextAd(4, { images: [{ cdnBaseUrl: 'https://images.example/1' }] }),
+    ]), SEARCH_URL, NOW);
+    expect(r.errors).toEqual([]);
+    expect(r.observations.map((o) => o.coverUrl)).toEqual([null, null, null, null]);
   });
 });

@@ -182,7 +182,7 @@ describe('createController in modalità DOM', () => {
   const card = (id: number) => `<article data-id="${id}"><div class="foto"><img></div></article>`;
   const obsFor = (id: number): ListingObservation => ({
     portal: 'idealista', portalId: id, url: `https://portale.test/immobile/${id}/`, title: 't', address: null, city: null, zone: null,
-    typology: null, category: null, surfaceM2: null, rooms: null, price: 1, sellerType: 'private', portalCreatedAt: null, lastDrop: null, source: 'search',
+    typology: null, category: null, surfaceM2: null, rooms: null, price: 1, sellerType: 'private', portalCreatedAt: null, lastDrop: null, coverUrl: null, source: 'search',
   });
   // Adattatore minimo: una card = un privato; la pagina "?nuovi" segnala l'ID più recente.
   const domAdapter: PortalAdapter = {

@@ -1,6 +1,7 @@
 import type { z } from 'zod';
 import type { PayloadKind, PortalAdapter } from '@/adapters/types';
 import { categoryFromTypology } from '@/core/category';
+import { coverOrNull, subitoCover } from '@/core/cover';
 import type { ListingObservation, ParseResult, SellerType } from '@/shared/types';
 import { ApiAdSchema, NextAdSchema, type CommonAd } from './schemas';
 import { isInterceptedUrl, listingIdFromHref, pageKind } from './urls';
@@ -56,6 +57,11 @@ function sellerTypeOf(adv: CommonAd['advertiser']): SellerType {
   return adv.type === 0 ? 'private' : 'unknown';
 }
 
+function coverOf(images: CommonAd['images']): string | null {
+  const base = images?.[0]?.cdnBaseUrl ?? images?.[0]?.cdn_base_url;
+  return base ? coverOrNull('subito', subitoCover(base)) : null;
+}
+
 function toObservation({ ad, typology, features }: Normalized, portalId: number): ListingObservation {
   return {
     portal: 'subito',
@@ -73,6 +79,7 @@ function toObservation({ ad, typology, features }: Normalized, portalId: number)
     sellerType: sellerTypeOf(ad.advertiser),
     portalCreatedAt: null,
     lastDrop: null,
+    coverUrl: coverOf(ad.images),
     source: 'search',
   };
 }
