@@ -177,4 +177,30 @@ describe('ingest: copertina', () => {
     await svc.ingest([obs({ coverUrl: B })]);
     expect((await db.listings.get('immobiliare:128416572'))!.coverUrl).toBe(B);
   });
+
+  it('un prezzo che diventa riservato azzera il prezzo attuale e resta nello storico', async () => {
+    const { db, svc, advance } = setup();
+    const key = 'casadaprivato:55';
+    await svc.ingest([obs({ portal: 'casadaprivato', portalId: 55, lastDrop: null, price: 200_000 })]);
+    advance(VISIT_GAP_MS);
+    await svc.ingest([obs({ portal: 'casadaprivato', portalId: 55, lastDrop: null, price: null, priceReserved: true })]);
+    expect((await db.listings.get(key))!.currentPrice).toBeNull();
+    expect((await db.priceSnapshots.toArray()).map((s) => s.price)).toEqual([200_000]);
+  });
+
+  it('un prezzo non letto tiene quello precedente', async () => {
+    const { db, svc, advance } = setup();
+    await svc.ingest([obs({ lastDrop: null, price: 200_000 })]);
+    advance(VISIT_GAP_MS);
+    await svc.ingest([obs({ lastDrop: null, price: null })]);
+    expect((await db.listings.get(KEY))!.currentPrice).toBe(200_000);
+  });
+
+  it('un lead riservato torna normale quando compare il prezzo', async () => {
+    const { db, svc, advance } = setup();
+    await svc.ingest([obs({ lastDrop: null, price: null, priceReserved: true })]);
+    advance(VISIT_GAP_MS);
+    await svc.ingest([obs({ lastDrop: null, price: 180_000 })]);
+    expect((await db.listings.get(KEY))!.currentPrice).toBe(180_000);
+  });
 });
