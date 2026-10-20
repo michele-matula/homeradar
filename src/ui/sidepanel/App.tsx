@@ -63,6 +63,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
   const [text, setText] = useState('');
   const [minInput, setMinInput] = useState('');
   const [maxInput, setMaxInput] = useState('');
+  const [reservedOnly, setReservedOnly] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
@@ -109,7 +110,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
   const minPrice = parseThousands(minInput);
   const maxPrice = parseThousands(maxInput);
   // Un prezzo non valido non filtra: il campo è segnato in rosso.
-  const query: LeadQuery = { text, minPrice: minPrice === 'invalid' ? null : minPrice, maxPrice: maxPrice === 'invalid' ? null : maxPrice };
+  const query: LeadQuery = { text, minPrice: minPrice === 'invalid' ? null : minPrice, maxPrice: maxPrice === 'invalid' ? null : maxPrice, reservedOnly };
   // Ricerca e prezzo agiscono prima delle schede, così anche i loro conteggi li seguono.
   const now = Date.now();
   const beforeCategories = applyQuery(leads, query).filter((l) =>
@@ -143,6 +144,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
     setText('');
     setMinInput('');
     setMaxInput('');
+    setReservedOnly(false);
     setFilter('all');
     setPortals([]);
     setMulti(false);
@@ -174,7 +176,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
     });
   };
 
-  useEffect(() => setConfirmingAll(false), [tab, filter, portals, multi, categories, missingOnly, since, visible.length, text, query.minPrice, query.maxPrice]);
+  useEffect(() => setConfirmingAll(false), [tab, filter, portals, multi, categories, missingOnly, since, visible.length, text, query.minPrice, query.maxPrice, reservedOnly]);
 
   return (
     <main className="panel">
@@ -284,7 +286,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
                   aria-label="Prezzo minimo in migliaia di euro"
                   aria-invalid={minPrice === 'invalid'}
                   value={minInput}
-                  onChange={(e) => setMinInput(e.target.value)}
+                  onChange={(e) => { setMinInput(e.target.value); setReservedOnly(false); }}
                 />
                 <span className="price__label">a</span>
                 <input
@@ -293,9 +295,23 @@ export function App({ api = defaultApi }: { api?: Api }) {
                   aria-label="Prezzo massimo in migliaia di euro"
                   aria-invalid={maxPrice === 'invalid'}
                   value={maxInput}
-                  onChange={(e) => setMaxInput(e.target.value)}
+                  onChange={(e) => { setMaxInput(e.target.value); setReservedOnly(false); }}
                 />
                 <span className="price__label">k€</span>
+                <button
+                  type="button"
+                  className="btn btn--sm"
+                  aria-pressed={reservedOnly}
+                  onClick={() => {
+                    if (!reservedOnly) {
+                      setMinInput('');
+                      setMaxInput('');
+                    }
+                    setReservedOnly(!reservedOnly);
+                  }}
+                >
+                  Solo trattativa riservata
+                </button>
                 {anyFilter && (
                   <button type="button" className="btn btn--sm price__reset" onClick={resetFilters}>Azzera filtri</button>
                 )}

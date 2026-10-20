@@ -5,6 +5,8 @@ export interface LeadQuery {
   text: string;
   minPrice: number | null;
   maxPrice: number | null;
+  /** Solo i lead senza prezzo («Trattativa riservata»). Esclude la fascia di prezzo. */
+  reservedOnly?: boolean;
 }
 
 export const EMPTY_QUERY: LeadQuery = { text: '', minPrice: null, maxPrice: null };
@@ -56,11 +58,11 @@ export function inPriceRange(lead: LeadView, min: number | null, max: number | n
 }
 
 export function applyQuery(leads: LeadView[], q: LeadQuery): LeadView[] {
-  return leads.filter((l) => matchesText(l, q.text) && inPriceRange(l, q.minPrice, q.maxPrice));
+  return leads.filter((l) => matchesText(l, q.text) && (q.reservedOnly ? l.listing.currentPrice == null : inPriceRange(l, q.minPrice, q.maxPrice)));
 }
 
 export function isEmptyQuery(q: LeadQuery): boolean {
-  return words(q.text).length === 0 && q.minPrice == null && q.maxPrice == null;
+  return words(q.text).length === 0 && q.minPrice == null && q.maxPrice == null && !q.reservedOnly;
 }
 
 const thousands = (euro: number) => String(euro / 1000).replace('.', ',');
@@ -73,5 +75,6 @@ export function describeQuery(q: LeadQuery): string[] {
   if (lo != null && hi != null) parts.push(`${thousands(lo)}–${thousands(hi)} k€`);
   else if (lo != null) parts.push(`da ${thousands(lo)} k€`);
   else if (hi != null) parts.push(`fino a ${thousands(hi)} k€`);
+  if (q.reservedOnly) parts.push('trattativa riservata');
   return parts;
 }

@@ -49,8 +49,7 @@ test('CasaDaPrivato: i lead compaiono nel pannello con l\'etichetta del portale'
   await expect(panel.locator('.lead .portal-tag').first()).toHaveText('CasaDaPrivato');
 });
 
-// Passa solo dopo il Task 7 («Trattativa riservata» nel pannello): togliere fixme allora.
-test.fixme('CasaDaPrivato: prezzo riservato mostrato come «Trattativa riservata»', async ({ context, extensionId }) => {
+test('CasaDaPrivato: prezzo riservato mostrato come «Trattativa riservata»', async ({ context, extensionId }) => {
   const page = await context.newPage();
   await page.goto('https://www.casadaprivato.it/annunci-vendita/immobili/salerno-salerno');
   await page.locator('[data-homeradar-badge]').first().waitFor();

@@ -494,6 +494,29 @@ describe('App', () => {
     expect(titles()).toEqual(['Bilocale 1', 'Bilocale 2', 'Bilocale 3']);
   });
 
+  it('«Solo trattativa riservata»: mostra i lead senza prezzo, svuota la fascia, si spegne scrivendo un prezzo e con «Azzera filtri»', async () => {
+    const leads = [withPrice(lead(1, 'high'), 150000), at(lead(2, 'high'), { currentPrice: null })];
+    render(<App api={fakeApi(leads)} />);
+    const min = (await screen.findByLabelText('Prezzo minimo in migliaia di euro')) as HTMLInputElement;
+    expect(screen.getAllByText('Trattativa riservata')).toHaveLength(1);
+    expect(screen.queryByText('Prezzo n.d.')).toBeNull();
+    fireEvent.change(min, { target: { value: '100' } });
+    const btn = screen.getByRole('button', { name: 'Solo trattativa riservata' });
+    expect(btn.getAttribute('aria-pressed')).toBe('false');
+    fireEvent.click(btn);
+    expect(btn.getAttribute('aria-pressed')).toBe('true');
+    expect(min.value).toBe('');
+    expect(titles()).toEqual(['Bilocale 2']);
+    expect(screen.getByText('Elimina tutti «trattativa riservata» (1)')).toBeTruthy();
+    fireEvent.change(min, { target: { value: '100' } });
+    expect(btn.getAttribute('aria-pressed')).toBe('false');
+    expect(titles()).toEqual(['Bilocale 1']);
+    fireEvent.click(btn);
+    fireEvent.click(screen.getByRole('button', { name: 'Azzera filtri' }));
+    expect(btn.getAttribute('aria-pressed')).toBe('false');
+    expect(titles()).toHaveLength(2);
+  });
+
   it('"Elimina tutti" riporta ricerca e prezzo, elimina solo i visibili e la conferma si annulla se cambia la ricerca', async () => {
     const api = fakeApi([
       at(withPrice(lead(1, 'high'), 200000), { zone: 'Navile' }),
