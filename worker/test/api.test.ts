@@ -36,6 +36,16 @@ describe('/report', () => {
     expect(rows.results).toEqual([{ version: '0.2.0', code: 'ROSSI-7K2P' }]);
   });
 
+  it('accetta byPortal senza casadaprivato e quattro avvisi', async () => {
+    const r = report();
+    const body = {
+      ...r,
+      leads: { ...(r.leads as object), byPortal: { immobiliare: 3, idealista: 0, subito: 0 } },
+      technical: { counters: {}, adapterWarning: ['immobiliare', 'idealista', 'subito', 'casadaprivato'], errors: [] },
+    };
+    expect((await post('/report', body)).status).toBe(204);
+  });
+
   it('scarta i campi non dichiarati', async () => {
     await post('/report', report({ titolo: 'Via Roma 12' }));
     const row = await env.DB.prepare('SELECT payload FROM reports').first<{ payload: string }>();

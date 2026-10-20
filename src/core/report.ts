@@ -36,7 +36,7 @@ export interface ReportInput {
 }
 
 export function buildReport(i: ReportInput): UsageReport {
-  const byPortal = Object.fromEntries(PORTALS.map((p) => [p, 0])) as UsageReport['leads']['byPortal'];
+  const byPortal = Object.fromEntries(PORTALS.map((p) => [p, 0])) as Record<(typeof PORTALS)[number], number>;
   const byPriority: UsageReport['leads']['byPriority'] = { high: 0, medium: 0, verify: 0, none: 0 };
   let newLast7Days = 0;
   for (const l of i.leads) {

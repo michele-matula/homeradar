@@ -53,6 +53,20 @@ describe('sanitizeError', () => {
   });
 });
 
+describe('schema del report', () => {
+  const base = () => buildReport(input());
+  it('accetta byPortal senza casadaprivato (estensioni precedenti)', () => {
+    const r = base();
+    const byPortal = { immobiliare: 3, idealista: 0, subito: 0 };
+    expect(UsageReportSchema.safeParse({ ...r, leads: { ...r.leads, byPortal } }).success).toBe(true);
+  });
+  it('accetta quattro avvisi adapter', () => {
+    const r = base();
+    const adapterWarning = ['immobiliare', 'idealista', 'subito', 'casadaprivato'];
+    expect(UsageReportSchema.safeParse({ ...r, technical: { ...r.technical, adapterWarning } }).success).toBe(true);
+  });
+});
+
 describe('buildReport', () => {
   it('produce un report valido con giorni, portali attivi e avvisi', () => {
     const r = buildReport(input());

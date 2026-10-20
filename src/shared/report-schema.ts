@@ -34,13 +34,13 @@ export const UsageReportSchema = z.object({
   }),
   leads: z.object({
     total: count,
-    byPortal: z.record(portal, count),
+    byPortal: z.partialRecord(portal, count),
     byPriority: z.record(priority, count),
     newLast7Days: count,
   }),
   technical: z.object({
     counters: z.record(z.string().max(40), count),
-    adapterWarning: z.array(portal).max(3),
+    adapterWarning: z.array(portal).max(4),
     errors: z.array(z.object({ at: z.number().int(), message: z.string().max(200) })).max(20),
   }),
 });

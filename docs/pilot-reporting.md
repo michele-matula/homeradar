@@ -15,7 +15,7 @@ Da `worker/`:
 
 ## Aggiornare il Worker prima dell'estensione
 
-Quando lo schema del report cambia (per esempio un nuovo portale nell'enum, come `casadaprivato`), ridistribuisci il Worker (`npx wrangler deploy` da `worker/`) **prima** di consegnare la nuova estensione: altrimenti rifiuterebbe i report delle estensioni nuove.
+Quando lo schema del report cambia (per esempio un nuovo portale nell'enum, come `casadaprivato`), ridistribuisci il Worker (`npx wrangler deploy` da `worker/`) **prima** di consegnare la nuova estensione: altrimenti rifiuterebbe i report delle estensioni nuove (il vecchio Worker non conosce `casadaprivato`). Con `byPortal` come `partialRecord` il Worker nuovo accetta i report sia delle estensioni vecchie (senza `casadaprivato`) sia di quelle nuove.
 
 ## Build dell'estensione per il pilota
 
