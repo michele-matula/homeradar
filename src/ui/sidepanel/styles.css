@@ -125,7 +125,22 @@ button, input, select { font: inherit; color: inherit; }
 .price { display: flex; align-items: center; gap: 6px; padding: 8px 12px 0; }
 .price__label { color: var(--muted); font-size: 12px; white-space: nowrap; }
 .price__input { width: 64px; height: 28px; font-size: 12px; text-align: right; }
-.price__reset { margin-left: auto; white-space: nowrap; }
+.filterbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 12px 0; }
+.filterbar__toggle { gap: 4px; }
+.filterbar__toggle--on { border-color: var(--brand); color: var(--brand); }
+.filterbar__reset { margin-left: auto; white-space: nowrap; }
+.filter-tag {
+  display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 6px 0 10px;
+  border: 1px solid var(--brand); border-radius: 999px; background: var(--brand-soft);
+  color: var(--brand); font-size: 12px; font-weight: 500; cursor: pointer;
+}
+.filter-tag .icon { width: 12px; height: 12px; }
+.filter-tag:hover { background: var(--surface); }
+.filter-tag:focus-visible { outline: none; box-shadow: var(--focus); }
+.drawer { margin: 8px 12px 0; padding: 2px 0 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-muted); }
+.drawer__section .filters, .drawer__section .price { padding: 4px 10px 0; }
+.drawer__title { margin: 8px 10px 0; color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.drawer .price { flex-wrap: wrap; }
 .field[aria-invalid='true'] { border-color: var(--high); }
 .filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 12px 0; }
 .chip {

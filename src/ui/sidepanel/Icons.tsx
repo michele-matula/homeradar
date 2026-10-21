@@ -77,6 +77,12 @@ export const CloseIcon = () => (
   </Icon>
 );
 
+export const ChevronIcon = ({ open }: { open: boolean }) => (
+  <Icon size={14}>
+    <path d={open ? 'm6 15 6-6 6 6' : 'm6 9 6 6 6-6'} />
+  </Icon>
+);
+
 export const HouseIcon = () => (
   <Icon size={24}>
     <path d="M3 10.5 12 3l9 7.5" />

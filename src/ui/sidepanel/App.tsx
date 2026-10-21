@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { warnedPortals } from '@/core/diagnostics';
-import { applyQuery, describeQuery, isEmptyQuery, parseThousands, type LeadQuery } from '@/core/lead-filters';
+import { applyQuery, describeQuery, inComuni, isEmptyQuery, OTHER_COMUNI, parseThousands, type LeadQuery } from '@/core/lead-filters';
 import { seenSince } from '@/core/lead-groups';
 import { groupByRecall, groupByStatus, leadCategories, leadKeys, leadPortals, PRIORITY_LABELS, RECALL_GROUP_LABELS, SORT_KEYS, SORT_LABELS, sortLeadsBy, type SortKey } from '@/core/leads';
 import { needsOnboarding } from '@/core/onboarding';
@@ -9,14 +9,15 @@ import { Onboarding } from '@/ui/onboarding/Onboarding';
 import { joinList } from '@/shared/format';
 import {
   CATEGORY_LABELS, LEAD_STATUSES, PORTAL_SITES, PORTAL_TAGS, PORTALS, PROPERTY_CATEGORIES,
-  type LeadStatus, type LeadView, type Portal, type Priority, type PropertyCategory,
+  type ComuneRef, type LeadStatus, type LeadView, type Portal, type Priority, type PropertyCategory,
 } from '@/shared/types';
 import { defaultApi, type Api } from './api';
 import { ExportBar } from './ExportBar';
-import { AlertIcon, BackIcon, CloseIcon, Logo, SearchIcon, SettingsIcon } from './Icons';
+import { AlertIcon, BackIcon, ChevronIcon, CloseIcon, Logo, SearchIcon, SettingsIcon } from './Icons';
 import { LeadItem } from './LeadItem';
 import { SettingsView } from './SettingsView';
 import { SweepCard } from './SweepCard';
+import { loadFiltersOpen, saveFiltersOpen } from './filtersPrefs';
 import { loadSortByTab, saveSortByTab, type SortByTab } from './sortPrefs';
 
 type Tab = 'recall' | LeadStatus;
@@ -50,6 +51,11 @@ export function App({ api = defaultApi }: { api?: Api }) {
   /** Filtri che agiscono prima delle schede, come ricerca e prezzo. */
   const [categories, setCategories] = useState<PropertyCategory[]>([]);
   const [missingOnly, setMissingOnly] = useState(false);
+  /** Comuni della zona di «Cerca», dalle impostazioni: sono i bottoni del filtro per comune. */
+  const [zone, setZone] = useState<ComuneRef[]>([]);
+  /** Codici ISTAT scelti e/o `OTHER_COMUNI`; vuoto = tutti i comuni. */
+  const [chosenComuni, setChosenComuni] = useState<string[]>([]);
+  const [filtersOpen, setFiltersOpen] = useState(loadFiltersOpen);
   /** "Vedi i nuovi" del giro: lead con una fonte vista per la prima volta da questa data. */
   const [since, setSince] = useState<number | null>(null);
   const [view, setView] = useState<'leads' | 'settings' | 'guide'>('leads');
@@ -66,6 +72,8 @@ export function App({ api = defaultApi }: { api?: Api }) {
   const [reservedOnly, setReservedOnly] = useState(false);
 
   const refresh = useCallback(async () => {
+    // La zona serve solo al filtro per comune: se non si legge, la lista si mostra comunque.
+    api.getSettings().then((s) => setZone(s.searchArea.comuni), () => {});
     try {
       const [list, diag] = await Promise.all([api.listLeads(), api.getDiagnostics()]);
       setLeads(list);
@@ -113,11 +121,17 @@ export function App({ api = defaultApi }: { api?: Api }) {
   const query: LeadQuery = { text, minPrice: minPrice === 'invalid' ? null : minPrice, maxPrice: maxPrice === 'invalid' ? null : maxPrice, reservedOnly };
   // Ricerca e prezzo agiscono prima delle schede, così anche i loro conteggi li seguono.
   const now = Date.now();
-  const beforeCategories = applyQuery(leads, query).filter((l) =>
+  const base = applyQuery(leads, query).filter((l) =>
     (!missingOnly || l.missing != null || l.missingPortals.length > 0)
     && (since == null || seenSince(l, since)));
-  // Le categorie si contano prima del loro filtro: così se ne può scegliere più di una.
-  const applied = categories.length ? beforeCategories.filter((l) => leadCategories(l).some((c) => categories.includes(c))) : beforeCategories;
+  // Un comune tolto dalla zona esce dal filtro; senza zona il filtro per comune non c'è.
+  const comuni = zone.length ? chosenComuni.filter((c) => c === OTHER_COMUNI || zone.some((z) => z.istat === c)) : [];
+  const byCategories = (list: LeadView[]) => (categories.length ? list.filter((l) => leadCategories(l).some((c) => categories.includes(c))) : list);
+  const byComuni = (list: LeadView[]) => (comuni.length ? list.filter((l) => inComuni(l, zone, comuni)) : list);
+  // Categorie e comuni si contano prima del proprio filtro: così se ne può scegliere più di uno.
+  const beforeCategories = byComuni(base);
+  const beforeComuni = byCategories(base);
+  const applied = byCategories(beforeCategories);
   const inTab = (list: LeadView[], t: Tab) => (t === 'recall' ? list.filter((l) => l.state.recallAt != null) : groupByStatus(list)[t]);
   const groups = groupByStatus(applied);
   const recalls = applied.filter((l) => l.state.recallAt != null);
@@ -128,8 +142,11 @@ export function App({ api = defaultApi }: { api?: Api }) {
   const recallGroups = tab === 'recall' ? groupByRecall(filtered, now) : [];
   // Nella scheda "Richiami" l'ordine è quello dei gruppi; altrove il criterio scelto.
   const visible = tab === 'recall' ? recallGroups.flatMap((g) => g.leads) : sortLeadsBy(filtered, sortByTab[tab]);
+  const comuneName = (c: string) => (c === OTHER_COMUNI ? 'altri comuni' : zone.find((z) => z.istat === c)?.name ?? c);
+  const comuniTag = comuni.length ? joinList(comuni.map(comuneName), 'e') : null;
   const tagParts = [
     ...(filter === 'all' ? [] : [FILTER_LABELS[filter]]),
+    ...(comuniTag ? [comuniTag] : []),
     ...(portals.length ? [joinList(portals.map((p) => PORTAL_TAGS[p]), 'e')] : []),
     ...(multi ? ['su più portali'] : []),
     ...(categories.length ? [joinList(categories.map((c) => CATEGORY_LABELS[c]), 'e')] : []),
@@ -138,8 +155,27 @@ export function App({ api = defaultApi }: { api?: Api }) {
     ...describeQuery(query),
   ];
   const filterTag = tagParts.length ? ` «${tagParts.join(', ')}»` : '';
-  const anyFilter = filter !== 'all' || portals.length > 0 || multi || !isEmptyQuery(query) || minPrice === 'invalid' || maxPrice === 'invalid'
-    || categories.length > 0 || missingOnly || since != null;
+  const clearPrice = () => {
+    setMinInput('');
+    setMaxInput('');
+    setReservedOnly(false);
+  };
+  // Filtri del riquadro «Filtri»: a riquadro chiuso restano visibili come etichette che si tolgono con un clic.
+  const priceTag = describeQuery({ ...query, text: '' }).join(', ') || (minPrice === 'invalid' || maxPrice === 'invalid' ? 'prezzo non valido' : '');
+  const drawerTags: { label: string; clear: () => void }[] = [
+    ...(comuniTag ? [{ label: comuniTag, clear: () => setChosenComuni([]) }] : []),
+    ...(portals.length ? [{ label: joinList(portals.map((p) => PORTAL_TAGS[p]), 'e'), clear: () => setPortals([]) }] : []),
+    ...(multi ? [{ label: 'Su più portali', clear: () => setMulti(false) }] : []),
+    ...(categories.length ? [{ label: joinList(categories.map((c) => CATEGORY_LABELS[c]), 'e'), clear: () => setCategories([]) }] : []),
+    ...(priceTag ? [{ label: priceTag, clear: clearPrice }] : []),
+    ...(missingOnly ? [{ label: 'Non più visti', clear: () => setMissingOnly(false) }] : []),
+    ...(since != null ? [{ label: 'Da questo giro', clear: () => setSince(null) }] : []),
+  ];
+  const anyFilter = filter !== 'all' || !isEmptyQuery(query) || drawerTags.length > 0;
+  const toggleFilters = () => {
+    saveFiltersOpen(!filtersOpen);
+    setFiltersOpen(!filtersOpen);
+  };
   const resetFilters = () => {
     setText('');
     setMinInput('');
@@ -149,9 +185,18 @@ export function App({ api = defaultApi }: { api?: Api }) {
     setPortals([]);
     setMulti(false);
     setCategories([]);
+    setChosenComuni([]);
     setMissingOnly(false);
     setSince(null);
   };
+
+  // Come per siti e categorie, sceglierli tutti equivale a nessun filtro.
+  const toggleComune = (c: string) =>
+    setChosenComuni(() => {
+      const options = [...zone.map((z) => z.istat), OTHER_COMUNI];
+      const next = options.filter((x) => (x === c ? !comuni.includes(x) : comuni.includes(x)));
+      return next.length === options.length ? [] : next;
+    });
 
   const toggleCategory = (c: PropertyCategory) =>
     setCategories((cs) => {
@@ -176,7 +221,7 @@ export function App({ api = defaultApi }: { api?: Api }) {
     });
   };
 
-  useEffect(() => setConfirmingAll(false), [tab, filter, portals, multi, categories, missingOnly, since, visible.length, text, query.minPrice, query.maxPrice, reservedOnly]);
+  useEffect(() => setConfirmingAll(false), [tab, filter, portals, multi, categories, chosenComuni, missingOnly, since, visible.length, text, query.minPrice, query.maxPrice, reservedOnly]);
 
   return (
     <main className="panel">
@@ -278,44 +323,6 @@ export function App({ api = defaultApi }: { api?: Api }) {
                   </button>
                 )}
               </div>
-              <div className="price">
-                <span className="price__label">Prezzo da</span>
-                <input
-                  className="field price__input"
-                  inputMode="decimal"
-                  aria-label="Prezzo minimo in migliaia di euro"
-                  aria-invalid={minPrice === 'invalid'}
-                  value={minInput}
-                  onChange={(e) => { setMinInput(e.target.value); setReservedOnly(false); }}
-                />
-                <span className="price__label">a</span>
-                <input
-                  className="field price__input"
-                  inputMode="decimal"
-                  aria-label="Prezzo massimo in migliaia di euro"
-                  aria-invalid={maxPrice === 'invalid'}
-                  value={maxInput}
-                  onChange={(e) => { setMaxInput(e.target.value); setReservedOnly(false); }}
-                />
-                <span className="price__label">k€</span>
-                <button
-                  type="button"
-                  className="btn btn--sm"
-                  aria-pressed={reservedOnly}
-                  onClick={() => {
-                    if (!reservedOnly) {
-                      setMinInput('');
-                      setMaxInput('');
-                    }
-                    setReservedOnly(!reservedOnly);
-                  }}
-                >
-                  Solo trattativa riservata
-                </button>
-                {anyFilter && (
-                  <button type="button" className="btn btn--sm price__reset" onClick={resetFilters}>Azzera filtri</button>
-                )}
-              </div>
               <div className="filters" role="radiogroup" aria-label="Filtra per badge">
                 {PRIORITY_FILTERS.map((f) => {
                   const count = byFilter(inPortals, f).length;
@@ -336,85 +343,193 @@ export function App({ api = defaultApi }: { api?: Api }) {
                   );
                 })}
               </div>
-              <div className="filters" role="group" aria-label="Filtra per sito">
+              <div className="filterbar">
                 <button
                   type="button"
-                  aria-pressed={portals.length === 0}
-                  className={`chip${portals.length === 0 ? ' chip--on' : ''}`}
-                  onClick={() => setPortals([])}
+                  className={`btn btn--sm filterbar__toggle${drawerTags.length ? ' filterbar__toggle--on' : ''}`}
+                  aria-expanded={filtersOpen}
+                  aria-controls="filters-drawer"
+                  onClick={toggleFilters}
                 >
-                  Tutti i siti
+                  {drawerTags.length ? `Filtri (${drawerTags.length})` : 'Filtri'}
+                  <ChevronIcon open={filtersOpen} />
                 </button>
-                {PORTALS.map((p) => {
-                  const count = byFilter(byMulti(tabLeads(tab), multi), filter).filter((l) => leadPortals(l).includes(p)).length;
-                  const on = portals.includes(p);
-                  return (
-                    <button
-                      key={p}
-                      type="button"
-                      aria-pressed={on}
-                      aria-label={`${PORTAL_TAGS[p]} (${count})`}
-                      className={`chip${on ? ' chip--on' : ''}`}
-                      disabled={count === 0 && !on}
-                      onClick={() => togglePortal(p)}
-                    >
-                      {PORTAL_TAGS[p]} <span className="chip__count">{count}</span>
-                    </button>
-                  );
-                })}
-                {(() => {
-                  const count = byFilter(byPortals(tabLeads(tab), portals), filter).filter((l) => leadPortals(l).length > 1).length;
-                  return (
-                    <button
-                      type="button"
-                      aria-pressed={multi}
-                      aria-label={`Su più portali (${count})`}
-                      className={`chip${multi ? ' chip--on' : ''}`}
-                      disabled={count === 0 && !multi}
-                      onClick={() => setMulti((m) => !m)}
-                    >
-                      Su più portali <span className="chip__count">{count}</span>
-                    </button>
-                  );
-                })()}
-              </div>
-              <div className="filters" role="group" aria-label="Filtra per categoria">
-                {PROPERTY_CATEGORIES.map((c) => {
-                  const count = inTab(beforeCategories, tab).filter((l) => leadCategories(l).includes(c)).length;
-                  const on = categories.includes(c);
-                  return (
-                    <button
-                      key={c}
-                      type="button"
-                      aria-pressed={on}
-                      aria-label={`${CATEGORY_LABELS[c]} (${count})`}
-                      className={`chip${on ? ' chip--on' : ''}`}
-                      disabled={count === 0 && !on}
-                      onClick={() => toggleCategory(c)}
-                    >
-                      {CATEGORY_LABELS[c]} <span className="chip__count">{count}</span>
-                    </button>
-                  );
-                })}
-                {(() => {
-                  const count = tabLeads(tab).filter((l) => l.missing != null || l.missingPortals.length > 0).length;
-                  return (
-                    <button
-                      type="button"
-                      aria-pressed={missingOnly}
-                      aria-label={`Non più visti (${count})`}
-                      className={`chip${missingOnly ? ' chip--on' : ''}`}
-                      disabled={count === 0 && !missingOnly}
-                      onClick={() => setMissingOnly((m) => !m)}
-                    >
-                      Non più visti <span className="chip__count">{count}</span>
-                    </button>
-                  );
-                })()}
-                {since != null && (
-                  <button type="button" aria-pressed className="chip chip--on" onClick={() => setSince(null)}>Da questo giro ✕</button>
+                {!filtersOpen && drawerTags.map((t) => (
+                  <button key={t.label} type="button" className="filter-tag" aria-label={`Togli il filtro ${t.label}`} title="Togli il filtro" onClick={t.clear}>
+                    {t.label}
+                    <CloseIcon />
+                  </button>
+                ))}
+                {anyFilter && (
+                  <button type="button" className="btn btn--sm filterbar__reset" onClick={resetFilters}>Azzera filtri</button>
                 )}
               </div>
+              {filtersOpen && (
+                <div className="drawer" id="filters-drawer">
+                  {zone.length > 0 && (
+                    <section className="drawer__section">
+                      <h4 className="drawer__title">Comune</h4>
+                      <div className="filters" role="group" aria-label="Filtra per comune">
+                        <button
+                          type="button"
+                          aria-pressed={comuni.length === 0}
+                          className={`chip${comuni.length === 0 ? ' chip--on' : ''}`}
+                          onClick={() => setChosenComuni([])}
+                        >
+                          Tutti i comuni
+                        </button>
+                        {[...zone.map((z) => z.istat), OTHER_COMUNI].map((c) => {
+                          const count = byFilter(byMulti(byPortals(inTab(beforeComuni, tab), portals), multi), filter)
+                            .filter((l) => inComuni(l, zone, [c])).length;
+                          const on = comuni.includes(c);
+                          const label = c === OTHER_COMUNI ? 'Altri comuni' : comuneName(c);
+                          return (
+                            <button
+                              key={c}
+                              type="button"
+                              aria-pressed={on}
+                              aria-label={`${label} (${count})`}
+                              className={`chip${on ? ' chip--on' : ''}`}
+                              disabled={count === 0 && !on}
+                              onClick={() => toggleComune(c)}
+                            >
+                              {label} <span className="chip__count">{count}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  )}
+                  <section className="drawer__section">
+                    <h4 className="drawer__title">Sito</h4>
+                    <div className="filters" role="group" aria-label="Filtra per sito">
+                      <button
+                        type="button"
+                        aria-pressed={portals.length === 0}
+                        className={`chip${portals.length === 0 ? ' chip--on' : ''}`}
+                        onClick={() => setPortals([])}
+                      >
+                        Tutti i siti
+                      </button>
+                      {PORTALS.map((p) => {
+                        const count = byFilter(byMulti(tabLeads(tab), multi), filter).filter((l) => leadPortals(l).includes(p)).length;
+                        const on = portals.includes(p);
+                        return (
+                          <button
+                            key={p}
+                            type="button"
+                            aria-pressed={on}
+                            aria-label={`${PORTAL_TAGS[p]} (${count})`}
+                            className={`chip${on ? ' chip--on' : ''}`}
+                            disabled={count === 0 && !on}
+                            onClick={() => togglePortal(p)}
+                          >
+                            {PORTAL_TAGS[p]} <span className="chip__count">{count}</span>
+                          </button>
+                        );
+                      })}
+                      {(() => {
+                        const count = byFilter(byPortals(tabLeads(tab), portals), filter).filter((l) => leadPortals(l).length > 1).length;
+                        return (
+                          <button
+                            type="button"
+                            aria-pressed={multi}
+                            aria-label={`Su più portali (${count})`}
+                            className={`chip${multi ? ' chip--on' : ''}`}
+                            disabled={count === 0 && !multi}
+                            onClick={() => setMulti((m) => !m)}
+                          >
+                            Su più portali <span className="chip__count">{count}</span>
+                          </button>
+                        );
+                      })()}
+                    </div>
+                  </section>
+                  <section className="drawer__section">
+                    <h4 className="drawer__title">Categoria</h4>
+                    <div className="filters" role="group" aria-label="Filtra per categoria">
+                      {PROPERTY_CATEGORIES.map((c) => {
+                        const count = inTab(beforeCategories, tab).filter((l) => leadCategories(l).includes(c)).length;
+                        const on = categories.includes(c);
+                        return (
+                          <button
+                            key={c}
+                            type="button"
+                            aria-pressed={on}
+                            aria-label={`${CATEGORY_LABELS[c]} (${count})`}
+                            className={`chip${on ? ' chip--on' : ''}`}
+                            disabled={count === 0 && !on}
+                            onClick={() => toggleCategory(c)}
+                          >
+                            {CATEGORY_LABELS[c]} <span className="chip__count">{count}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </section>
+                  <section className="drawer__section">
+                    <h4 className="drawer__title">Prezzo</h4>
+                    <div className="price">
+                      <span className="price__label">da</span>
+                      <input
+                        className="field price__input"
+                        inputMode="decimal"
+                        aria-label="Prezzo minimo in migliaia di euro"
+                        aria-invalid={minPrice === 'invalid'}
+                        value={minInput}
+                        onChange={(e) => { setMinInput(e.target.value); setReservedOnly(false); }}
+                      />
+                      <span className="price__label">a</span>
+                      <input
+                        className="field price__input"
+                        inputMode="decimal"
+                        aria-label="Prezzo massimo in migliaia di euro"
+                        aria-invalid={maxPrice === 'invalid'}
+                        value={maxInput}
+                        onChange={(e) => { setMaxInput(e.target.value); setReservedOnly(false); }}
+                      />
+                      <span className="price__label">k€</span>
+                      <button
+                        type="button"
+                        className="btn btn--sm"
+                        aria-pressed={reservedOnly}
+                        onClick={() => {
+                          if (!reservedOnly) {
+                            setMinInput('');
+                            setMaxInput('');
+                          }
+                          setReservedOnly(!reservedOnly);
+                        }}
+                      >
+                        Solo trattativa riservata
+                      </button>
+                    </div>
+                  </section>
+                  <section className="drawer__section">
+                    <h4 className="drawer__title">Altro</h4>
+                    <div className="filters" role="group" aria-label="Altri filtri">
+                      {(() => {
+                        const count = tabLeads(tab).filter((l) => l.missing != null || l.missingPortals.length > 0).length;
+                        return (
+                          <button
+                            type="button"
+                            aria-pressed={missingOnly}
+                            aria-label={`Non più visti (${count})`}
+                            className={`chip${missingOnly ? ' chip--on' : ''}`}
+                            disabled={count === 0 && !missingOnly}
+                            onClick={() => setMissingOnly((m) => !m)}
+                          >
+                            Non più visti <span className="chip__count">{count}</span>
+                          </button>
+                        );
+                      })()}
+                      {since != null && (
+                        <button type="button" aria-pressed className="chip chip--on" onClick={() => setSince(null)}>Da questo giro ✕</button>
+                      )}
+                    </div>
+                  </section>
+                </div>
+              )}
               {tab !== 'recall' && (
                 <label className="sort">
                   <span className="sort__label">Ordina per</span>
