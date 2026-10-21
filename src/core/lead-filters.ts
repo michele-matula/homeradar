@@ -1,4 +1,4 @@
-import type { LeadView } from '@/shared/types';
+import type { ComuneRef, LeadView } from '@/shared/types';
 
 /** Ricerca e fascia di prezzo del pannello. Prezzi in euro; `null` = nessun limite. */
 export interface LeadQuery {
@@ -77,4 +77,33 @@ export function describeQuery(q: LeadQuery): string[] {
   else if (hi != null) parts.push(`fino a ${thousands(hi)} k€`);
   if (q.reservedOnly) parts.push('trattativa riservata');
   return parts;
+}
+
+/** Scelta «Altri comuni» del filtro per comune: lead fuori dalla zona di «Cerca» o senza comune. */
+export const OTHER_COMUNI = 'other';
+
+const SCOPE_ISTAT = /\|comune:(\d{6})\|/;
+
+/**
+ * Codici ISTAT dei comuni della zona in cui sta il lead (basta una fonte). Vale la città scritta dal portale;
+ * se manca o non è un comune della zona, il comune della ricerca del giro che ha trovato l'annuncio.
+ */
+export function leadComuni(lead: LeadView, comuni: ComuneRef[]): string[] {
+  const byName = new Map(comuni.map((c) => [normalize(c.name), c.istat]));
+  const inZone = new Set(comuni.map((c) => c.istat));
+  const found = new Set<string>();
+  for (const { city, sweepScope } of [lead.listing, ...lead.others.map((o) => o.listing)]) {
+    const named = city != null ? byName.get(normalize(city)) : undefined;
+    const scoped = sweepScope?.match(SCOPE_ISTAT)?.[1];
+    const istat = named ?? (scoped != null && inZone.has(scoped) ? scoped : undefined);
+    if (istat) found.add(istat);
+  }
+  return comuni.map((c) => c.istat).filter((i) => found.has(i));
+}
+
+/** Filtro per comune: lista vuota = tutti. Contiene codici ISTAT della zona e/o `OTHER_COMUNI`. */
+export function inComuni(lead: LeadView, comuni: ComuneRef[], chosen: string[]): boolean {
+  if (!chosen.length) return true;
+  const own = leadComuni(lead, comuni);
+  return own.length ? own.some((i) => chosen.includes(i)) : chosen.includes(OTHER_COMUNI);
 }

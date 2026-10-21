@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyQuery, describeQuery, EMPTY_QUERY, inPriceRange, isEmptyQuery, matchesText, normalize, parseThousands } from '@/core/lead-filters';
+import { applyQuery, describeQuery, EMPTY_QUERY, inComuni, inPriceRange, isEmptyQuery, leadComuni, matchesText, normalize, OTHER_COMUNI, parseThousands } from '@/core/lead-filters';
 import type { LeadView } from '@/shared/types';
 
 type ListingFields = Partial<Pick<LeadView['listing'], 'title' | 'address' | 'city' | 'zone' | 'typology' | 'currentPrice'>>;
@@ -141,5 +141,46 @@ describe('matchesText su un lead unito', () => {
     const merged: LeadView = { ...main, others: [{ listing: other.listing, evaluation: other.evaluation, prices: [], previous: false }] };
     expect(matchesText(merged, 'padova')).toBe(true);
     expect(matchesText(main, 'padova')).toBe(false);
+  });
+});
+
+describe('leadComuni e inComuni', () => {
+  const zone = [
+    { istat: '098031', name: 'Lodi', province: 'LO' },
+    { istat: '098048', name: "Sant'Angelo Lodigiano", province: 'LO' },
+  ];
+  const withSource = (l: LeadView, f: ListingFields & { sweepScope?: string | null }): LeadView =>
+    ({ ...l, others: [{ listing: { ...l.listing, key: `${l.listing.key}-b`, city: null, sweepScope: null, ...f } } as LeadView['others'][number]] });
+  const scoped = (key: string, f: ListingFields, sweepScope: string | null) =>
+    ({ ...lead(key, f), listing: { ...lead(key, f).listing, sweepScope } }) as LeadView;
+
+  it('riconosce il comune dal nome scritto dal portale, senza maiuscole, accenti e apostrofi', () => {
+    expect(leadComuni(lead('a', { city: 'LODI' }), zone)).toEqual(['098031']);
+    expect(leadComuni(lead('b', { city: 'Sant Angelo Lodigiano' }), zone)).toEqual(['098048']);
+    expect(leadComuni(lead('c', { city: 'Codogno' }), zone)).toEqual([]);
+  });
+
+  it('senza città, o con una città fuori zona, usa il comune della ricerca del giro che ha trovato l\'annuncio', () => {
+    expect(leadComuni(scoped('a', {}, 'subito|comune:098031|immobili'), zone)).toEqual(['098031']);
+    expect(leadComuni(scoped('b', { city: 'Lodi Vecchio' }, 'immobiliare|comune:098048|case'), zone)).toEqual(['098048']);
+    expect(leadComuni(scoped('c', { city: 'Lodi' }, 'immobiliare|comune:098048|case'), zone)).toEqual(['098031']);
+    expect(leadComuni(scoped('d', {}, 'immobiliare|comune:015146|case'), zone)).toEqual([]);
+    expect(leadComuni(lead('e'), zone)).toEqual([]);
+  });
+
+  it('basta una fonte del lead nel comune', () => {
+    expect(leadComuni(withSource(lead('a', { city: null }), { city: 'Lodi' }), zone)).toEqual(['098031']);
+  });
+
+  it('inComuni: nessuna scelta passa tutto; "altri comuni" prende i lead fuori zona e senza comune', () => {
+    const lodi = lead('a', { city: 'Lodi' });
+    const codogno = lead('b', { city: 'Codogno' });
+    const none = lead('c');
+    const pick = (chosen: string[]) => keys([lodi, codogno, none].filter((l) => inComuni(l, zone, chosen)));
+    expect(pick([])).toEqual(['a', 'b', 'c']);
+    expect(pick(['098031'])).toEqual(['a']);
+    expect(pick([OTHER_COMUNI])).toEqual(['b', 'c']);
+    expect(pick(['098031', OTHER_COMUNI])).toEqual(['a', 'b', 'c']);
+    expect(pick(['098048'])).toEqual([]);
   });
 });

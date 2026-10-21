@@ -18,6 +18,8 @@ Durata: ~10 minuti. Usa `npm run build` e carica `.output/chrome-mv3` in Chrome.
    - [ ] Filtro per badge: scegli "Da verificare" e restano solo quei lead; i conteggi dei filtri corrispondono alla scheda; cambiando scheda il filtro resta attivo e i filtri senza annunci sono disattivati.
    - [ ] Con un filtro attivo il pulsante dice "Elimina tutti «…» (n)" e n è il numero dei lead filtrati (premi "Annulla", non confermare).
    - [ ] Ricerca: scrivi il nome di una zona o di una via che vedi nei lead (anche senza accenti); lista e numeri sulle schede si aggiornano mentre scrivi; la ✕ svuota la ricerca e torna tutto come prima.
+   - [ ] Riquadro «Filtri»: alla prima apertura è chiuso, ricerca e badge restano in vista; aperto mostra Comune, Sito, Categoria, Prezzo e Altro. Chiudi e riapri il pannello: resta come l'avevi lasciato. A riquadro chiuso i filtri accesi compaiono come etichette, il bottone dice "Filtri (n)" e la ✕ di un'etichetta toglie solo quel filtro.
+   - [ ] Con almeno due comuni nella zona di «Cerca»: un bottone per comune più «Altri comuni» (fuori zona o senza comune); scegliendone uno restano solo i suoi lead e le schede contano solo quelli; sceglierli tutti torna a «Tutti i comuni». Senza comuni nella zona la sezione Comune non c'è.
    - [ ] Prezzo da/a in k€ (es. 150 e 250): restano solo i lead nella fascia, senza quelli privi di prezzo; un valore come "abc" si colora di rosso e non filtra; "Azzera filtri" riporta ricerca, prezzo, badge e siti a "Tutti".
    - [ ] Con ricerca o prezzo attivi, "Elimina tutti «…»" li riporta nel testo (premi "Annulla").
 6. Export.

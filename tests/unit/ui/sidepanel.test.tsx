@@ -1,6 +1,6 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { buildBackup } from '@/core/backup';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '@/ui/sidepanel/App';
 import type { Api } from '@/ui/sidepanel/api';
 import { LeadItem } from '@/ui/sidepanel/LeadItem';
@@ -11,6 +11,9 @@ afterEach(() => {
   cleanup();
   localStorage.clear();
 });
+
+// Quasi tutti i test usano i filtri del riquadro «Filtri»: si parte con il riquadro aperto. I test del riquadro lo chiudono.
+beforeEach(() => localStorage.setItem('homeradar.filtersOpen', 'true'));
 
 function lead(id: number, priority: Priority, status: LeadStatus = 'new'): LeadView {
   const key = `immobiliare:${id}`;
@@ -759,6 +762,106 @@ describe('revisione: filtri per categoria multipli', () => {
     expect(boxChip.disabled).toBe(false);
     fireEvent.click(boxChip);
     expect(document.querySelectorAll('li.lead').length).toBe(2);
+  });
+});
+
+describe('filtro per comune', () => {
+  const lodi = { istat: '098031', name: 'Lodi', province: 'LO' };
+  const codogno = { istat: '098019', name: 'Codogno', province: 'LO' };
+  const inCity = (id: number, city: string | null, priority: Priority = 'high'): LeadView => { const l = lead(id, priority); return { ...l, listing: { ...l.listing, city } }; };
+  const withZone = (api: Api, comuni: typeof lodi[]) => {
+    api.getSettings = vi.fn(async () => ({ ...DEFAULT_SETTINGS, searchArea: { comuni, categories: ['residential' as const] } }));
+    return api;
+  };
+  const titles = () => screen.getAllByText(/^Bilocale \d+$/).map((e) => e.textContent);
+  const leads = [inCity(1, 'LODI'), inCity(2, 'Codogno', 'medium'), inCity(3, 'Milano'), inCity(4, null), inCity(5, 'Lodi', 'medium')];
+
+  it('un bottone per comune della zona più «Altri comuni», anche più comuni insieme; tutti equivale a «Tutti i comuni»', async () => {
+    const api = withZone(fakeApi(leads), [lodi, codogno]);
+    render(<App api={api} />);
+    const chip = (name: string) => screen.getByRole('button', { name });
+    expect((await screen.findByRole('button', { name: 'Lodi (2)' })).getAttribute('aria-pressed')).toBe('false');
+    expect(chip('Tutti i comuni').getAttribute('aria-pressed')).toBe('true');
+    expect(chip('Codogno (1)')).toBeTruthy();
+    fireEvent.click(chip('Lodi (2)'));
+    expect(titles()).toEqual(['Bilocale 1', 'Bilocale 5']);
+    expect(screen.getByText('Elimina tutti «Lodi» (2)')).toBeTruthy();
+    // Il conteggio segue gli altri filtri, la scheda segue il comune.
+    fireEvent.click(screen.getByRole('radio', { name: 'Media (1)' }));
+    expect(chip('Lodi (1)')).toBeTruthy();
+    expect(chip('Codogno (1)')).toBeTruthy();
+    fireEvent.click(screen.getByRole('radio', { name: 'Tutti (2)' }));
+    fireEvent.click(chip('Altri comuni (2)'));
+    expect(titles()).toEqual(['Bilocale 1', 'Bilocale 3', 'Bilocale 4', 'Bilocale 5']);
+    expect(screen.getByText('Elimina tutti «Lodi e altri comuni» (4)')).toBeTruthy();
+    fireEvent.click(chip('Codogno (1)'));
+    expect(chip('Tutti i comuni').getAttribute('aria-pressed')).toBe('true');
+    expect(titles()).toHaveLength(5);
+  });
+
+  it('senza comuni nella zona di «Cerca» la sezione non c\'è', async () => {
+    render(<App api={fakeApi(leads)} />);
+    await screen.findByText('Bilocale 1');
+    expect(screen.queryByText('Tutti i comuni')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Tutti i siti' })).toBeTruthy();
+  });
+
+  it('un comune tolto dalla zona esce dal filtro', async () => {
+    let notify = () => {};
+    const api = withZone(fakeApi(leads), [lodi, codogno]);
+    api.onLeadsChanged = vi.fn((cb: () => void) => {
+      notify = cb;
+      return () => {};
+    });
+    render(<App api={api} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Codogno (1)' }));
+    expect(titles()).toEqual(['Bilocale 2']);
+    withZone(api, [lodi]);
+    await act(async () => notify());
+    expect(screen.queryByRole('button', { name: /^Codogno/ })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Tutti i comuni' }).getAttribute('aria-pressed')).toBe('true');
+    expect(titles()).toHaveLength(5);
+  });
+});
+
+describe('riquadro «Filtri»', () => {
+  beforeEach(() => localStorage.removeItem('homeradar.filtersOpen'));
+  const toggle = () => screen.getByRole('button', { name: /^Filtri/ });
+
+  it('alla prima apertura è chiuso; aperto o chiuso, lo ricorda alla riapertura del pannello', async () => {
+    const { unmount } = render(<App api={fakeApi([lead(1, 'high')])} />);
+    await screen.findByText('Bilocale 1');
+    expect(toggle().getAttribute('aria-expanded')).toBe('false');
+    expect(screen.queryByRole('button', { name: 'Tutti i siti' })).toBeNull();
+    // Ricerca e priorità restano sempre in vista.
+    expect(screen.getByLabelText('Cerca nei lead')).toBeTruthy();
+    expect(screen.getByRole('radio', { name: 'Alta (1)' })).toBeTruthy();
+    fireEvent.click(toggle());
+    expect(toggle().getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByRole('button', { name: 'Tutti i siti' })).toBeTruthy();
+    unmount();
+    render(<App api={fakeApi([lead(1, 'high')])} />);
+    await screen.findByText('Bilocale 1');
+    expect(toggle().getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('a riquadro chiuso i filtri accesi sono etichette con il numero sul bottone; la ✕ toglie solo quel filtro', async () => {
+    const leads = [lead(1, 'high'), from('subito', lead(2, 'high')), { ...lead(3, 'high'), listing: { ...lead(3, 'high').listing, currentPrice: 500000 } }];
+    render(<App api={fakeApi(leads)} />);
+    await screen.findByText('Bilocale 1');
+    fireEvent.click(toggle());
+    fireEvent.click(screen.getByRole('button', { name: 'Immobiliare (2)' }));
+    fireEvent.change(screen.getByLabelText('Prezzo massimo in migliaia di euro'), { target: { value: '300' } });
+    fireEvent.click(toggle());
+    expect(toggle().textContent).toBe('Filtri (2)');
+    expect(screen.getAllByText(/^Bilocale \d+$/).map((e) => e.textContent)).toEqual(['Bilocale 1']);
+    fireEvent.click(screen.getByRole('button', { name: 'Togli il filtro fino a 300 k€' }));
+    expect(toggle().textContent).toBe('Filtri (1)');
+    expect(screen.getAllByText(/^Bilocale \d+$/).map((e) => e.textContent)).toEqual(['Bilocale 1', 'Bilocale 3']);
+    expect(screen.getByRole('button', { name: 'Togli il filtro Immobiliare' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Azzera filtri' }));
+    expect(toggle().textContent).toBe('Filtri');
+    expect(screen.queryByRole('button', { name: /^Togli il filtro/ })).toBeNull();
   });
 });
 
